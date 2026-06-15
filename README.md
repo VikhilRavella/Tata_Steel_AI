@@ -32,6 +32,60 @@ Tata_Steel_AI/
 
 ---
 
+## 🏗️ Complete System Architecture
+
+```mermaid
+graph TD
+    %% Styling Colors (Steel Gray & Blue Theme)
+    classDef users fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef backend fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef intel fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef models fill:#312e81,stroke:#c084fc,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef data fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+
+    %% Users Layer
+    subgraph "👥 Presentation Layer (Users)"
+        E(Engineer Portal):::users
+        S(Supervisor Portal):::users
+        M(Manager Portal):::users
+    end
+
+    %% Backend Layer
+    subgraph "⚙️ FastAPI Backend"
+        API("<b>Core Services:</b><br/>Authentication Service<br/>Notification Service<br/>Workflow Engine<br/>Approval Engine<br/>Audit Logging<br/>Report Generation<br/>Inventory Management<br/>Work Order Management"):::backend
+    end
+
+    %% Intelligence Layer
+    subgraph "🧠 Maintenance Intelligence Layer"
+        INTEL("<b>Agentic Modules:</b><br/>Sandbox Agent<br/>Engineering Agent<br/>Document Intelligence<br/>Vision Diagnostics<br/>Inventory Intelligence<br/>Root Cause Analysis<br/>Risk Assessment Engine<br/>Recommendation Engine<br/>Workflow Intelligence"):::intel
+    end
+
+    %% AI Models Layer
+    subgraph "🤖 AI Models Layer"
+        AI("Mistral (Engineering Reasoning)<br/>Qwen2.5VL (Vision Analysis)<br/>BAAI/bge-small-en-v1.5 (Document Embeddings)"):::models
+    end
+
+    %% Data Layer
+    subgraph "💾 Data Layer"
+        SQL("<b>SQLite Database</b><br/>Users, Inventory, Requests, Work Orders, Notifications, Audit Logs, Maintenance History, Maintenance Outcomes, Supervisor Directory"):::data
+        CHROMA("<b>ChromaDB</b><br/>PDF Embeddings, SOP Embeddings, Maintenance Manuals, Engineering Knowledge Base"):::data
+        FILE("<b>File Storage</b><br/>Uploaded PDFs, Equipment Images, Generated Reports, Profile Images"):::data
+    end
+
+    %% Connections
+    E --> API
+    S --> API
+    M --> API
+    
+    API --> INTEL
+    INTEL --> AI
+    INTEL --> SQL
+    INTEL --> CHROMA
+    INTEL --> FILE
+```
+
+---
+
 ## ✨ Platform Features & Capabilities
 
 The Maintenance Wizard is a comprehensive, production-ready Agentic AI platform built with a wide array of advanced features specifically tailored for industrial environments:
