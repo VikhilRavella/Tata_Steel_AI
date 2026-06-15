@@ -1,4 +1,0 @@
-history_id,equipment_id,work_order_id,engineer_user_id,supervisor_id,maintenance_type,findings,action_taken,completion_date
-dd924c98,EQP-045,WO-1001,U0016,SUP004,Preventive,Normal wear,Replaced parts,2026-06-08
-2e94abc5,EQP-003,WO-1008,U0015,SUP005,Preventive,Normal wear,Replaced parts,2026-06-08
-a84162d9,EQP-004,WO-1011,U0002,SUP001,Preventive,Normal wear,Replaced parts,2026-06-08
