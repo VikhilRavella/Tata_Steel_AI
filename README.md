@@ -131,3 +131,22 @@ Everything is now installed and configured. You can boot up both the **Frontend*
 4. Automatically open your default web browser directly to the Login portal!
 
 To safely stop the servers, simply press `Ctrl+C` in your terminal. Good luck with the Hackathon!
+
+---
+
+## 📥 Step 6: Loading Demo Data (For Judges)
+
+To fully explore the platform's capabilities, we have provided an `EXAMPLE/` folder inside this repository containing sample CSV databases and a PDF manual. 
+
+Please log into the **Manager Portal** (`manager` / `password`) and use the sidebar menu to upload the following CSV files from the `EXAMPLE/` folder to populate the system:
+
+1. **Engineer Management**: Upload `users.csv`
+2. **Supervisor Management**: Upload `supervisor_directory (1).csv`
+   * *Inside Supervisor Management (Mapping)*: Upload `engineer_supervisor_mapping (1).csv`
+3. **Equipment Registry**: Upload `equipment (1).csv`
+   * *Inside Equipment Registry (Mapping)*: Upload `supervisor_equipment_mapping (1).csv`
+4. **Equipment BOM**: Upload `equipment_parts.csv`
+5. **Inventory**: Upload `inventory (1).csv`
+6. **Work Orders**: Upload `work_orders.csv`
+7. **Maintenance History**: Upload `maintenance_history.csv`
+8. **Document Library**: Upload the provided PDF manual `t999_user_manual.pdf` to test the AI RAG functionality.
