@@ -134,28 +134,81 @@ To safely stop the servers, simply press `Ctrl+C` in your terminal. Good luck wi
 
 ---
 
-## 📥 Step 6: Loading Demo Data (For Judges)
+## 🔓 Step 6: Quick-Access Login Cards (No Typing Required)
+To make testing as seamless as possible for the judges, we have built a rapid-access login page. You do not need to manually type any usernames or passwords. 
+1. When you arrive at the `http://localhost:3000` login page, simply click on one of the three **Role Cards** (Manager, Supervisor, or Engineer).
+2. The system will automatically inject the secure credentials and instantly log you into that specific dashboard!
 
-To fully explore the platform's capabilities, we have provided an `EXAMPLE/` folder inside this repository containing sample CSV databases, a PDF manual, and a test image. 
+---
 
-Please log into the **Manager Portal** (`manager` / `password`) and use the sidebar menu to upload the following CSV files from the `EXAMPLE/` folder to populate the system:
+## 📥 Step 7: Complete User Flow & Demo Data Initialization
 
-1. **Engineer Management**: Upload `users.csv`
-2. **Supervisor Management**: Upload `supervisor_directory (1).csv`
-   * *Inside Supervisor Management (Mapping)*: Upload `engineer_supervisor_mapping (1).csv`
-3. **Equipment Registry**: Upload `equipment (1).csv`
-   * *Inside Equipment Registry (Mapping)*: Upload `supervisor_equipment_mapping (1).csv`
-4. **Equipment BOM**: Upload `equipment_parts.csv`
-5. **Inventory**: Upload `inventory (1).csv`
-6. **Work Orders**: Upload `work_orders.csv`
-7. **Maintenance History**: Upload `maintenance_history.csv`
-8. **Document Library**: Upload the provided PDF manual `t999_user_manual.pdf` to test the AI RAG functionality.
+To fully evaluate the platform, judges must follow this exact sequence to populate the databases, map the user roles, and verify the AI training documents.
 
-### 📸 Testing Computer Vision AI
-You can also test the application's Computer Vision diagnostic abilities! 
-1. Log into the **Engineer Portal** (`engineer` / `password`).
-2. Open the AI Engineering Agent chat.
-3. Click the attachment icon and upload the `EXAMPLE/test_equipment_defect.jpeg` image.
-4. Ask the AI: *"Analyze this image and tell me how to repair it."*
+### Phase A: Manager Data Mapping (Database Initialization)
+1. Click the **Plant Manager** login card.
+2. You will be greeted by the **Manager Dashboard Overview** showing live plant metrics.
+3. Using the left sidebar menu, you must upload the provided sample `.csv` files from the `EXAMPLE/` folder to populate the company database. **Please upload them in this exact order to ensure relationships map correctly:**
+   * **Engineer Management** $\rightarrow$ Upload `users.csv`
+   * **Supervisor Management** $\rightarrow$ Upload `supervisor_directory (1).csv`
+   * **Supervisor Management** $\rightarrow$ Upload `engineer_supervisor_mapping (1).csv`
+   * **Equipment Registry** $\rightarrow$ Upload `equipment (1).csv`
+   * **Equipment Registry** $\rightarrow$ Upload `supervisor_equipment_mapping (1).csv`
+   * **Equipment BOM** $\rightarrow$ Upload `equipment_parts.csv`
+   * **Inventory** $\rightarrow$ Upload `inventory (1).csv`
+   * **Work Orders** $\rightarrow$ Upload `work_orders.csv`
+   * **Maintenance History** $\rightarrow$ Upload `maintenance_history.csv`
 
-<img src="EXAMPLE/test_equipment_defect.jpeg" width="300" alt="Defect Example">
+### Phase B: Document Verification Flow (RAG Knowledge Base)
+The Engineering AI Agent operates on strict compliance. It will **NOT** read or reference any uploaded manual unless it has been explicitly approved by a Manager.
+1. While still logged in as the **Manager**, navigate to the **Document Library** via the sidebar.
+2. Upload the provided PDF manual: `EXAMPLE/t999_user_manual.pdf`.
+3. Once uploaded, the document will appear in the library table with a status of **"Pending"**.
+4. **Crucial Step:** You must click the dropdown menu next to the document and change its status to **"Approved"**. 
+5. The moment it is approved, the backend automatically chunks and vectorizes the PDF into the local ChromaDB database, making it instantly available to the AI.
+
+---
+
+## 👷 Step 8: Exploring the Engineer Portal & Daily Execution
+
+The Engineer Portal is the operational heart of the platform. This is where maintenance workers manage their assigned machinery, check active work orders, and interact with the AI.
+
+### 1. Accessing the Workspace
+1. Click **Logout** from the Manager portal, and click the **Engineer** login card on the home screen.
+2. You will land on the **Engineer Workspace Overview** dashboard to instantly view your assigned KPI metrics (Assigned Equipment, Open Work Orders, Pending Requests).
+
+### 2. Managing Daily Operations
+Use the left sidebar menu to navigate the execution workflows:
+* **My Equipment**: View a list of all heavy machinery currently assigned to your profile based on the data the Manager mapped earlier.
+* **Work Orders**: View all your assigned, active maintenance tasks.
+* **Inventory & Parts**: Browse the factory's live database of spare parts (valves, bearings).
+* **Maintenance History**: Review a comprehensive log of all past repairs performed on your assigned equipment.
+
+---
+
+## 🧠 Step 9: Testing the Intelligent Engineering Agent (AI Sandbox)
+
+The most powerful feature of the Engineer Portal is the multimodal AI assistant built to help troubleshoot mechanical failures on the factory floor. 
+
+### 1. Testing the RAG Pipeline (PDF Knowledge Retrieval)
+1. Click on **Engineering Agent** in the left sidebar.
+2. Because the Manager approved the document in Phase B, you can now test the AI. Ask it a technical question: *"What is the standard operating procedure for the T999 machine?"* 
+3. The AI will instantly search the approved manuals and provide a highly accurate, summarized response complete with specific source citations. *(If the manager had rejected the document, the AI would have safely stated it does not have the knowledge).*
+
+### 2. Testing Computer Vision Diagnostics
+The agent can also "see" physical damage and diagnose it using Vision AI models.
+1. Click the **Attachment (Paperclip) icon** next to the chat bar.
+2. Select and upload the provided sample image: `EXAMPLE/test_equipment_defect.jpeg`.
+3. Type a prompt alongside the image, such as: *"Analyze this visual defect and tell me exactly how to repair it."*
+4. The Vision AI will process the image, identify the structural fault, and output a step-by-step repair strategy.
+<br><img src="EXAMPLE/test_equipment_defect.jpeg" width="300" alt="Defect Example">
+
+### 3. Testing Automated Workflow Triggers
+1. In the chat, type an intent-driven command like: *"I need to order 5 replacement bearings for the main conveyor."*
+2. The AI will seamlessly intercept the intent and automatically generate an **Inventory Request ticket** in the background, without requiring you to manually fill out any forms!
+
+---
+
+## 📊 Step 10: Supervisor Monitoring
+1. Log out and click the **Shift Supervisor** login card.
+2. Navigate the left sidebar to view the results of the data you mapped in Phase A. You will see real-time Plant Health summaries, low Inventory Alerts, and dynamic Work Order Escalations generated automatically for your specific shift!
