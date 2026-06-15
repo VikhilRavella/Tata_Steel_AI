@@ -136,7 +136,7 @@ To safely stop the servers, simply press `Ctrl+C` in your terminal. Good luck wi
 
 ## 📥 Step 6: Loading Demo Data (For Judges)
 
-To fully explore the platform's capabilities, we have provided an `EXAMPLE/` folder inside this repository containing sample CSV databases and a PDF manual. 
+To fully explore the platform's capabilities, we have provided an `EXAMPLE/` folder inside this repository containing sample CSV databases, a PDF manual, and a test image. 
 
 Please log into the **Manager Portal** (`manager` / `password`) and use the sidebar menu to upload the following CSV files from the `EXAMPLE/` folder to populate the system:
 
@@ -150,3 +150,12 @@ Please log into the **Manager Portal** (`manager` / `password`) and use the side
 6. **Work Orders**: Upload `work_orders.csv`
 7. **Maintenance History**: Upload `maintenance_history.csv`
 8. **Document Library**: Upload the provided PDF manual `t999_user_manual.pdf` to test the AI RAG functionality.
+
+### 📸 Testing Computer Vision AI
+You can also test the application's Computer Vision diagnostic abilities! 
+1. Log into the **Engineer Portal** (`engineer` / `password`).
+2. Open the AI Engineering Agent chat.
+3. Click the attachment icon and upload the `EXAMPLE/test_equipment_defect.jpeg` image.
+4. Ask the AI: *"Analyze this image and tell me how to repair it."*
+
+<img src="EXAMPLE/test_equipment_defect.jpeg" width="300" alt="Defect Example">
