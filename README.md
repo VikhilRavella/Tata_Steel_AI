@@ -288,6 +288,97 @@ graph TD
 
 ---
 
+## 📦 Inventory & Approval Workflow
+**Automated Spare Part Request and Approval Process**
+
+```mermaid
+graph TD
+    %% Styling Colors (Steel Gray & Blue Theme)
+    classDef input fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef db fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef decision fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef action fill:#312e81,stroke:#c084fc,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef alert fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef monitor fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+
+    %% Engineer Initiates Request
+    subgraph "👷 Engineer Initiates Request"
+        EF[Equipment Failure Detected]:::input
+        EF --> EAR[Engineering Agent Recommendation]:::input
+        EAR --> IS[Inventory Search]:::input
+        IS --> PAC[Part Availability Check]:::input
+        PAC --> CIR("<b>Create Inventory Request</b><br/>Examples:<br/>• Bearing<br/>• Motor<br/>• Coupling<br/>• Gear<br/>• Pump Seal"):::input
+    end
+
+    %% Inventory System
+    subgraph "📦 Inventory System"
+        CIR --> IDB("<b>Inventory Database Checks:</b><br/>• Part Availability<br/>• Stock Quantity<br/>• Reorder Level<br/>• Warehouse Location"):::db
+        IDB --> SA{"<b>Stock Available?</b>"}:::decision
+    end
+
+    %% IF STOCK AVAILABLE
+    subgraph "✅ IF STOCK AVAILABLE"
+        SA -->|YES| RS[Request Submitted]:::action
+        RS --> SR[Supervisor Review]:::action
+        SR --> APP{"<b>Approve or Reject?</b>"}:::decision
+    end
+
+    %% IF APPROVED
+    subgraph "✔️ IF APPROVED"
+        APP -->|Approve| IA[Inventory Allocation]:::action
+        IA --> SU[Stock Updated]:::action
+        SU --> PR[Part Reserved]:::action
+        PR --> EN1[Engineer Notification]:::action
+        EN1 --> WOE[Work Order Execution]:::action
+    end
+
+    %% IF REJECTED
+    subgraph "❌ IF REJECTED"
+        APP -->|Reject| RR[Request Returned]:::alert
+        RR --> EN2[Engineer Notification]:::alert
+        EN2 --> AR[Alternative Recommendation]:::alert
+    end
+
+    %% IF STOCK NOT AVAILABLE
+    subgraph "⚠️ IF STOCK NOT AVAILABLE"
+        SA -->|NO| LIA[Low Inventory Alert]:::alert
+        LIA --> SN[Supervisor Notification]:::alert
+        SN --> MN[Manager Notification]:::alert
+        MN --> REQ[Reorder Request]:::alert
+        REQ --> PP[Procurement Process]:::alert
+    end
+
+    %% Final Output
+    subgraph "🏁 Final Output"
+        WOE --> II[Inventory Issued]:::monitor
+        II --> MA[Maintenance Activity]:::monitor
+        MA --> WOC[Work Order Completion]:::monitor
+        WOC --> MHU[Maintenance History Updated]:::monitor
+    end
+
+    %% Manager Monitoring
+    subgraph "📊 Manager Monitoring"
+        MD("<b>Manager Dashboard Displays:</b><br/>• Pending Requests<br/>• Approved Requests<br/>• Rejected Requests<br/>• Inventory Status<br/>• Low Stock Alerts<br/>• Critical Inventory Items"):::monitor
+    end
+
+    %% Notification Center
+    subgraph "🔔 Notification Center"
+        NC("<b>Send Notifications To:</b><br/>• Engineer | Supervisor | Manager<br/><br/><b>Types:</b><br/>Created | Approved | Rejected | Updated | Alerts"):::db
+    end
+
+    %% Audit Logging
+    subgraph "📝 Audit Logging"
+        AL("<b>Record:</b><br/>• Request ID<br/>• User<br/>• Part Name<br/>• Quantity<br/>• Approval Status<br/>• Timestamp"):::db
+    end
+
+    %% Floating connections for visual completeness
+    RS -.-> NC
+    APP -.-> AL
+    LIA -.-> MD
+```
+
+---
+
 ## ✨ Platform Features & Capabilities
 
 The Maintenance Wizard is a comprehensive, production-ready Agentic AI platform built with a wide array of advanced features specifically tailored for industrial environments:
