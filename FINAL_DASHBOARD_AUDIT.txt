@@ -1,9 +1,0 @@
-==================================================
-FINAL DASHBOARD & DB AUDIT REPORT
-==================================================
-
-Dashboard Under Maintenance: 0
-Dashboard Open Work Orders: 0
-Dashboard Low Stock Alerts: 0
-
-DB INTEGRITY: Users count: 28
