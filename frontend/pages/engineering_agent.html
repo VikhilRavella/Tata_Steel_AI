@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    /* Layout */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Top Nav */
+    .top-nav {
+      height: 52px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-6);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      width: 220px;
+    }
+    
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .nav-plant { font-size: 11px; color: var(--text-muted); }
+    
+    .search-bar {
+      position: relative;
+      width: 320px;
+    }
+    
+    .search-bar i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .search-input {
+      width: 100%;
+      height: 32px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      background-color: var(--bg-page);
+      font-size: 13px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+    }
+    
+    .icon-btn {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    
+    .icon-btn:hover { color: var(--text-primary); }
+    
+    .badge-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--status-critical);
+      color: white;
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 50%;
+      height: 14px;
+      min-width: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+    }
+    
+    .avatar {
+      height: 32px;
+      width: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border-default);
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .user-card {
+      padding: var(--spacing-5);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .user-card .avatar { width: 48px; height: 48px; font-size: 18px; margin-bottom: var(--spacing-2); }
+    .user-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .user-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: var(--spacing-1); }
+    
+    .nav-menu {
+      padding: var(--spacing-4) 0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-3) var(--spacing-5);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      gap: var(--spacing-3);
+      transition: background 0.2s, color 0.2s;
+    }
+    
+    .nav-item:hover {
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      color: var(--primary);
+      background-color: var(--status-success-bg);
+      border-right: 3px solid var(--primary);
+    }
+    
+    .nav-item i { width: 16px; text-align: center; }
+    
+    .sidebar-footer {
+      padding: var(--spacing-5);
+      border-top: 1px solid var(--border-default);
+    }
+    
+    .version-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: var(--spacing-4);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex-grow: 1;
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      overflow-y: auto;
+      padding: var(--spacing-6) var(--spacing-8);
+      background-color: var(--bg-page);
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--spacing-6);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .metric-card {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .metric-value {
+      font-size: 32px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      margin: var(--spacing-2) 0;
+    }
+    
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-6);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .list-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-3) 0;
+      border-bottom: 1px solid var(--border-default);
+    }
+    
+    .list-row:last-child { border-bottom: none; }
+    
+    .row-main { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
+    .row-title { font-weight: 500; font-size: 14px; }
+    .row-meta { font-size: 12px; color: var(--text-muted); }
+    
+    .quick-start {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(59, 109, 17, 0.2);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .quick-start-btn {
+      background-color: white;
+      color: var(--primary);
+      padding: 0 var(--spacing-6);
+      height: 48px;
+      font-size: 16px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-2);
+    }
+    
+    .quick-start-btn:hover { background-color: var(--bg-page); }
+
+    .health-stats { display: flex; justify-content: space-between; padding-top: 10px; }
+    .health-stat { text-align: center; }
+    .health-stat-val { font-size: 24px; font-weight: bold; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+
+  <!-- Top Nav -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div>
+        <div class="nav-title">Maintenance Wizard</div>
+        <div class="nav-plant">Tata Steel &middot; Jamshedpur</div>
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <i class="fa-solid fa-search"></i>
+      <input type="text" class="search-input" placeholder="Search equipment, SOPs, logs...">
+    </div>
+    
+    <div class="nav-actions">
+      <button class="icon-btn">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge-count">3</span>
+      </button>
+      <span class="badge status-info" id="userRole">Engineer</span>
+      <div class="avatar" id="navAvatar">EN</div>
+      <a href="index.html" class="icon-btn" title="Logout" onclick="localStorage.clear();"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar" id="userAvatar">EN</div>
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-id" id="userId">ID: ...</div>
+      </div>
+      
+            <nav class="nav-menu">
+        <a href="home_page_engineer.html" class="nav-item">
+          <i class="fa-solid fa-home"></i> Home Dashboard
+        </a>
+        <a href="engineering_agent.html" class="nav-item active">
+          <i class="fa-solid fa-robot"></i> AI Agent
+        </a>
+        <a href="agent_sandbox.html" class="nav-item">
+          <i class="fa-solid fa-flask"></i> Sandbox
+        </a>
+        <a href="chat.html" class="nav-item">
+          <i class="fa-solid fa-clipboard-check"></i> My Tasks
+        </a>
+        <a href="history.html" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i> Session Logs
+        </a>
+        <a href="upload.html" class="nav-item">
+          <i class="fa-solid fa-file-pdf"></i> Documents
+        </a>
+        <a href="equipment.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i> Equipment Health
+        </a>
+        <a href="safety.html" class="nav-item">
+          <i class="fa-solid fa-shield-halved"></i> Safety Verification
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i> Profile
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="version-info">v2.1.0 &middot; Plant: JSR-01</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+<style>
+
+        .main-content {
+            display: flex;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--bg-page);
+        }
+        .workspace-nav {
+            width: 60px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+        .workspace-nav a { color: var(--text-muted); font-size: 20px; text-decoration: none; }
+        .workspace-nav a:hover { color: var(--text-primary); }
+        .workspace-chat {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .header { height: 60px; border-bottom: 1px solid var(--border-default); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; background: var(--bg-card); }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; background: var(--bg-page); }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 8px; line-height: 1.5; font-size: 14px; }
+        .message.user { align-self: flex-end; background-color: var(--primary); color: white; border-bottom-right-radius: 0; }
+        .message.agent { align-self: flex-start; background-color: var(--bg-card); border: 1px solid var(--border-default); color: var(--text-primary); border-bottom-left-radius: 0; }
+        .input-area { height: 80px; border-top: 1px solid var(--border-default); display: flex; align-items: center; padding: 0 20px; background: var(--bg-card); gap: 10px; flex-shrink: 0; }
+        .input-area input { flex: 1; height: 40px; border: 1px solid var(--border-default); border-radius: 4px; padding: 0 15px; outline: none; background: var(--bg-page); color: var(--text-primary); }
+        .input-area button { height: 40px; padding: 0 20px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        
+        .side-panel { width: 350px; background: var(--bg-card); border-left: 1px solid var(--border-default); display: flex; flex-direction: column; flex-shrink: 0; }
+        .panel-header { height: 60px; border-bottom: 1px solid var(--border-default); display: flex; align-items: center; padding: 0 20px; font-weight: 600; background: var(--bg-card); }
+        .panel-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: var(--bg-page); border: 1px solid var(--border-default); border-radius: 6px; padding: 15px; }
+        .card h3 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+        .context-item { margin-bottom: 10px; font-size: 13px; }
+        .context-item strong { color: var(--text-primary); }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; background: var(--status-warning-bg); color: var(--status-warning); }
+        .badge.complete { background: var(--status-success-bg); color: var(--status-success); }
+        .agent-thinking {
+            color: #64748b;
+            font-style: italic;
+        }
+        .agent-thinking::before {
+            content: "⚙️ ";
+        }
+
+</style>
+
+      <div class="workspace-nav">
+        <a href="#" onclick="navigateHome(event)" title="Home"><i class="fa-solid fa-home"></i></a>
+        <a href="agent_sandbox.html" title="Sandbox"><i class="fa-solid fa-flask"></i></a>
+        <a href="#" style="color: var(--primary);" title="Engineering Workspace"><i class="fa-solid fa-laptop-code"></i></a>
+    </div>
+    
+    <div class="workspace-chat">
+        <div class="header">
+            <div>
+                <strong style="font-size: 18px;">Engineering Workspace</strong>
+                <span style="margin-left: 10px; font-size: 12px; color: var(--text-muted);">Session: <span id="sessionDisplay">Loading...</span></span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button id="openSidePanelBtn" onclick="document.querySelector('.side-panel').style.display='flex'; this.style.display='none';" class="btn btn-secondary" style="display:none; height: 32px; padding: 0 10px; font-size: 12px;" title="Open Context Panel"><i class="fa-solid fa-layer-group"></i> Context</button>
+                <select id="modelSelect" class="input-field" style="height: 32px; width: 150px;">
+                    <option value="mistral">Mistral (Default)</option>
+                    <option value="llama3">Llama 3</option>
+                    <option value="qwen">Qwen</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="chat-container" id="chatBox">
+            <div style="text-align: center; margin-bottom: 10px; font-size: 12px; color: var(--text-muted); display: none;" id="activeDocBanner">
+                <i class="fa-solid fa-file-pdf" style="color: var(--primary);"></i> Active Knowledge Source: <strong id="activeDocName" style="color: var(--text-primary);"></strong>
+                <button onclick="clearActiveDoc()" style="margin-left: 5px; background: none; border: none; color: var(--status-critical); cursor: pointer;"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="message agent">Welcome to the Engineering Workspace. I'm connected to your project context. How can we proceed with the requirements today?</div>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; background: var(--bg-card); border-top: 1px solid var(--border-default);">
+            <div id="imagePreviewContainer" style="display: none; padding: 10px 20px; border-bottom: 1px solid var(--border-default);">
+                <img id="imagePreview" src="" style="max-height: 100px; border-radius: 4px; border: 1px solid var(--border-default);">
+                <button onclick="clearImage()" style="background: none; border: none; color: var(--status-critical); cursor: pointer; margin-left: 10px;"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="input-area" style="border-top: none;">
+                <input type="file" id="imageUpload" accept="image/jpeg, image/png, image/webp" style="display: none;" onchange="handleImageSelect(event)">
+                <button onclick="document.getElementById('imageUpload').click()" style="background: var(--bg-page); color: var(--text-primary); border: 1px solid var(--border-default);"><i class="fa-solid fa-image"></i></button>
+                <button onclick="openDocsModal()" style="background: var(--bg-page); color: var(--primary); border: 1px solid var(--primary); margin-left: 5px;" title="Verified Company Documents"><i class="fa-solid fa-file-pdf"></i></button>
+                <input type="text" id="chatInput" placeholder="Type a message or clarify requirements...">
+                <button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i> Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="side-panel">
+        <div class="panel-header">
+            <i class="fa-solid fa-layer-group" style="margin-right: 8px;"></i> Project Context
+            <button onclick="refreshContext()" class="btn btn-secondary" style="margin-left: auto; height: 24px; padding: 0 8px; font-size: 11px;" title="Refresh Context"><i class="fa-solid fa-rotate"></i></button>
+            <button onclick="document.querySelector('.side-panel').style.display='none'; document.getElementById('openSidePanelBtn').style.display='block';" class="btn btn-secondary" style="margin-left: 5px; height: 24px; padding: 0 8px; font-size: 11px;" title="Close Panel"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <div class="panel-content">
+            <div class="card" id="sessionHistoryCard">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3>AI Engineering Sessions</h3>
+                    <button onclick="createNewSession()" class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;">+ New</button>
+                </div>
+                <div class="search-bar" style="margin-bottom: 10px; width: 100%;">
+                    <i class="fa-solid fa-search" style="left: 8px;"></i>
+                    <input type="text" id="sessionSearch" class="search-input" placeholder="Search sessions..." onkeyup="filterSessions()" style="height: 28px; font-size: 11px; padding-left: 28px;">
+                </div>
+                <div id="sessionListContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;">
+                    <!-- Session items will be dynamically injected here -->
+                    <div style="font-size: 12px; color: var(--text-muted);">Loading sessions...</div>
+                </div>
+            </div>
+            
+            <div class="card" id="reqCard">
+                <h3>Requirement Profile <span class="badge" id="reqStatus">Loading...</span></h3>
+                <div id="reqDetails" style="font-size: 13px; color: var(--text-secondary);">Initializing...</div>
+            </div>
+            
+            <div class="card" id="memCard">
+                <h3>Agent Memory</h3>
+                <div id="memDetails" style="font-size: 13px; color: var(--text-secondary);">Initializing...</div>
+            </div>
+            
+            <div class="card" id="repCard">
+                <h3>Engineering Reports</h3>
+                <div id="repDetails" style="font-size: 13px; color: var(--text-secondary);">Initializing...</div>
+            </div>
+            
+            <div class="card" id="ragCard">
+                <h3>Engineering Knowledge Base</h3>
+                <div style="margin-bottom: 10px;">
+                    <input type="file" id="engPdfUpload" accept=".pdf,.docx" style="display: none;">
+                    <button class="btn btn-outline" style="width: 100%; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px;" onclick="document.getElementById('engPdfUpload').click()">
+                        <i class="fa-solid fa-upload"></i> Upload PDF / Document
+                    </button>
+                    <div id="engUploadStatus" style="font-size: 11px; margin-top: 5px; text-align: center;"></div>
+                </div>
+                <div id="ragDocsList" style="font-size: 13px; color: var(--text-secondary);">
+                    <em>No documents uploaded yet.</em>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+const params = new URLSearchParams(window.location.search);
+let sessionId = params.get("session_id") || localStorage.getItem('engineering_session_id');
+let currentImageBase64 = null;
+
+function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        currentImageBase64 = e.target.result.split(',')[1];
+        document.getElementById('imagePreview').src = e.target.result;
+        document.getElementById('imagePreviewContainer').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearImage() {
+    currentImageBase64 = null;
+    const uploadInput = document.getElementById('imageUpload');
+    if (uploadInput) uploadInput.value = '';
+    const container = document.getElementById('imagePreviewContainer');
+    if (container) container.style.display = 'none';
+}
+const token = localStorage.getItem('access_token');
+
+const API_BASE = "http://localhost:8000";
+
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadInput = document.getElementById('engPdfUpload');
+    if(uploadInput) {
+        uploadInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const statusDiv = document.getElementById('engUploadStatus');
+            statusDiv.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            statusDiv.style.color = 'var(--text-primary)';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/engineering/upload`, {
+                    method: 'POST',
+                    headers: { 
+        'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                if(response.ok) {
+                    statusDiv.innerHTML = '<i class="fa-solid fa-check" style="color:var(--status-healthy)"></i> Document Uploaded Successfully';
+                    
+                    const listDiv = document.getElementById('ragDocsList');
+                    if (listDiv.innerHTML.includes('No documents')) {
+                        listDiv.innerHTML = '';
+                    }
+                    
+                    const timeNow = new Date().toLocaleTimeString();
+                    listDiv.innerHTML += `<div style="padding: 5px 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>${file.name}</strong><br>
+                        <span style="font-size: 11px; color: var(--text-muted);">${timeNow}</span>
+                    </div>`;
+                    
+                } else {
+                    const err = await response.json();
+                    statusDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--status-critical)"></i> ${err.detail || 'Upload Failed'}`;
+                }
+            } catch (err) {
+                statusDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--status-critical)"></i> Network Error`;
+            }
+        });
+    }
+});
+
+async function fetchWithTimeout(resource, options = {}) {
+    const { timeout = 60000 } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    
+    if (resource.startsWith('/')) {
+        resource = API_BASE + resource;
+    } else if (!resource.startsWith('http')) {
+        resource = API_BASE + '/' + resource;
+    }
+    
+    options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+    };
+    
+    try {
+        const response = await fetch(resource, {
+            ...options,
+            signal: controller.signal  
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        if (error.name === 'AbortError') {
+            throw new Error(`Request timed out after ${timeout/1000} seconds`);
+        }
+        throw new Error(`Network error: ${error.message}`);
+    }
+}
+
+async function initSession() {
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    try {
+        if (!sessionId || sessionId === 'test-eng') {
+            const res = await fetchWithTimeout('/api/engineering/session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+            if (res.ok) {
+                const data = await res.json();
+                sessionId = data.id || data.session_id;
+                localStorage.setItem('engineering_session_id', sessionId);
+                
+                // Set the URL parameter without reloading
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('session_id', sessionId);
+                window.history.pushState({path:newUrl.href}, '', newUrl.href);
+            } else {
+                throw new Error(await res.text());
+            }
+        }
+        document.getElementById('sessionDisplay').innerText = sessionId;
+    } catch (e) {
+        document.getElementById('sessionDisplay').innerText = `Error: ${e.message}`;
+    }
+}
+
+async function loadChatHistory() {
+    try {
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = '<div class="message agent">Loading history...</div>';
+        
+        const res = await fetchWithTimeout(`/api/engineering/history/chat/${sessionId}`);
+        if (res.ok) {
+            const data = await res.json();
+            chatBox.innerHTML = '';
+            
+            if (data && data.length > 0) {
+                data.forEach(msg => {
+                    const safeContent = (msg.content || '').replace(/\n/g, '<br>');
+                    if (msg.sender === 'user') {
+                        let html = `<div class="message user">${safeContent}</div>`;
+                        if (msg.image_analysis) {
+                            html += `<div class="message agent" style="background-color: var(--bg-page); border: 1px solid var(--border-default); font-size: 0.9em; margin-top: -5px;"><i class="fa-solid fa-eye"></i> <strong>Vision Analysis:</strong><br>${marked.parse(msg.image_analysis)}</div>`;
+                        }
+                        chatBox.innerHTML += html;
+                    } else if (msg.type === 'system') {
+                        chatBox.innerHTML += `<div style="text-align: center; margin: 10px 0; font-size: 12px; color: #ffaa00; background: rgba(255,170,0,0.1); padding: 8px; border-radius: 4px; border: 1px dashed #ffaa00; font-weight: 600;"><i class="fa-solid fa-flask"></i> ${safeContent}</div>`;
+                    } else {
+                        chatBox.innerHTML += `<div class="message agent">${marked.parse(msg.content || '')}</div>`;
+                    }
+                });
+            } else {
+                chatBox.innerHTML = '<div class="message agent">Welcome to the Engineering Workspace. I\'m connected to your project context. How can we proceed with the requirements today?</div>';
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } else {
+            chatBox.innerHTML = '<div class="message agent" style="color:red">Failed to load history</div>';
+        }
+    } catch (e) {
+        document.getElementById('chatBox').innerHTML = `<div class="message agent" style="color:red">Error loading history: ${e.message}</div>`;
+    }
+}
+
+async function loadUserProfile() {
+    try {
+        const name = localStorage.getItem('user_name') || 'Engineer';
+        const role = localStorage.getItem('user_role') || 'engineer';
+        const empId = localStorage.getItem('employee_id') || 'ID: ...';
+        
+        document.getElementById('userName').innerText = name;
+        document.getElementById('userId').innerText = `ID: ${empId}`;
+        document.getElementById('userRole').innerText = role;
+        
+        const initial = name.substring(0, 2).toUpperCase();
+        document.getElementById('userAvatar').innerText = initial;
+        document.getElementById('navAvatar').innerText = initial;
+    } catch (e) {
+        document.getElementById('userName').innerText = `Error: ${e.message}`;
+    }
+}
+
+async function loadAgentMemory() {
+    try {
+        const memDetails = document.getElementById('memDetails');
+        memDetails.innerText = 'Loading...';
+        const res = await fetchWithTimeout(`/api/engineering/context/${sessionId}`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.memories && data.memories.length > 0) {
+                memDetails.innerHTML = data.memories.map(m => `<div class="context-item"><strong>${m.type}:</strong> ${m.content} <span style="font-size:10px;color:var(--text-muted)">(${m.score})</span></div>`).join('');
+            } else {
+                memDetails.innerHTML = 'No memory available';
+            }
+        } else {
+            memDetails.innerText = 'No memory or error';
+        }
+    } catch (e) {
+        document.getElementById('memDetails').innerText = `Error: ${e.message}`;
+    }
+}
+
+async function loadRequirementProfile() {
+    try {
+        const reqStatus = document.getElementById('reqStatus');
+        const reqDetails = document.getElementById('reqDetails');
+        if (!reqStatus || !reqDetails) return;
+        
+        reqStatus.innerText = 'Loading...';
+        
+        const res = await fetchWithTimeout(`/api/engineering/requirements/${sessionId}`);
+        if (res.ok) {
+            const data = await res.json();
+            const p = data.profile;
+            reqStatus.innerText = p.profile_status;
+            if (p.profile_status === 'COMPLETE') {
+                reqStatus.className = 'badge complete';
+            } else {
+                reqStatus.className = 'badge';
+            }
+            
+            reqDetails.innerHTML = `
+                <div class="context-item"><strong>Project:</strong> ${p.project_name || 'Pending'}</div>
+                <div class="context-item"><strong>Problem:</strong> ${p.problem_statement || 'Pending'}</div>
+                <div class="context-item"><strong>Goal:</strong> ${p.business_goal || 'Pending'}</div>
+                <div class="context-item"><strong>Tech Stack:</strong> ${p.tech_stack || 'Pending'}</div>
+                <div class="context-item"><strong>Constraints:</strong> ${p.constraints || 'Pending'}</div>
+            `;
+        } else {
+            reqStatus.innerText = 'Unknown';
+            reqDetails.innerText = 'No profile generated yet. Start chatting to build requirements.';
+        }
+    } catch (e) {
+        reqStatus.innerText = 'Error';
+        reqDetails.innerText = `Error: ${e.message}`;
+    }
+}
+
+async function loadSessionsList() {
+    try {
+        const res = await fetchWithTimeout('/api/engineering/history/list');
+        if (res.ok) {
+            const data = await res.json();
+            const container = document.getElementById('sessionListContainer');
+            container.innerHTML = '';
+            if (data && Array.isArray(data)) {
+                data.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'card context-item session-item';
+                    div.style.cursor = 'pointer';
+                    if (s.session_id === sessionId) div.style.borderLeft = '3px solid var(--primary)';
+                    div.onclick = () => {
+                        localStorage.setItem('engineering_session_id', s.session_id);
+                        sessionId = s.session_id;
+                        const newUrl = new URL(window.location.href);
+                        newUrl.searchParams.set('session_id', sessionId);
+                        window.history.pushState({path:newUrl.href}, '', newUrl.href);
+                        
+                        document.getElementById('sessionDisplay').innerText = sessionId;
+                        refreshContext();
+                        loadChatHistory();
+                        
+                        document.querySelectorAll('.session-item').forEach(el => el.style.borderLeft = 'none');
+                        div.style.borderLeft = '3px solid var(--primary)';
+                    };
+                    div.innerHTML = `<strong>${s.session_id.split('-').pop()}</strong><br><span style="color:var(--text-muted);font-size:11px;">${new Date(typeof s.created_at === 'string' && !s.created_at.endsWith('Z') ? s.created_at + 'Z' : s.created_at).toLocaleString()}</span>`;
+                    container.appendChild(div);
+                });
+            } else {
+                container.innerHTML = '<div style="color:var(--text-muted);font-size:11px;">No sessions</div>';
+            }
+        }
+    } catch (e) {
+        document.getElementById('sessionListContainer').innerHTML = `<div style="color:red">Error: ${e.message}</div>`;
+    }
+}
+
+async function refreshContext() {
+    loadUserProfile();
+    loadAgentMemory();
+    loadRequirementProfile();
+    loadReports();
+}
+
+async function loadReports() {
+    if (!sessionId) return;
+    try {
+        const res = await fetchWithTimeout(`/api/reports/session/${sessionId}`);
+        if (res.ok) {
+            const data = await res.json();
+            const div = document.getElementById('repDetails');
+            if (data.length === 0) {
+                div.innerHTML = "No reports generated yet.";
+                return;
+            }
+            let html = "";
+            for (let r of data) {
+                html += `<div style="margin-bottom: 10px; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface);">
+                    <div style="font-weight: 600;">${r.title}</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 5px;">${new Date(typeof r.created_at === 'string' && !r.created_at.endsWith('Z') ? r.created_at + 'Z' : r.created_at).toLocaleString()}</div>
+                    <button onclick="exportReportPDF(${r.id})" style="font-size: 11px; padding: 4px 8px; cursor: pointer; background: var(--primary-color); color: white; border: none; border-radius: 4px;">View & Export PDF</button>
+                </div>`;
+            }
+            div.innerHTML = html;
+        }
+    } catch (e) {
+        document.getElementById('repDetails').innerHTML = "Failed to load reports.";
+    }
+}
+
+async function exportReportPDF(reportId) {
+    try {
+        const res = await fetchWithTimeout(`/api/reports/${reportId}`);
+        if (res.ok) {
+            const data = await res.json();
+            const printWin = window.open('', '_blank');
+            printWin.document.write(`
+                <html>
+                <head>
+                    <title>${data.title}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+                        h1, h2, h3 { color: #000; }
+                        pre { background: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; }
+                    </style>
+                </head>
+                <body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+                    <h1>${data.title}</h1>
+                    <p><em>Type: ${data.report_type} | Date: ${new Date(typeof data.created_at === 'string' && !data.created_at.endsWith('Z') ? data.created_at + 'Z' : data.created_at).toLocaleString()}</em></p>
+                    <hr/>
+                    <div style="white-space: pre-wrap; font-family: monospace;">${data.report_content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+            printWin.onload = function() {
+                printWin.print();
+            };
+        }
+    } catch (e) {
+        alert("Failed to export report: " + e.message);
+    }
+}
+
+function createNewSession() {
+    localStorage.removeItem('engineering_session_id');
+    window.location.href = 'engineering_agent.html';
+}
+
+function filterSessions() {
+    const query = document.getElementById('sessionSearch').value.toLowerCase();
+    const items = document.querySelectorAll('.session-item');
+    items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        item.style.display = text.includes(query) ? 'block' : 'none';
+    });
+}
+
+function navigateHome(e) {
+    e.preventDefault();
+    window.location.href = 'home_page_engineer.html';
+}
+
+async function sendMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const text = chatInput.value.trim();
+    if (!text && !currentImageBase64) return;
+    
+    const chatBox = document.getElementById('chatBox');
+    let userMsgHtml = `<div class="message user">${text}</div>`;
+    if (currentImageBase64) {
+        userMsgHtml = `<div class="message user"><img src="data:image/jpeg;base64,${currentImageBase64}" style="max-height: 100px; display: block; margin-bottom: 10px;">${text}</div>`;
+    }
+    chatBox.innerHTML += userMsgHtml;
+    
+    const bodyPayload = { message: text, session_id: sessionId };
+    if (currentImageBase64) {
+        bodyPayload.image_base64 = currentImageBase64;
+        clearImage();
+    }
+    if (selectedDocumentId) {
+        bodyPayload.document_id = selectedDocumentId;
+    }
+    
+    chatInput.value = '';
+    chatBox.scrollTop = chatBox.scrollHeight;
+    
+    let msgLower = text.toLowerCase();
+    let initialText = 'Engineering Agent is analyzing...';
+    if (selectedDocumentId) {
+        initialText = '📄 Reading selected document...';
+    } else if (currentEngImageBase64 || msgLower.includes('image') || msgLower.includes('photo')) {
+        initialText = '🖼️ Analyzing uploaded image...';
+    } else if (msgLower.match(/inventory|stock|spare|part|bearing/)) {
+        initialText = '📦 Checking inventory database...';
+    } else if (msgLower.match(/work order|task|maintenance/)) {
+        initialText = '🔧 Loading assigned work orders...';
+    }
+
+    // Add typing indicator
+    const typingId = 'typing-' + Date.now();
+    chatBox.innerHTML += `<div id="${typingId}" class="message agent agent-thinking">${initialText}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+    
+    let dots = 0;
+    const typingInterval = setInterval(() => {
+        const el = document.getElementById(typingId);
+        if (el) {
+            dots = (dots + 1) % 4;
+            let baseText = initialText.replace(/\.+$/, '');
+            el.innerText = baseText + ".".repeat(dots);
+        } else {
+            clearInterval(typingInterval);
+        }
+    }, 500);
+    
+    try {
+        const res = await fetchWithTimeout(`/api/engineering/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyPayload)
+        });
+        
+        clearInterval(typingInterval);
+        const el = document.getElementById(typingId);
+        
+        if (res.ok) {
+            // Check if it's a stream
+            const contentType = res.headers.get('content-type');
+            if (contentType && contentType.includes('text/event-stream')) {
+                const msgId = typingId;
+                if (el) {
+                    let genText = selectedDocumentId ? '📚 Analyzing maintenance content...' : 'Generating response...';
+                    el.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-primary" style="margin-right:6px;"></i> ${genText}`;
+                }
+                
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let done = false;
+                let buffer = '';
+                window.engFullMessage = '';
+                while (!done) {
+                    const { value, done: readerDone } = await reader.read();
+                    done = readerDone;
+                    if (value) {
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const dataStr = line.replace('data: ', '').trim();
+                                if (dataStr === '[DONE]') break;
+                                try {
+                                    const data = JSON.parse(dataStr);
+                                    if (data.status) {
+                                        const el = document.getElementById(msgId);
+                                        if (el && !window.engFullMessage) {
+                                            el.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-primary" style="margin-right:6px;"></i> ${data.status}`;
+                                            chatBox.scrollTop = chatBox.scrollHeight;
+                                        }
+                                    }
+                                    if (data.token) {
+                                        if (!window.engFullMessage) window.engFullMessage = '';
+                                        window.engFullMessage += data.token;
+                                        const el = document.getElementById(msgId);
+                                        if (el) {
+                                            let cleanMessage = window.engFullMessage.replace(/\[(?:RESPONSE_TRIGGER|WORK_ORDER_TRIGGER|REPORT_TRIGGER|INVENTORY_REQUEST_TRIGGER|INVENTORY_APPROVAL_TRIGGER|INVENTORY_RETURN_TRIGGER|PART_CARD|DOCUMENT_QA|ENGINEERING_ANALYSIS|CONTEXTUAL_EVIDENCE|VISION_ANALYSIS|System:)[\s\S]*?(?:\]|$)/gi, '');
+                                            if (cleanMessage.trim() !== '') {
+                                                el.className = 'message agent';
+                                                el.innerHTML = marked.parse(cleanMessage);
+                                                chatBox.scrollTop = chatBox.scrollHeight;
+                                            }
+                                        }
+                                    }
+                                } catch(e) {}
+                            }
+                        }
+                    }
+                }
+            } else {
+                const data = await res.json();
+                if (el) {
+                    el.className = 'message agent';
+                    el.innerHTML = marked.parse(data.response || data.message || 'Done');
+                } else {
+                    chatBox.innerHTML += `<div class="message agent">${marked.parse(data.response || data.message || 'Done')}</div>`;
+                }
+            }
+        } else {
+            if (el) {
+                el.className = 'message agent';
+                el.innerHTML = '<span style="color:red">❌ Unable to generate response.<br>Please try again.</span>';
+            }
+        }
+        
+        // Refresh context panels
+        setTimeout(refreshContext, 1000);
+        
+    } catch (e) {
+        clearInterval(typingInterval);
+        const el = document.getElementById(typingId);
+        if (el) {
+            el.className = 'message agent';
+            el.innerHTML = '<span style="color:red">❌ Unable to generate response.<br>Please try again.</span>';
+        }
+    }
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await initSession();
+    refreshContext();
+    loadSessionsList();
+    await loadChatHistory();
+    
+    // Check for global search query
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('q');
+    if (searchQuery) {
+        document.getElementById('chatInput').value = `Please search for information regarding: ${searchQuery}`;
+        sendMessage();
+        
+        // Remove 'q' from URL so it doesn't trigger again on refresh
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('q');
+        window.history.replaceState({path:newUrl.href}, '', newUrl.href);
+    }
+    
+    // allow enter key to send message
+    document.getElementById('chatInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+});
+let selectedDocumentId = null;
+
+function openDocsModal() {
+    document.getElementById('docsModal').style.display = 'flex';
+    fetchApprovedDocs();
+}
+
+function closeDocsModal() {
+    document.getElementById('docsModal').style.display = 'none';
+}
+
+async function fetchApprovedDocs() {
+    const list = document.getElementById('docsList');
+    list.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading documents...</div>';
+    try {
+        const res = await fetchWithTimeout('/api/company-documents/approved');
+        if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+        const docs = await res.json();
+        
+        if (docs.length === 0) {
+            list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">No approved documents available.</div>';
+            return;
+        }
+        
+        let html = '';
+        docs.forEach(d => {
+            html += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid var(--border-default); border-radius:6px; background:var(--bg-card); margin-bottom:10px;">
+                <div>
+                    <div style="font-weight:600; font-size:14px; color:#f1f5f9;">${d.filename}</div>
+                    <div style="font-size:11px; color:var(--text-muted);">Uploaded: ${new Date(typeof d.upload_date === 'string' && !d.upload_date.endsWith('Z') ? d.upload_date + 'Z' : d.upload_date).toLocaleDateString()}</div>
+                </div>
+                <button class="btn btn-primary" style="padding:4px 12px; font-size:12px; border-radius: 4px; background: var(--primary); color: white; border: none; cursor: pointer;" onclick="useDocument(${d.id}, '${d.filename}')">Use Document</button>
+            </div>
+            `;
+        });
+        list.innerHTML = html;
+    } catch (e) {
+        console.error("fetchApprovedDocs error:", e);
+        list.innerHTML = `<div style="color:var(--status-critical); padding:10px;">Error loading documents: ${e.message}</div>`;
+    }
+}
+
+function useDocument(id, filename) {
+    selectedDocumentId = id;
+    const banner = document.getElementById('activeDocBanner');
+    const nameEl = document.getElementById('activeDocName');
+    if (banner && nameEl) {
+        banner.style.display = 'block';
+        nameEl.innerText = filename;
+    }
+    closeDocsModal();
+}
+
+function clearActiveDoc() {
+    selectedDocumentId = null;
+    document.getElementById('activeDocBanner').style.display = 'none';
+}
+</script>
+
+<div id="docsModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:var(--bg-panel); width:600px; max-width:90%; padding:20px; border-radius:8px; border:1px solid var(--border-default);">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;"><i class="fa-solid fa-file-pdf"></i> Verified Company Documents</h3>
+            <button onclick="closeDocsModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Select a company-approved document to use as the active knowledge source for this session.</p>
+        <div id="docsList" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+            <!-- Docs will be injected here -->
+        </div>
+        <div style="margin-top:20px; text-align:right;">
+            <button class="btn" style="padding: 6px 12px; cursor: pointer; border-radius: 4px; border: 1px solid var(--border-default); background: var(--bg-card); color: var(--text-primary);" onclick="closeDocsModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+==================================================
+API INVENTORY REPORT
+==================================================
+
+ROUTE                                    METHOD   PURPOSE                                  FRONTEND CALLER             BACKEND HANDLER
+-----------------------------------------------------------------------------------------------------------------------------------
+/api/auth/login                          POST     Authenticate User                        login.html                  routers/auth.py
+/api/auth/me                             GET      Fetch Current User Profile               All Pages                   routers/auth.py
+/api/auth/users                          GET      Fetch all users (admin)                  manager_dashboard.html      routers/auth.py
+
+/api/sandbox/session                     POST     Create Sandbox Session                   agent_sandbox.html          routers/sandbox.py
+/api/sandbox/chat                        POST     Process Sandbox Chat                     agent_sandbox.html          routers/sandbox.py
+/api/sandbox/voice/transcribe            POST     Transcribe Audio to Text                 agent_sandbox.html          routers/sandbox.py
+/api/sandbox/upload                      POST     Upload PDF Document                      agent_sandbox.html          routers/sandbox.py
+/api/sandbox/reset                       DELETE   Reset Chroma DB Collections              agent_sandbox.html          routers/sandbox.py
+
+/api/engineering/session                 POST     Create Engineering Session               home_page_engineer.html     routers/engineering_agent.py
+/api/engineering/history/list            GET      List Engineering Sessions                home_page_engineer.html     routers/engineering_agent.py
+/api/engineering/history/chat/{id}       GET      Fetch Chat History                       home_page_engineer.html     routers/engineering_agent.py
+/api/engineering/chat                    POST     Process Engineering Chat                 home_page_engineer.html     routers/engineering_agent.py
+/api/engineering/inventory-requests      GET      Fetch Engineer's Part Requests           home_page_engineer.html     routers/engineering_agent.py
+
+/api/inventory/search                    GET      Search InventoryMaster                   home_page_engineer.html     routers/inventory.py
+/api/inventory/request                   POST     Create Spare Part Request                home_page_engineer.html     routers/inventory.py
+
+/api/supervisor/inventory-requests       GET      Fetch Pending Part Requests              home_page_supervisor.html   routers/supervisor.py
+/api/supervisor/approve-inventory        POST     Approve/Reject Part Request              home_page_supervisor.html   routers/supervisor.py
+/api/supervisor/engineers                GET      List Assigned Engineers                  home_page_supervisor.html   routers/supervisor.py
+
+/api/manager/dashboard                   GET      Fetch System Metrics                     manager_dashboard.html      routers/manager_portal.py
+/api/manager/audit-logs                  GET      Fetch System Audit Logs                  manager_dashboard.html      routers/manager_portal.py
+
+/api/reports/rca                         POST     Generate RCA Report                      home_page_engineer.html     routers/reports.py
+/api/reports/shift                       POST     Generate Shift Summary                   home_page_supervisor.html   routers/reports.py

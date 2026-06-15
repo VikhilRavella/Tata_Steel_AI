@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Users - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    .app-container { display: flex; height: 100vh; overflow: hidden; }
+    .top-nav { height: 52px; background-color: var(--bg-card); border-bottom: 1px solid var(--border-default); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--spacing-6); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+    .nav-brand { display: flex; align-items: center; gap: var(--spacing-3); width: 220px; }
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .search-bar { position: relative; width: 320px; }
+    .search-input { width: 100%; height: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 12px; background-color: var(--bg-page); }
+    .nav-actions { display: flex; align-items: center; gap: var(--spacing-4); }
+    .avatar { height: 32px; width: 32px; border-radius: 50%; background-color: var(--status-info); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+    .sidebar { width: 220px; background-color: var(--bg-card); border-right: 1px solid var(--border-default); height: calc(100vh - 52px); margin-top: 52px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .user-card { padding: var(--spacing-5); border-bottom: 1px solid var(--border-default); display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .nav-menu { padding: var(--spacing-4) 0; flex-grow: 1; overflow-y: auto; }
+    .nav-item { display: flex; align-items: center; padding: var(--spacing-3) var(--spacing-5); color: var(--text-secondary); text-decoration: none; font-weight: 500; gap: var(--spacing-3); }
+    .nav-item.active { color: var(--primary); background-color: var(--status-success-bg); border-right: 3px solid var(--primary); }
+    .main-content { flex-grow: 1; height: calc(100vh - 52px); margin-top: 52px; overflow-y: auto; padding: var(--spacing-6) var(--spacing-8); background-color: var(--bg-page); }
+    
+    .data-table { width: 100%; border-collapse: collapse; background-color: var(--bg-card); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-card); }
+    .data-table th { background-color: var(--bg-panel); color: var(--text-secondary); font-size: 12px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-strong); font-weight: 600; }
+    .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--border-default); font-size: 13px; vertical-align: middle; }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div class="nav-title">Maintenance Wizard</div>
+    </div>
+    <div class="search-bar"><input type="text" class="search-input" placeholder="Search plant KPIs, reports..."></div>
+    <div class="nav-actions">
+      <span class="badge status-info">Plant Manager</span>
+      <div class="avatar">MK</div>
+      <a href="index.html" style="color: var(--text-secondary)"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar profile-icon" style="width:48px;height:48px;font-size:18px;margin-bottom:8px;">MK</div>
+        <div class="profile-name" style="font-weight:600">Manish Kumar</div>
+        <span class="badge status-info profile-role">Plant Manager</span>
+      </div>
+      <nav class="nav-menu">
+        <a href="home_page_manager.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Plant KPIs</a>
+        <a href="manager_audit_log.html" class="nav-item"><i class="fa-solid fa-file-invoice"></i> Audit Logs</a>
+        <a href="manager_documents.html" class="nav-item"><i class="fa-solid fa-book"></i> Global SOPs</a>
+        <a href="manager_asset_health.html" class="nav-item"><i class="fa-solid fa-city"></i> Asset Health</a>
+        <a href="manager_users.html" class="nav-item active"><i class="fa-solid fa-users-gear"></i> Manage Users</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
+        <h2>User Management</h2>
+        <button class="btn btn-primary" onclick="openCreateUserModal()"><i class="fa-solid fa-user-plus"></i> Add User</button>
+      </div>
+
+      <h3 style="margin-bottom: var(--spacing-4);">Plant Managers</h3>
+      <table class="data-table" style="margin-bottom: var(--spacing-6);">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="managers-table-body">
+          <tr><td colspan="4" style="text-align: center;">Loading...</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-bottom: var(--spacing-4);">Shift Supervisors</h3>
+      <table class="data-table" style="margin-bottom: var(--spacing-6);">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="supervisors-table-body">
+          <tr><td colspan="4" style="text-align: center;">Loading...</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-bottom: var(--spacing-4);">Field Engineers</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Specialization / Work</th>
+            <th>Safety Compliance</th>
+            <th>AI Agent Usage</th>
+            <th>Assigned Supervisor</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="engineers-table-body">
+          <tr><td colspan="7" style="text-align: center;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Deactivation Modal -->
+  <div id="deactivate-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div class="block-card" style="width: 400px; padding: var(--spacing-6); text-align: center;">
+      <h3 style="margin-bottom: var(--spacing-3); color: var(--status-critical);">Confirm Deactivation</h3>
+      <p id="deactivate-text" style="color: var(--text-secondary); margin-bottom: var(--spacing-6); font-size: 14px; line-height: 1.5;">
+        Deactivate User? This will immediately revoke their login access. All past session logs, documents, and safety history will be preserved.
+      </p>
+      <div style="display: flex; gap: var(--spacing-3); justify-content: center;">
+        <button class="btn btn-secondary" onclick="closeDeactivateModal()">Cancel</button>
+        <button class="btn btn-primary" style="background-color: var(--status-critical); border-color: var(--status-critical);" onclick="confirmDeactivation()">Confirm Deactivation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add User Modal -->
+  <div id="create-user-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div class="block-card" style="width: 400px; padding: var(--spacing-6);">
+      <h3 style="margin-bottom: var(--spacing-4); color: var(--text-primary);">Create New User</h3>
+      <span id="create-user-error" style="color: var(--status-critical); font-size: 13px; display: block; margin-bottom: var(--spacing-3);"></span>
+      <form id="create-user-form" onsubmit="submitCreateUser(event)">
+        <div style="margin-bottom: var(--spacing-3);">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Employee ID</label>
+          <input type="text" id="create-employee-id" class="filter-input" style="width:100%; box-sizing:border-box;" required>
+        </div>
+        <div style="margin-bottom: var(--spacing-3);">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Full Name</label>
+          <input type="text" id="create-name" class="filter-input" style="width:100%; box-sizing:border-box;" required>
+        </div>
+        <div style="margin-bottom: var(--spacing-3);">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Role</label>
+          <select id="create-role" class="filter-input" style="width:100%; box-sizing:border-box;" required onchange="handleRoleChange()">
+            <option value="engineer">Engineer</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+        <div style="margin-bottom: var(--spacing-3);">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Department / Specialization</label>
+          <input type="text" id="create-department" class="filter-input" style="width:100%; box-sizing:border-box;">
+        </div>
+        <div id="supervisor-select-group" style="margin-bottom: var(--spacing-3); display: none;">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Assign Supervisor</label>
+          <select id="supervisor-select" class="filter-input" style="width:100%; box-sizing:border-box;">
+            <option value="">-- Select Supervisor --</option>
+          </select>
+        </div>
+        <div style="margin-bottom: var(--spacing-5);">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Temporary Password</label>
+          <input type="password" id="create-password" class="filter-input" style="width:100%; box-sizing:border-box;" required>
+        </div>
+        <div style="display: flex; gap: var(--spacing-3); justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div id="edit-user-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div class="block-card" style="width: 400px; padding: var(--spacing-6);">
+      <h3 style="margin-bottom: var(--spacing-4); color: var(--text-primary);">Edit User Profile</h3>
+      <span id="edit-user-error" style="color: var(--status-critical); font-size: 13px; display: block; margin-bottom: var(--spacing-3);"></span>
+      <form id="edit-user-form" onsubmit="submitEditUser(event)">
+        <input type="hidden" id="edit-user-id">
+        <div style="margin-bottom: var(--spacing-3);">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Employee ID (Read Only)</label>
+          <input type="text" id="edit-employee-id" class="filter-input" style="width:100%; box-sizing:border-box; background-color: var(--bg-panel);" readonly>
+        </div>
+        <div style="margin-bottom: var(--spacing-3);">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Full Name</label>
+          <input type="text" id="edit-name" class="filter-input" style="width:100%; box-sizing:border-box;" required>
+        </div>
+        <div style="margin-bottom: var(--spacing-3);">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Role</label>
+          <select id="edit-role" class="filter-input" style="width:100%; box-sizing:border-box;" required onchange="handleEditRoleChange()">
+            <option value="engineer">Engineer</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+        <div style="margin-bottom: var(--spacing-3);">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Department / Specialization</label>
+          <input type="text" id="edit-department" class="filter-input" style="width:100%; box-sizing:border-box;">
+        </div>
+        <div id="edit-supervisor-select-group" style="margin-bottom: var(--spacing-3); display: none;">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Assign Supervisor</label>
+          <select id="edit-supervisor-select" class="filter-input" style="width:100%; box-sizing:border-box;">
+            <option value="">-- Select Supervisor --</option>
+          </select>
+        </div>
+        <div style="margin-bottom: var(--spacing-5);">
+          <label style="display:block; margin-bottom:4px; font-size:13px;">Reset Password</label>
+          <input type="password" id="edit-password" class="filter-input" style="width:100%; box-sizing:border-box;" placeholder="Leave blank to keep current password">
+          <small style="display:block; color: var(--text-muted); font-size: 11px; margin-top: 4px;">Leave blank to keep current password</small>
+        </div>
+        <div style="display: flex; gap: var(--spacing-3); justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="closeEditUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentDeactivateId = null;
+
+    async function loadUsers() {
+      const token = localStorage.getItem('access_token');
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/manager/users/manager-view', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const mgrBody = document.getElementById('managers-table-body');
+        const supBody = document.getElementById('supervisors-table-body');
+        const engBody = document.getElementById('engineers-table-body');
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Raw API Response:", data);
+          
+          const managers = data?.managers || [];
+          const supervisors = data?.supervisors || [];
+          const engineers = data?.engineers || [];
+          
+          if (mgrBody) {
+            if (managers.length === 0) {
+              mgrBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary);">No users found in database.</td></tr>';
+            } else {
+              mgrBody.innerHTML = managers.map(u => renderUserRow(u, 'manager')).join('');
+            }
+          }
+
+          if (supBody) {
+            if (supervisors.length === 0) {
+              supBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary);">No users found in database.</td></tr>';
+            } else {
+              supBody.innerHTML = supervisors.map(u => renderUserRow(u, 'supervisor')).join('');
+            }
+          }
+
+          if (engBody) {
+            if (engineers.length === 0) {
+              engBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-secondary);">No users found in database.</td></tr>';
+            } else {
+              engBody.innerHTML = engineers.map(u => renderUserRow(u, 'engineer')).join('');
+            }
+          }
+        } else {
+          throw new Error("HTTP error " + response.status);
+        }
+      } catch (e) {
+        console.error("Failed to load users", e);
+        const errorRow = `<tr><td colspan="100%" style="text-align:center; color: var(--status-critical);">Failed to load data. Check console.</td></tr>`;
+        const mgrBody = document.getElementById('managers-table-body');
+        const supBody = document.getElementById('supervisors-table-body');
+        const engBody = document.getElementById('engineers-table-body');
+        if (mgrBody) mgrBody.innerHTML = errorRow;
+        if (supBody) supBody.innerHTML = errorRow;
+        if (engBody) engBody.innerHTML = errorRow;
+      }
+    }
+
+    function renderUserRow(user, role) {
+      try {
+        const isInactive = !user?.is_active;
+        const rowStyle = isInactive ? 'background-color: var(--bg-panel); opacity: 0.7;' : '';
+        const nameEl = isInactive 
+          ? `<span style="text-decoration: line-through;">${user?.name || 'Unknown'}</span> <span class="badge status-critical">Inactive</span>` 
+          : `<strong>${user?.name || 'Unknown'}</strong>`;
+        const actionBtn = isInactive 
+          ? `<button class="btn btn-secondary" style="height:28px; font-size:12px; color: var(--status-success); border-color: var(--status-success);" onclick="toggleStatus(${user?.id})">Reactivate</button>`
+          : `<button class="btn btn-secondary" style="height:28px; font-size:12px; color: var(--status-critical); border-color: var(--status-critical);" onclick="openDeactivateModal(${user?.id}, '${user?.name || 'Unknown'}')">Deactivate</button>`;
+        
+        let extraCols = '';
+        if (role === 'engineer') {
+          let safetyBadge = 'status-info';
+          const compliance = user?.safety_compliance || 'No Data';
+          if (typeof compliance === 'string' && compliance.includes('Compliant')) safetyBadge = 'status-success';
+          if (typeof compliance === 'string' && compliance.includes('Warning')) safetyBadge = 'status-warning';
+          
+          extraCols = `
+            <td>${user?.specialization || 'N/A'}</td>
+            <td><span class="badge ${safetyBadge}">${compliance}</span></td>
+            <td><span class="badge status-info">${user?.ai_agent_usage || 'No Data'}</span></td>
+          `;
+        }
+
+        const supervisorCol = role === 'engineer' ? `<td>${user?.supervisor_name || 'Unassigned'}</td>` : '';
+
+        return `
+          <tr id="user-row-${user?.id}" style="${rowStyle}">
+            <td class="font-mono">${user?.employee_id || 'N/A'}</td>
+            <td>${nameEl}</td>
+            ${role === 'engineer' ? '' : `<td>${user?.department || 'N/A'}</td>`}
+            ${extraCols}
+            ${supervisorCol}
+            <td>
+              <button class="btn btn-secondary" style="height:28px; font-size:12px;" onclick="editUser(${user?.id})">Edit Profile</button>
+              ${actionBtn}
+            </td>
+          </tr>
+        `;
+      } catch (err) {
+        console.error("Row render failed for user:", user, err);
+        return '<tr><td colspan="100%">Row Error</td></tr>';
+      }
+    }
+    
+    async function editUser(id) {
+      document.getElementById('edit-user-error').innerText = '';
+      document.getElementById('edit-user-form').reset();
+      
+      const token = localStorage.getItem('access_token');
+      
+      // 1. Populate supervisor dropdown first
+      const select = document.getElementById('edit-supervisor-select');
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/manager/supervisors/list', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const supervisors = await response.json();
+          select.innerHTML = '<option value="">-- Select Supervisor --</option>';
+          supervisors.forEach(s => {
+            select.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load supervisors", e);
+      }
+
+      // 2. Fetch target user profile details
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/manager/users/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const user = await response.json();
+          document.getElementById('edit-user-id').value = user.id;
+          document.getElementById('edit-employee-id').value = user.employee_id;
+          document.getElementById('edit-name').value = user.name;
+          document.getElementById('edit-role').value = user.role;
+          document.getElementById('edit-department').value = user.department || '';
+          document.getElementById('edit-supervisor-select').value = user.supervisor_id || '';
+          document.getElementById('edit-password').value = '';
+          
+          // Show the modal
+          document.getElementById('edit-user-modal').style.display = 'flex';
+          
+          // Handle initial role-specific UI state
+          handleEditRoleChange();
+        } else {
+          alert("Failed to fetch user details.");
+        }
+      } catch (e) {
+        console.error("Error fetching user profile", e);
+        alert("Network error fetching user details.");
+      }
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('edit-user-modal').style.display = 'none';
+    }
+
+    function handleEditRoleChange() {
+      const role = document.getElementById('edit-role').value;
+      const group = document.getElementById('edit-supervisor-select-group');
+      const select = document.getElementById('edit-supervisor-select');
+      if (role === 'engineer') {
+        group.style.display = 'block';
+        select.setAttribute('required', 'required');
+      } else {
+        group.style.display = 'none';
+        select.removeAttribute('required');
+        select.value = '';
+      }
+    }
+
+    async function submitEditUser(e) {
+      e.preventDefault();
+      const token = localStorage.getItem('access_token');
+      const userId = document.getElementById('edit-user-id').value;
+      const role = document.getElementById('edit-role').value;
+      
+      const payload = {
+        name: document.getElementById('edit-name').value,
+        role: role,
+        department: document.getElementById('edit-department').value,
+        specialization: document.getElementById('edit-department').value, // match dept/spec
+      };
+
+      if (role === 'engineer') {
+        const supervisorSelect = document.getElementById('edit-supervisor-select');
+        if (supervisorSelect.value) {
+          payload.supervisor_id = parseInt(supervisorSelect.value, 10);
+        }
+      }
+
+      const password = document.getElementById('edit-password').value;
+      if (password && password.trim() !== '') {
+        payload.password = password;
+      }
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/manager/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          closeEditUserModal();
+          alert('User updated successfully!');
+          loadUsers();
+        } else {
+          const errData = await response.json();
+          document.getElementById('edit-user-error').innerText = errData.detail || 'Failed to update user';
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('edit-user-error').innerText = 'Network error occurred.';
+      }
+    }
+
+    function openDeactivateModal(id, name) {
+      currentDeactivateId = id;
+      document.getElementById('deactivate-text').innerText = `Deactivate ${name}? This will immediately revoke their login access. All past session logs, documents, and safety history will be preserved.`;
+      document.getElementById('deactivate-modal').style.display = 'flex';
+    }
+
+    function closeDeactivateModal() {
+      document.getElementById('deactivate-modal').style.display = 'none';
+      currentDeactivateId = null;
+    }
+
+    async function toggleStatus(id) {
+      const targetId = id || currentDeactivateId;
+      if (!targetId) return;
+
+      const token = localStorage.getItem('access_token');
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/manager/users/${targetId}/toggle-status`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          closeDeactivateModal();
+          loadUsers(); // refresh the tables to reflect updated styling
+        } else {
+          alert('Failed to toggle user status.');
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function confirmDeactivation() {
+      toggleStatus();
+    }
+
+    function openCreateUserModal() {
+      document.getElementById('create-user-error').innerText = '';
+      document.getElementById('create-user-form').reset();
+      document.getElementById('supervisor-select-group').style.display = 'none';
+      document.getElementById('supervisor-select').removeAttribute('required');
+      document.getElementById('create-user-modal').style.display = 'flex';
+      loadSupervisorDropdown();
+    }
+
+    function closeCreateUserModal() {
+      document.getElementById('create-user-modal').style.display = 'none';
+    }
+
+    async function loadSupervisorDropdown() {
+      const token = localStorage.getItem('access_token');
+      const select = document.getElementById('supervisor-select');
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/manager/supervisors/list', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const supervisors = await response.json();
+          select.innerHTML = '<option value="">-- Select Supervisor --</option>';
+          supervisors.forEach(s => {
+            select.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load supervisors", e);
+      }
+    }
+
+    function handleRoleChange() {
+      const role = document.getElementById('create-role').value;
+      const group = document.getElementById('supervisor-select-group');
+      const select = document.getElementById('supervisor-select');
+      if (role === 'engineer') {
+        group.style.display = 'block';
+        select.setAttribute('required', 'required');
+      } else {
+        group.style.display = 'none';
+        select.removeAttribute('required');
+        select.value = '';
+      }
+    }
+
+    async function submitCreateUser(e) {
+      e.preventDefault();
+      const token = localStorage.getItem('access_token');
+      const role = document.getElementById('create-role').value;
+      const payload = {
+        employee_id: document.getElementById('create-employee-id').value,
+        name: document.getElementById('create-name').value,
+        role: role,
+        department: document.getElementById('create-department').value,
+        specialization: document.getElementById('create-department').value,
+        password: document.getElementById('create-password').value
+      };
+
+      if (role === 'engineer') {
+        const supervisorSelect = document.getElementById('supervisor-select');
+        if (supervisorSelect.value) {
+          payload.supervisor_id = parseInt(supervisorSelect.value, 10);
+        }
+      }
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/manager/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          closeCreateUserModal();
+          alert('User created successfully!');
+          loadUsers();
+        } else {
+          const errData = await response.json();
+          document.getElementById('create-user-error').innerText = errData.detail || 'Failed to create user';
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('create-user-error').innerText = 'Network error occurred.';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadUsers);
+  </script>
+</body>
+</html>

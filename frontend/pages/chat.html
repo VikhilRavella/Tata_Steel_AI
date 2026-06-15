@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Chat - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    /* Layout */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Top Nav */
+    .top-nav {
+      height: 52px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-6);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      width: 220px;
+    }
+    
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .nav-plant { font-size: 11px; color: var(--text-muted); }
+    
+    .search-bar {
+      position: relative;
+      width: 320px;
+    }
+    
+    .search-bar i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .search-input {
+      width: 100%;
+      height: 32px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      background-color: var(--bg-page);
+      font-size: 13px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+    }
+    
+    .icon-btn {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    
+    .icon-btn:hover { color: var(--text-primary); }
+    
+    .badge-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--status-critical);
+      color: white;
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 50%;
+      height: 14px;
+      min-width: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+    }
+    
+    .avatar {
+      height: 32px;
+      width: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border-default);
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .user-card {
+      padding: var(--spacing-5);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .user-card .avatar { width: 48px; height: 48px; font-size: 18px; margin-bottom: var(--spacing-2); }
+    .user-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .user-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: var(--spacing-1); }
+    
+    .nav-menu {
+      padding: var(--spacing-4) 0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-3) var(--spacing-5);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      gap: var(--spacing-3);
+      transition: background 0.2s, color 0.2s;
+    }
+    
+    .nav-item:hover {
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      color: var(--primary);
+      background-color: var(--status-success-bg);
+      border-right: 3px solid var(--primary);
+    }
+    
+    .nav-item i { width: 16px; text-align: center; }
+    
+    .sidebar-footer {
+      padding: var(--spacing-5);
+      border-top: 1px solid var(--border-default);
+    }
+    
+    .version-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: var(--spacing-4);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex-grow: 1;
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      overflow-y: auto;
+      padding: var(--spacing-6) var(--spacing-8);
+      background-color: var(--bg-page);
+    }
+
+
+    
+    /* Top Nav */
+    
+    /* Sidebar */
+    
+    /* Chat Area */
+    .chat-area { flex-grow: 1; display: flex; flex-direction: column; height: calc(100vh - 52px); margin-top: 52px; background-color: var(--bg-page); }
+    
+    .chat-header { height: 56px; background-color: var(--bg-card); border-bottom: 1px solid var(--border-default); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--spacing-6); }
+    .header-left { display: flex; align-items: center; gap: var(--spacing-3); }
+    .live-dot { height: 8px; width: 8px; background-color: var(--status-success); border-radius: 50%; box-shadow: 0 0 0 3px var(--status-success-bg); }
+    .context-chips { display: flex; gap: var(--spacing-2); }
+    
+    .messages-container { flex-grow: 1; overflow-y: auto; padding: var(--spacing-6); display: flex; flex-direction: column; gap: var(--spacing-4); }
+    
+    .message { max-width: 70%; display: flex; flex-direction: column; }
+    .user-message { align-self: flex-end; }
+    .user-message .message-content { background-color: var(--status-success-bg); border: 1px solid #C0DD97; border-radius: var(--radius-lg) var(--radius-lg) 0 var(--radius-lg); padding: var(--spacing-3) var(--spacing-4); color: var(--text-primary); }
+    
+    .agent-message { align-self: flex-start; }
+    .agent-message .message-content { background-color: var(--bg-card); border: 1px solid var(--border-default); border-left: 3px solid var(--primary); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0; padding: var(--spacing-3) var(--spacing-4); box-shadow: var(--shadow-card); }
+    
+    .system-message { align-self: center; background-color: var(--border-default); color: var(--text-secondary); padding: 4px 12px; border-radius: var(--radius-xl); font-size: 11px; margin: var(--spacing-2) 0; }
+    
+    .message-time { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-align: right; }
+    
+    .typing-dot { width: 6px; height: 6px; background-color: var(--text-muted); border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
+    @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    
+    /* Input Area */
+    .input-area { height: 100px; background-color: var(--bg-card); border-top: 1px solid var(--border-default); padding: var(--spacing-3) var(--spacing-6); display: flex; flex-direction: column; gap: var(--spacing-2); }
+    .upload-row { display: flex; gap: var(--spacing-3); }
+    .upload-btn { background: none; border: 1px dashed var(--border-strong); color: var(--text-secondary); border-radius: var(--radius-sm); padding: 4px 12px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .upload-btn:hover { border-color: var(--primary); color: var(--primary); }
+    
+    .text-row { display: flex; gap: var(--spacing-3); }
+    .chat-input { flex-grow: 1; height: 42px; border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 16px; font-family: var(--font-body); }
+    .chat-input:focus { outline: none; border-color: var(--primary); }
+    .send-btn { width: 42px; height: 42px; background-color: var(--primary); color: white; border: none; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    
+    /* Right Panel */
+    .right-panel { width: 240px; background-color: var(--bg-panel); border-left: 1px solid var(--border-default); height: calc(100vh - 52px); margin-top: 52px; flex-shrink: 0; padding: var(--spacing-4); overflow-y: auto; }
+    .panel-section { margin-bottom: var(--spacing-6); }
+    .panel-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: var(--spacing-3); font-weight: 600; }
+    .panel-card { background-color: var(--bg-card); border: 1px solid var(--border-default); border-radius: var(--radius-sm); padding: var(--spacing-3); margin-bottom: var(--spacing-2); font-size: 13px; }
+  
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div>
+        <div class="nav-title">Maintenance Wizard</div>
+        <div class="nav-plant">Tata Steel &middot; Jamshedpur</div>
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <i class="fa-solid fa-search"></i>
+      <input type="text" class="search-input" placeholder="Search equipment, SOPs, logs...">
+    </div>
+    
+    <div class="nav-actions">
+      <button class="icon-btn">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge-count">3</span>
+      </button>
+      <span class="badge status-info" id="userRole">Engineer</span>
+      <div class="avatar" id="navAvatar">EN</div>
+      <a href="index.html" class="icon-btn" title="Logout" onclick="localStorage.clear();"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar" id="userAvatar">EN</div>
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-id" id="userId">ID: ...</div>
+      </div>
+      
+            <nav class="nav-menu">
+        <a href="home_page_engineer.html" class="nav-item">
+          <i class="fa-solid fa-home"></i> Home Dashboard
+        </a>
+        <a href="engineering_agent.html" class="nav-item">
+          <i class="fa-solid fa-robot"></i> AI Agent
+        </a>
+        <a href="agent_sandbox.html" class="nav-item">
+          <i class="fa-solid fa-flask"></i> Sandbox
+        </a>
+        <a href="chat.html" class="nav-item active">
+          <i class="fa-solid fa-clipboard-check"></i> My Tasks
+        </a>
+        <a href="history.html" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i> Session Logs
+        </a>
+        <a href="upload.html" class="nav-item">
+          <i class="fa-solid fa-file-pdf"></i> Documents
+        </a>
+        <a href="equipment.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i> Equipment Health
+        </a>
+        <a href="safety.html" class="nav-item">
+          <i class="fa-solid fa-shield-halved"></i> Safety Verification
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i> Profile
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="version-info">v2.1.0 &middot; Plant: JSR-01</div>
+      </div>
+    </aside>
+
+    <main class="chat-area">
+      <div class="chat-header">
+        <div class="header-left">
+          <div class="live-dot"></div>
+          <span style="font-weight: 500;">Active Session</span>
+          <span class="text-muted" style="margin-left: 8px;">ID: #MW-8942</span>
+        </div>
+        <div class="context-chips">
+          <span class="chip">Block A</span>
+          <span class="chip">Fl. 2</span>
+          <span class="chip">Pump C-104</span>
+        </div>
+        <div>
+          <span class="badge status-success">LOTO Verified</span>
+          <span class="badge status-success" style="margin-left: 8px;">Domain Match</span>
+        </div>
+      </div>
+      
+      <div class="messages-container" id="chatMessages">
+        <div class="system-message">Session started &middot; 14:28</div>
+        <div class="system-message">Safety verified &middot; 14:31</div>
+        
+        <div class="message agent-message">
+          <div class="message-content">
+            Hello Rahul. I see you're working on Pump C-104 in Block A. Safety checks are complete. How can I assist you with this equipment today?
+          </div>
+          <div class="message-time">14:31</div>
+        </div>
+        
+        <div class="message user-message">
+          <div class="message-content">The pump is experiencing high vibration and there is a strange noise coming from the bearing housing.</div>
+          <div class="message-time">14:33</div>
+        </div>
+        
+        <div class="message agent-message">
+          <div class="message-content">
+            <div style="border-left: 3px solid var(--status-warning); background-color: var(--status-warning-bg); padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; font-size: 13px;">
+              <i class="fa-solid fa-triangle-exclamation" style="color: var(--status-warning); margin-right: 4px;"></i> <strong>Warning:</strong> High vibration in C-series pumps often indicates misalignment or bearing failure.
+            </div>
+            Based on the symptoms, we should inspect the bearing housing. Please upload a photo of the bearing assembly, or confirm if you can see any visible metal shavings.
+            <div style="margin-top: 12px; display: flex; gap: 8px;">
+              <button class="btn btn-secondary" style="height: 28px; padding: 0 12px; font-size: 12px;">See Shavings</button>
+              <button class="btn btn-secondary" style="height: 28px; padding: 0 12px; font-size: 12px;">Looks Clean</button>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+            <span class="badge status-info" style="font-size: 10px;">Pump Manual &middot; Pg 42</span>
+            <div class="message-time">14:34</div>
+          </div>
+        </div>
+      </div>
+      
+      <form class="input-area" id="chatForm">
+        <div class="upload-row">
+          <button type="button" class="upload-btn"><i class="fa-solid fa-camera"></i> Upload image</button>
+          <button type="button" class="upload-btn"><i class="fa-solid fa-file-arrow-up"></i> Upload document</button>
+        </div>
+        <div class="text-row">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Type your message or attach a file..." autocomplete="off">
+          <button type="button" class="send-btn" style="background-color: var(--bg-panel); color: var(--text-muted);"><i class="fa-solid fa-microphone"></i></button>
+          <button type="submit" class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </form>
+    </main>
+    
+    <aside class="right-panel">
+      <div class="panel-section">
+        <div class="panel-title">Equipment Health</div>
+        <div class="panel-card">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span>Vibration</span> <span class="status-critical">High</span>
+          </div>
+          <div style="width: 100%; height: 6px; background-color: var(--border-default); border-radius: 3px;">
+            <div style="width: 85%; height: 100%; background-color: var(--status-critical); border-radius: 3px;"></div>
+          </div>
+        </div>
+        <div class="panel-card">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span>Temperature</span> <span class="status-warning">Elevated</span>
+          </div>
+          <div style="width: 100%; height: 6px; background-color: var(--border-default); border-radius: 3px;">
+            <div style="width: 70%; height: 100%; background-color: var(--status-warning); border-radius: 3px;"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel-section">
+        <div class="panel-title">Retrieved Docs</div>
+        <div class="panel-card" style="display: flex; gap: 8px; align-items: center;">
+          <i class="fa-solid fa-file-pdf" style="color: #E24B4A; font-size: 16px;"></i>
+          <div>
+            <div style="font-weight: 500;">C-Series Pump SOP</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Pages 40-45</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel-section">
+        <div class="panel-title">Spare Parts (C-104)</div>
+        <div class="panel-card">
+          <div>14mm Bearing Set</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+            <span class="text-muted" style="font-size: 11px;">Part #892-A</span>
+            <span class="badge status-success" style="font-size: 10px;">In Stock (12)</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Safety Verification Modal -->
+  <div id="safetyModal" class="modal" style="display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;">
+    <div class="card" style="width: 500px;">
+      <h3 style="color: var(--status-critical); margin-bottom: var(--spacing-4);">Mandatory Safety Verification</h3>
+      
+      <div id="safetyStep1">
+        <h4>Step 1: Identity & Location</h4>
+        <div class="form-group" style="margin-top: 12px;">
+          <label>Confirm Worker Name</label>
+          <input type="text" id="safetyWorkerName" class="input-field" placeholder="e.g. Rahul Agarwal">
+        </div>
+        <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="nextSafetyStep(2)">Next: PPE Check</button>
+      </div>
+      
+      <div id="safetyStep2" style="display: none;">
+        <h4>Step 2: PPE Verification</h4>
+        <p class="text-muted text-sm">Upload photo of current PPE attire for LLaVA analysis.</p>
+        <div style="border: 2px dashed var(--border-strong); padding: 24px; text-align: center; margin: 12px 0; border-radius: 8px;">
+          <i class="fa-solid fa-camera" style="font-size: 24px; color: var(--text-muted); margin-bottom: 8px;"></i>
+          <div>Upload PPE Photo</div>
+        </div>
+        <div class="form-group" style="display: flex; gap: 8px; align-items: center;">
+          <input type="checkbox" id="ppeBypass"> <label>Mock: Bypass LLaVA Check</label>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="nextSafetyStep(3)">Next: LOTO Status</button>
+      </div>
+      
+      <div id="safetyStep3" style="display: none;">
+        <h4>Step 3: LOTO Confirmation</h4>
+        <div style="background-color: var(--status-warning-bg); border-left: 3px solid var(--status-warning); padding: 12px; margin: 12px 0;">
+          Verify Lockout/Tagout has been physically applied to the main breaker.
+        </div>
+        <div class="form-group" style="display: flex; gap: 8px; align-items: center;">
+          <input type="checkbox" id="lotoCheck"> <label>I confirm LOTO is applied.</label>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="nextSafetyStep(4)">Next: Digital Signature</button>
+      </div>
+      
+      <div id="safetyStep4" style="display: none;">
+        <h4>Step 4: Digital Signature</h4>
+        <div class="form-group" style="margin-top: 12px;">
+          <label>Type your full name to sign the safety policy.</label>
+          <input type="text" id="safetySignature" class="input-field" placeholder="Signature">
+        </div>
+        <button class="btn btn-primary" style="margin-top: 16px; width: 100%; background-color: var(--status-success); border-color: var(--status-success);" onclick="submitSafety()">Submit & Unlock Chat</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/agent-chat.js"></script>
+  <script>
+    // Show safety modal automatically if not verified
+    document.addEventListener("DOMContentLoaded", async () => {
+      const sessionId = localStorage.getItem('active_session_id');
+      const token = localStorage.getItem('access_token');
+      if(sessionId && token) {
+        try {
+          const res = await fetch(`http://127.0.0.1:8000/api/sessions/${sessionId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const session = await res.json();
+          if(!session.safety_verified) {
+             document.getElementById('safetyModal').style.display = 'flex';
+          }
+        } catch(e) {}
+      }
+    });
+    
+    function nextSafetyStep(step) {
+      document.getElementById('safetyStep1').style.display = 'none';
+      document.getElementById('safetyStep2').style.display = 'none';
+      document.getElementById('safetyStep3').style.display = 'none';
+      document.getElementById('safetyStep4').style.display = 'none';
+      document.getElementById(`safetyStep${step}`).style.display = 'block';
+    }
+    
+    async function submitSafety() {
+      const workerName = document.getElementById('safetyWorkerName').value;
+      const lotoApplied = document.getElementById('lotoCheck').checked;
+      const signature = document.getElementById('safetySignature').value;
+      const ppeVerified = document.getElementById('ppeBypass').checked;
+      
+      if(!workerName || !signature || !lotoApplied) {
+         alert("Please complete all mandatory fields."); return;
+      }
+      
+      const sessionId = localStorage.getItem('active_session_id');
+      const token = localStorage.getItem('access_token');
+      
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/sessions/${sessionId}/safety`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            worker_name: workerName,
+            ppe_verified: ppeVerified,
+            loto_applied: lotoApplied,
+            signature: signature
+          })
+        });
+        
+        if(response.ok) {
+           document.getElementById('safetyModal').style.display = 'none';
+           // Add system message
+           document.getElementById('chatMessages').insertAdjacentHTML('beforeend', `<div class="system-message">Safety verified by ${workerName}</div>`);
+        } else {
+           alert("Safety submission failed.");
+        }
+      } catch(e) { alert("Network error during safety submission."); }
+    }
+    
+    async function escalateSession() {
+       const sessionId = localStorage.getItem('active_session_id');
+       const token = localStorage.getItem('access_token');
+       await fetch(`http://127.0.0.1:8000/api/sessions/${sessionId}/escalate`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+       });
+       alert("Session Escalated to Supervisor.");
+       window.location.href = 'home_page_engineer.html';
+    }
+    
+    async function resolveSession() {
+       const sessionId = localStorage.getItem('active_session_id');
+       const token = localStorage.getItem('access_token');
+       await fetch(`http://127.0.0.1:8000/api/sessions/${sessionId}/resolve`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+       });
+       alert("Session Handover generated.");
+       window.location.href = 'home_page_engineer.html';
+    }
+  </script>
+  <script src="../js/dashboard.js?v=2.0"></script>
+</body>
+</html>

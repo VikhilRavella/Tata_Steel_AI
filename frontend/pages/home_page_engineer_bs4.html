@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Engineer Workspace - Industrial AI Platform</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<link href="../css/styles.css" rel="stylesheet"/>
+<script src="../js/rbac.js?v=2.1"></script>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+<div class="sidebar">
+<div class="sidebar-header">Maintenance Wizard</div>
+<div class="user-card">
+<div class="avatar profile-icon">EN</div>
+<div class="user-name profile-name" id="userName">Loading...</div>
+<div class="user-role"><span class="badge badge-info" id="userRoleBadge">Engineer</span></div>
+</div>
+<div class="sidebar-nav">
+<div class="nav-item active" onclick="showSection('dashboard', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</div>
+<div class="nav-item" onclick="showSection('engineering-agent', this)"><i class="fa-solid fa-robot"></i> Engineering Agent</div>
+<div class="nav-item" onclick="showSection('equipment', this)"><i class="fa-solid fa-industry"></i> My Equipment</div>
+<div class="nav-item" onclick="showSection('work_orders', this)"><i class="fa-solid fa-clipboard-list"></i> My Work Orders</div>
+<div class="nav-item" onclick="showSection('spare_parts', this)"><i class="fa-solid fa-box-open"></i> Request Spare Parts</div>
+<div class="nav-item" onclick="showSection('inventory', this)"><i class="fa-solid fa-magnifying-glass"></i> Inventory Search</div>
+<div class="nav-item" onclick="showSection('maintenance', this)"><i class="fa-solid fa-toolbox"></i> Maintenance History</div>
+<div class="nav-item" onclick="showSection('documents', this)"><i class="fa-solid fa-file-pdf"></i> Documents</div>
+<div class="nav-item" onclick="showSection('equipment_health', this)"><i class="fa-solid fa-heart-pulse"></i> Equipment Health</div>
+<div class="nav-item" onclick="showSection('safety', this)"><i class="fa-solid fa-shield-halved"></i> Safety Verification</div>
+<div class="nav-item" onclick="showSection('reports', this)"><i class="fa-solid fa-chart-pie"></i> Reports</div>
+<div class="nav-item" onclick="showSection('profile', this)"><i class="fa-solid fa-id-badge"></i> Profile</div>
+</div>
+</div>
+<div class="main-wrapper">
+<header class="topbar">
+<div class="topbar-left">
+        <i class="fa-solid fa-bars mobile-menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active'); document.querySelector('.sidebar-overlay').classList.toggle('active');"></i>
+<div class="search-bar">
+<i class="fa-solid fa-search"></i>
+<input placeholder="Search equipment, parts, procedures..." type="text"/>
+</div>
+</div>
+<div class="topbar-right">
+<div style="font-size: 13px; text-align: right; margin-right: 16px;">
+<div id="headerName" style="font-weight: 600;">Name</div>
+<div id="headerDept" style="color: var(--text-muted);">Dept | Plant</div>
+</div>
+<button class="action-btn" onclick="alert('No new notifications')" style="position: relative;">
+<i class="fa-regular fa-bell"></i>
+<span style="position: absolute; top: 0; right: 0; background: var(--badge-danger, #ef4444); color: white; border-radius: 50%; font-size: 10px; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center;">0</span>
+</button>
+<button class="btn btn-outline" onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='index.html'">Logout</button>
+</div>
+</header>
+<main class="content-area">
+<!-- DASHBOARD -->
+<div class="section active" id="section-dashboard">
+<div class="section-header">
+<h2 class="section-title">Engineer Workspace</h2>
+</div>
+<div class="dashboard-grid">
+<div class="card">
+<div class="card-title">Assigned Equipment</div>
+<div class="card-value" id="kpi-eq" style="color:var(--primary-blue)">-</div>
+</div>
+<div class="card">
+<div class="card-title">Open Work Orders</div>
+<div class="card-value" id="kpi-wo-open" style="color:#f59e0b">-</div>
+</div>
+<div class="card">
+<div class="card-title">Completed Work Orders</div>
+<div class="card-value" id="kpi-wo-done" style="color:#10b981">-</div>
+</div>
+<div class="card" onclick="toggleCopilot()" style="cursor:pointer;">
+<div class="card-title">Sandbox Agent</div>
+<div class="card-value" style="color:var(--primary-blue); font-size:20px; margin-top:8px;"><i class="fa-solid fa-flask" style="margin-right:8px;"></i> Open Workspace</div>
+<div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Industrial Design &amp; Planning</div>
+</div>
+</div>
+<div class="agent-interface" style="padding: 24px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, #ffffff, #eff6ff); border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
+<div>
+<h2 style="color: #0f172a; margin-bottom: 8px;">Engineering Agent</h2>
+<p style="color: #475569; margin: 0; max-width: 600px;">
+              Launch the AI assistant for contextual troubleshooting, multi-modal analysis (image/PDF), safety validation, and automated maintenance workflows.
+            </p>
+</div>
+<div>
+<button class="btn btn-primary" onclick="document.querySelectorAll('.nav-item')[1].click()" style="height: 48px; padding: 12px 24px; font-size: 16px; text-decoration: none; display: inline-flex; align-items: center; border: none; cursor: pointer;">
+<i class="fa-solid fa-play" style="margin-right: 8px;"></i> Launch Agent
+            </button>
+</div>
+</div>
+</div>
+<!-- ENGINEERING AGENT -->
+<div class="section" id="section-engineering-agent">
+<div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+<div>
+<h2 class="section-title">Engineering Agent</h2>
+<div style="font-size:14px; color:var(--text-muted); margin-top:4px;">Industrial Maintenance Intelligence Assistant</div>
+</div>
+<button class="btn btn-outline" onclick="openEngineeringHistory()"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 6px;"></i> History</button>
+</div>
+<div style="display:flex; gap:24px; height: calc(100vh - 220px);">
+<div style="flex:1; display:flex; flex-direction:row; border:1px solid var(--border-color); border-radius:12px; overflow:hidden; background:var(--bg-card);">
+<div style="flex:1; display:flex; flex-direction:column;">
+<div id="engChatBox" style="flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:16px; background:var(--bg-page);">
+<div class="message agent">
+                  Welcome to the Engineering Workspace. I am connected to the industrial knowledge base. How can I assist you today?
+                </div>
+</div>
+<div style="display:flex; flex-direction:column; border-top:1px solid var(--border-color); background:var(--bg-card);">
+<div id="engImagePreviewContainer" style="display:none; padding:12px 24px; border-bottom:1px solid var(--border-color);">
+<img id="engImagePreview" style="max-height:80px; border-radius:8px; border:1px solid var(--border-color);"/>
+<button onclick="clearEngImage()" style="background:none; border:none; color:var(--badge-danger, #ef4444); cursor:pointer; margin-left:12px;"><i class="fa-solid fa-times"></i></button>
+</div>
+<div style="display:flex; padding:16px 24px; gap:12px; align-items:center;">
+<input accept="image/*,application/pdf" id="engImageUpload" onchange="handleEngFileSelect(event)" style="display:none;" type="file"/>
+<button class="btn btn-outline" onclick="document.getElementById('engImageUpload').click()" style="height:44px; width:44px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px;"><i class="fa-solid fa-paperclip"></i></button>
+<input class="search-input" id="engChatInput" onkeypress="if(event.key === 'Enter') sendEngMessage()" placeholder="Describe the issue, ask a question, or upload an image/PDF..." style="flex:1; height:44px; border-radius:8px;" type="text"/>
+<button class="btn btn-primary" onclick="sendEngMessage()" style="height:44px; border-radius:8px; padding:0 24px;"><i class="fa-solid fa-paper-plane" style="margin-right:8px;"></i> Send</button>
+</div>
+</div>
+<div id="engHistoryPanel" style="width: 320px; border-left: 1px solid var(--border-color); background: var(--bg-page); display: none; flex-direction: column;">
+<div style="padding: 16px; border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
+<span>Engineering History</span>
+<button onclick="document.getElementById('engHistoryPanel').style.display='none'" style="background:transparent; border:none; cursor:pointer; color:var(--text-muted);" title="Close Panel"><i class="fa-solid fa-xmark"></i></button>
+</div>
+<div id="engHistoryList" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;"></div>
+</div>
+</div>
+<div style="width:320px; display:flex; flex-direction:column; gap:16px;">
+<div class="card" style="padding:20px;">
+<h3 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; letter-spacing:1px;">Capabilities</h3>
+<div style="display:flex; flex-wrap:wrap; gap:8px;">
+<span style="background:rgba(59,130,246,0.1); color:var(--primary-blue); border:1px solid rgba(59,130,246,0.2); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600;">Chat Interface</span>
+<span style="background:rgba(59,130,246,0.1); color:var(--primary-blue); border:1px solid rgba(59,130,246,0.2); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600;">Image Upload</span>
+<span style="background:rgba(59,130,246,0.1); color:var(--primary-blue); border:1px solid rgba(59,130,246,0.2); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600;">PDF Upload</span>
+<span style="background:rgba(59,130,246,0.1); color:var(--primary-blue); border:1px solid rgba(59,130,246,0.2); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600;">Maintenance Knowledge Search</span>
+<span style="background:rgba(59,130,246,0.1); color:var(--primary-blue); border:1px solid rgba(59,130,246,0.2); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600;">Root Cause Analysis</span>
+<span style="background:rgba(59,130,246,0.1); color:var(--primary-blue); border:1px solid rgba(59,130,246,0.2); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600;">Inventory Intelligence</span>
+<span style="background:rgba(59,130,246,0.1); color:var(--primary-blue); border:1px solid rgba(59,130,246,0.2); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600;">Work Order Generation</span>
+<span style="background:rgba(59,130,246,0.1); color:var(--primary-blue); border:1px solid rgba(59,130,246,0.2); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600;">Safety Verification</span>
+<span style="background:rgba(59,130,246,0.1); color:var(--primary-blue); border:1px solid rgba(59,130,246,0.2); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600;">Supervisor Escalation</span>
+</div>
+</div>
+<div class="card" style="padding:20px;">
+<h3 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; letter-spacing:1px;">Context Engine</h3>
+<div style="font-size:13px; display:flex; flex-direction:column; gap:12px;">
+<div style="display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-brain" style="color:var(--primary); width:16px;"></i> Agent Memory Active</div>
+<div style="display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-history" style="color:var(--primary); width:16px;"></i> Session History Linked</div>
+<div style="display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-rotate" style="color:var(--primary); width:16px;"></i> Continuous Learning</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- MY EQUIPMENT -->
+<div class="section" id="section-equipment">
+<div class="section-header">
+<h2 class="section-title">My Equipment</h2>
+<button class="btn btn-primary" onclick="loadMyEquipment()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+</div>
+<div class="table-container">
+<table class="clean-table">
+<thead>
+<tr><th>Equipment ID</th><th>Equipment Name</th><th>Type</th><th>Plant</th><th>Block</th><th>Status</th><th>Criticality</th><th>Supervisor</th><th>Last Maintenance</th></tr>
+</thead>
+<tbody id="equipment-table-body">
+<tr><td colspan="9" style="text-align: center;">Loading...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- MY WORK ORDERS -->
+<div class="section" id="section-work_orders">
+<div class="section-header">
+<h2 class="section-title">My Work Orders</h2>
+<button class="btn btn-primary" onclick="loadMyWorkOrders()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+</div>
+<div class="table-container">
+<table class="clean-table">
+<thead>
+<tr><th>ID</th><th>Title</th><th>Equipment</th><th>Priority</th><th>Status</th><th>Created Date</th><th>Assigned By</th><th>Actions</th></tr>
+</thead>
+<tbody id="work_orders-table-body">
+<tr><td colspan="8" style="text-align: center;">Loading...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- REQUEST SPARE PARTS -->
+<div class="section" id="section-spare_parts">
+<div class="section-header">
+<h2 class="section-title">Request Spare Parts</h2>
+</div>
+<div class="card" style="max-width: 600px;">
+<form id="part-request-form" onsubmit="submitPartRequest(event)">
+<div style="margin-bottom: 16px;">
+<label style="display:block; font-weight:500; margin-bottom:8px;">Part Number *</label>
+<input class="search-input" id="req-part" required="" style="width: 100%;" type="text"/>
+</div>
+<div style="margin-bottom: 16px;">
+<label style="display:block; font-weight:500; margin-bottom:8px;">Quantity *</label>
+<input class="search-input" id="req-qty" min="1" required="" style="width: 100%;" type="number"/>
+</div>
+<div style="margin-bottom: 16px;">
+<label style="display:block; font-weight:500; margin-bottom:8px;">Equipment ID (Optional)</label>
+<input class="search-input" id="req-eq" style="width: 100%;" type="text"/>
+</div>
+<div style="margin-bottom: 16px;">
+<label style="display:block; font-weight:500; margin-bottom:8px;">Reason</label>
+<textarea class="search-input" id="req-reason" rows="3" style="width: 100%; height: auto; padding: 12px;"></textarea>
+</div>
+<div style="margin-bottom: 24px;">
+<label style="display:block; font-weight:500; margin-bottom:8px;">Priority</label>
+<select class="search-input" id="req-priority" style="width: 100%;">
+<option value="Low">Low</option>
+<option selected="" value="Medium">Medium</option>
+<option value="High">High</option>
+<option value="Critical">Critical</option>
+</select>
+</div>
+<button class="btn btn-primary" style="width: 100%;" type="submit">Submit Request</button>
+<div id="req-msg" style="margin-top: 16px; font-weight: 500;"></div>
+</form>
+</div>
+</div>
+<!-- INVENTORY SEARCH -->
+<div class="section" id="section-inventory">
+<div class="section-header">
+<h2 class="section-title">Inventory Search</h2>
+<div style="display:flex; gap:16px;">
+<input class="search-input" id="inv-search-input" placeholder="Search Part Number or Name..." style="width: 300px;" type="text"/>
+<button class="btn btn-primary" onclick="loadInventorySearch()"><i class="fa-solid fa-search"></i> Search</button>
+</div>
+</div>
+<div class="table-container">
+<table class="clean-table">
+<thead>
+<tr><th>Part Number</th><th>Part Name</th><th>Category</th><th>Stock</th><th>Min Stock</th><th>Warehouse</th><th>Rack/Bin</th><th>Supplier</th></tr>
+</thead>
+<tbody id="inventory-table-body">
+<tr><td colspan="8" style="text-align: center;">Enter search criteria or load all...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- MAINTENANCE HISTORY -->
+<div class="section" id="section-maintenance">
+<div class="section-header">
+<h2 class="section-title">My Maintenance History</h2>
+<button class="btn btn-primary" onclick="loadMaintenanceHistory()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+</div>
+<div class="table-container">
+<table class="clean-table">
+<thead>
+<tr><th>ID</th><th>Equipment</th><th>Date</th><th>Description</th><th>Performed By</th><th>Status</th></tr>
+</thead>
+<tbody id="maintenance-table-body">
+<tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- DOCUMENTS -->
+<div class="section" id="section-documents">
+<div class="section-header">
+<h2 class="section-title">Documents &amp; SOPs</h2>
+<button class="btn btn-primary" onclick="loadDocuments()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+</div>
+<div class="table-container">
+<table class="clean-table">
+<thead>
+<tr><th>Filename</th><th>Category</th><th>Uploaded By</th><th>Upload Date</th><th>Actions</th></tr>
+</thead>
+<tbody id="documents-table-body">
+<tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- PROFILE -->
+<div class="section" id="section-profile">
+<div class="section-header">
+<h2 class="section-title">My Profile</h2>
+</div>
+<div class="card" id="profile-container" style="max-width: 600px;">
+          Loading profile...
+        </div>
+</div>
+<!-- Placeholders for other sections -->
+<div class="section" id="section-equipment_health"><h2 class="section-title">Equipment Health (Coming Soon)</h2></div>
+<div class="section" id="section-safety"><h2 class="section-title">Safety Verification (Coming Soon)</h2></div>
+<div class="section" id="section-reports"><h2 class="section-title">Reports (Coming Soon)</h2> </div>
+</div></main>
+</div>
+<!-- FLOATING SANDBOX COPILOT BUTTON -->
+<button id="copilot-btn" onclick="toggleCopilot()" style="position:fixed; bottom:24px; right:24px; z-index:50; height:60px; border-radius:30px; padding:0 24px; background:linear-gradient(135deg, #2563eb, #3b82f6); color:white; border:none; cursor:pointer; display:flex; align-items:center; gap:12px; font-size:15px; font-weight:600; box-shadow:0 8px 24px rgba(37,99,235,0.4); transition:all 0.3s ease; animation: pulse-glow 2s infinite;" title="Open Sandbox Agent">
+<i class="fa-solid fa-robot" style="font-size:20px;"></i>
+    Sandbox Agent
+  </button>
+<style>
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 0 0 0 rgba(37,99,235,0.7); }
+      70% { box-shadow: 0 0 0 12px rgba(37,99,235,0); }
+      100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); }
+    }
+    #copilot-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 12px 28px rgba(37,99,235,0.5);
+    }
+    .copilot-panel {
+      position: fixed;
+      top: 10vh;
+      right: 24px;
+      width: 420px;
+      height: 80vh;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 16px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.12);
+      z-index: 51;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(120%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+      opacity: 0;
+      overflow: hidden;
+    }
+    .copilot-panel.open {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .copilot-header {
+      background: linear-gradient(135deg, rgba(37,99,235,0.9), rgba(59,130,246,0.9));
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+    .copilot-action-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .copilot-action-btn:hover { background: rgba(255,255,255,0.3); }
+    .copilot-chip {
+      background: rgba(59,130,246,0.1);
+      color: #2563eb;
+      border: 1px solid rgba(59,130,246,0.2);
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .copilot-chip:hover {
+      background: #2563eb;
+      color: white;
+    }
+  
+    /* Agent & User Chat UI */
+    .message.user {
+      align-self: flex-end;
+      background: #2563eb;
+      color: white;
+      max-width: 70%;
+      border-radius: 16px;
+      padding: 12px 16px;
+      word-break: break-word;
+      white-space: pre-wrap;
+      box-shadow: 0 2px 5px rgba(37,99,235,0.2);
+      line-height: 1.5;
+    }
+    .message.agent {
+      align-self: flex-start;
+      background: #ffffff;
+      color: #111827;
+      max-width: 75%;
+      border-radius: 16px;
+      padding: 12px 16px;
+      word-break: break-word;
+      white-space: pre-wrap;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border: 1px solid var(--border-color, #e5e7eb);
+      line-height: 1.5;
+    }
+    #engChatBox {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+</style>
+<div class="copilot-panel" id="copilot-panel" style="width: 420px; flex-direction: column;">
+<!-- Chat Area -->
+<div style="flex: 1; display: flex; flex-direction: column; min-width: 420px;">
+<div class="copilot-header">
+<div>
+<div style="font-weight:600; font-size:16px; display:flex; align-items:center; gap:8px;">
+<i class="fa-solid fa-flask"></i> Sandbox Agent
+          </div>
+<div style="font-size:12px; opacity:0.9; margin-top:4px;">Industrial AI Design Workspace</div>
+</div>
+<div style="display:flex; gap:8px;">
+<button class="copilot-action-btn" onclick="openSandboxHistory()" style="background:var(--primary); width:auto; padding:0 12px; font-size:12px; font-weight:bold; color:white;" title="History"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 6px;"></i> History</button>
+<button class="copilot-action-btn" onclick="escalateSandbox()" style="background:var(--status-critical); width:auto; padding:0 8px; font-size:12px; font-weight:bold;" title="Escalate to Engineering Agent">Escalate</button>
+<button class="copilot-action-btn" onclick="resetSandbox()" title="Clear Knowledge Base"><i class="fa-solid fa-rotate-left"></i></button>
+<button class="copilot-action-btn" onclick="clearCopilotChat()" title="Clear Chat UI"><i class="fa-solid fa-trash-can"></i></button>
+<button class="copilot-action-btn" onclick="toggleCopilot()" title="Close Panel"><i class="fa-solid fa-xmark"></i></button>
+</div>
+</div>
+<div style="flex:1; display:flex; flex-direction:row; overflow:hidden;">
+<div style="flex:1; display:flex; flex-direction:column;">
+<div id="copilot-chat-box" style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:16px;">
+<!-- Welcome Screen -->
+<div id="copilot-welcome" style="background:var(--bg-page); border:1px solid var(--border-color); border-radius:12px; padding:16px;">
+<div style="font-weight:600; font-size:14px; margin-bottom:8px; color:var(--text-primary);">Welcome to Sandbox Agent</div>
+<div style="font-size:13px; color:var(--text-secondary); line-height:1.5;">
+            Sandbox Agent helps engineers design workflows, generate architectures, create prompts, plan systems, and prototype industrial AI solutions before implementation.
+          </div>
+<div style="margin-top:16px;">
+<div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:600; margin-bottom:8px; letter-spacing:0.5px;">Quick Actions</div>
+<div style="display:flex; flex-wrap:wrap; gap:8px;">
+<div class="copilot-chip" onclick="sendCopilotChip('Design Database Schema')">Database Schema</div>
+<div class="copilot-chip" onclick="sendCopilotChip('Create Agent Workflow')">Agent Workflow</div>
+<div class="copilot-chip" onclick="sendCopilotChip('Generate Prompt Template')">Prompt Template</div>
+<div class="copilot-chip" onclick="sendCopilotChip('Design API Architecture')">API Architecture</div>
+<div class="copilot-chip" onclick="sendCopilotChip('Build Industrial Dashboard')">Dashboard Design</div>
+</div>
+</div>
+</div>
+</div>
+<div id="sandboxHistoryPanel" style="width: 250px; border-left: 1px solid var(--border-color); background: var(--bg-page); display: none; flex-direction: column;">
+<div style="padding: 16px; border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
+<span>Sandbox History</span>
+<button onclick="document.getElementById('sandboxHistoryPanel').style.display='none'; document.getElementById('copilot-panel').style.width='420px';" style="background:transparent; border:none; cursor:pointer; color:var(--text-muted);" title="Close Panel"><i class="fa-solid fa-xmark"></i></button>
+</div>
+<div id="sandboxHistoryList" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;"></div>
+</div>
+</div>
+<div style="padding:16px; border-top:1px solid rgba(0,0,0,0.1); background:rgba(255,255,255,0.6);">
+<div style="display:flex; gap:10px; align-items:center; background:white; border:1px solid var(--border-color); border-radius:24px; padding:6px 6px 6px 16px; box-shadow:0 2px 6px rgba(0,0,0,0.05);">
+<input id="copilot-input" onkeypress="if(event.key === 'Enter') sendCopilotMessage()" placeholder="Ask Sandbox Agent..." style="flex:1; border:none; outline:none; background:transparent; font-size:14px; color:var(--text-primary);" type="text"/>
+<button onclick="sendCopilotMessage()" style="width:36px; height:36px; border-radius:50%; background:var(--primary); color:white; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer;"><i class="fa-solid fa-paper-plane"></i></button>
+</div>
+</div>
+</div>
+</div>
+<script>
+    const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+    
+    async async function showSection(sectionId, element) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      const target = document.getElementById(`section-${sectionId}`);
+      if(target) target.classList.add('active');
+      if(element) element.classList.add('active');
+
+      if(sectionId === 'dashboard') loadDashboardMetrics();
+      if(sectionId === 'engineering-agent'){
+          await initEngSession();
+          await loadEngChatHistory();
+          await loadEngContext();
+          await loadEngRequirements();
+          await loadEngReports();
+          await loadEngSessions();
+      }
+
+      if(sectionId === 'equipment') loadMyEquipment();
+      if(sectionId === 'work_orders') loadMyWorkOrders();
+      if(sectionId === 'inventory') loadInventorySearch();
+      if(sectionId === 'maintenance') loadMaintenanceHistory();
+      if(sectionId === 'documents') loadDocuments();
+      if(sectionId === 'profile') loadProfile();
+    }
+
+    async function fetchAPI(url, options = {}) {
+      if (!token) { window.location.href = 'index.html'; return null; }
+      if (!options.headers) options.headers = {};
+      options.headers['Authorization'] = `Bearer ${token}`;
+      try {
+        const response = await fetch(url.startsWith('http') ? url : 'http://localhost:8000' + url, options);
+        if (response.status === 401) window.location.href = 'index.html';
+        return await response.json();
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
+
+    async function loadProfile() {
+      const p = await fetchAPI('/api/engineer/profile');
+      if(p) {
+        document.getElementById('userName').innerText = p.name;
+        document.getElementById('headerName').innerText = p.name;
+        document.getElementById('headerDept').innerText = `${p.department} | ${p.plant}`;
+        
+        document.getElementById('profile-container').innerHTML = `
+          <div style="margin-bottom:12px"><strong>Name:</strong> ${p.name}</div>
+          <div style="margin-bottom:12px"><strong>Employee ID:</strong> ${p.employee_id}</div>
+          <div style="margin-bottom:12px"><strong>Email:</strong> ${p.email}</div>
+          <div style="margin-bottom:12px"><strong>Phone:</strong> ${p.phone}</div>
+          <div style="margin-bottom:12px"><strong>Department:</strong> ${p.department}</div>
+          <div style="margin-bottom:12px"><strong>Supervisor:</strong> ${p.supervisor}</div>
+          <div style="margin-bottom:12px"><strong>Plant:</strong> ${p.plant}</div>
+          <div style="margin-bottom:12px"><strong>Role:</strong> ${p.role}</div>
+        `;
+      }
+    }
+
+    async function loadDashboardMetrics() {
+      const data = await fetchAPI('/api/dashboard-metrics');
+      if(data) {
+          document.getElementById('kpi-eq').innerText = data.assigned_equipment;
+          document.getElementById('kpi-wo-open').innerText = data.open_work_orders;
+          document.getElementById('kpi-wo-done').innerText = data.completed_work_orders;
+          document.getElementById('kpi-req').innerText = data.pending_requests;
+      }
+    }
+
+    async function loadMyEquipment() {
+      const data = await fetchAPI('/api/equipment');
+      const tbody = document.getElementById('equipment-table-body');
+      if(!data) return;
+      tbody.innerHTML = data.map(d => `
+        <tr>
+          <td>${d.equipment_id}</td><td>${d.equipment_name}</td><td>${d.equipment_type}</td>
+          <td>${d.plant}</td><td>${d.block}</td>
+          <td><span class="badge ${d.status === 'Running' ? 'badge-success' : (d.status === 'Maintenance' ? 'badge-warning' : 'badge-danger')}">${d.status}</span></td>
+          <td>${d.criticality}</td><td>${d.assigned_supervisor}</td><td>${d.last_maintenance}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="9" style="text-align:center;">No data available</td></tr>';
+    }
+
+    async function loadMyWorkOrders() {
+      const data = await fetchAPI('/api/work-orders');
+      const tbody = document.getElementById('work_orders-table-body');
+      if(!data) return;
+      tbody.innerHTML = data.map(d => `
+        <tr>
+          <td>${d.id}</td><td>${d.title}</td><td>${d.equipment_name}</td>
+          <td><span class="badge badge-default">${d.priority}</span></td>
+          <td><span class="badge ${d.status === 'Open' ? 'badge-warning' : 'badge-success'}">${d.status}</span></td>
+          <td>${new Date(typeof d.created_at === 'string' && !d.created_at.endsWith('Z') ? d.created_at + 'Z' : d.created_at).toLocaleDateString()}</td><td>${d.assigned_by}</td>
+          <td><button class="btn btn-outline" style="padding: 4px 8px; font-size: 12px;">View</button></td>
+        </tr>
+      `).join('') || '<tr><td colspan="8" style="text-align:center;">No data available</td></tr>';
+    }
+
+    async function loadMaintenanceHistory() {
+      const data = await fetchAPI('/api/maintenance');
+      const tbody = document.getElementById('maintenance-table-body');
+      if(!data) return;
+      tbody.innerHTML = data.map(d => `
+        <tr>
+          <td>${d.id}</td><td>${d.equipment_name}</td><td>${new Date(typeof d.date === 'string' && !d.date.endsWith('Z') ? d.date + 'Z' : d.date).toLocaleDateString()}</td>
+          <td>${d.description}</td><td>${d.performed_by}</td>
+          <td><span class="badge ${d.status === 'Completed' ? 'badge-success' : 'badge-warning'}">${d.status}</span></td>
+        </tr>
+      `).join('') || '<tr><td colspan="6" style="text-align:center;">No data available</td></tr>';
+    }
+
+    async function loadInventorySearch() {
+      const q = document.getElementById('inv-search-input').value;
+      const data = await fetchAPI(`/api/inventory/search?part_name=${encodeURIComponent(q)}&part_number=${encodeURIComponent(q)}`);
+      const tbody = document.getElementById('inventory-table-body');
+      if(!data) return;
+      tbody.innerHTML = data.map(d => `
+        <tr>
+          <td>${d.part_number}</td><td>${d.part_name}</td><td>${d.part_category || 'N/A'}</td>
+          <td><span class="${d.stock_qty <= d.minimum_stock ? 'badge badge-danger' : ''}">${d.stock_qty}</span></td>
+          <td>${d.minimum_stock}</td><td>${d.warehouse || 'N/A'}</td>
+          <td>${d.rack || 'N/A'} / ${d.bin || 'N/A'}</td><td>${d.supplier || 'N/A'}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="8" style="text-align:center;">No data available</td></tr>';
+    }
+
+    async function loadDocuments() {
+      const data = await fetchAPI('/api/documents/');
+      const tbody = document.getElementById('documents-table-body');
+      if(!data) return;
+      tbody.innerHTML = data.map(d => `
+        <tr>
+          <td>${d.filename}</td><td>${d.category || 'Manual'}</td>
+          <td>${d.uploaded_by_name}</td><td>${new Date(typeof d.uploaded_at === 'string' && !d.uploaded_at.endsWith('Z') ? d.uploaded_at + 'Z' : d.uploaded_at).toLocaleDateString()}</td>
+          <td><button class="btn btn-outline" style="padding: 4px 8px; font-size: 12px;">Download</button></td>
+        </tr>
+      `).join('') || '<tr><td colspan="5" style="text-align:center;">No documents available</td></tr>';
+    }
+
+    async function submitPartRequest(e) {
+      e.preventDefault();
+      const p = await fetchAPI('/api/engineer/profile');
+      if(!p) return;
+      
+      const payload = {
+        requested_by: p.id,
+        part_number: document.getElementById('req-part').value,
+        quantity: parseInt(document.getElementById('req-qty').value),
+        equipment_id: document.getElementById('req-eq').value || null,
+        reason: document.getElementById('req-reason').value,
+        priority: document.getElementById('req-priority').value
+      };
+
+      const res = await fetchAPI('/api/part-request/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const msg = document.getElementById('req-msg');
+      if(res && res.request_id) {
+        msg.style.color = '#10b981';
+        msg.innerText = "Request submitted successfully! ID: " + res.request_id;
+        document.getElementById('part-request-form').reset();
+      } else {
+        msg.style.color = '#ef4444';
+        msg.innerText = "Failed to submit request.";
+      }
+    }
+
+    let currentEngImageBase64 = null;
+    let engSessionId = localStorage.getItem('engineering_session_id');
+
+async function initEngSession() {
+    if (!token) return;
+    if (!engSessionId) {
+        try {
+            const res = await fetchAPI('/api/engineering/session', { method: 'POST' });
+            if (res && res.session_id) {
+                engSessionId = res.session_id;
+                localStorage.setItem('engineering_session_id', engSessionId);
+            }
+        } catch (e) {
+            console.error("Failed to init eng session", e);
+        }
+    }
+}
+
+    let sandSessionId = 'sand-session-' + Date.now();
+
+    function handleEngFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const result = e.target.result;
+          document.getElementById('engImagePreview').src = result;
+          document.getElementById('engImagePreviewContainer').style.display = 'flex';
+          currentEngImageBase64 = result.split(',')[1];
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function clearEngImage() {
+      currentEngImageBase64 = null;
+      document.getElementById('engImagePreviewContainer').style.display = 'none';
+      document.getElementById('engImageUpload').value = '';
+    }
+
+    
+        async function switchEngineeringSession(sessionId) {
+      if (!token) return;
+      try {
+        localStorage.setItem('engineering_session_id', sessionId);
+        engSessionId = sessionId;
+        const chatBox = document.getElementById('engChatBox');
+        if (chatBox) chatBox.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding: 20px;">Loading workspace...</div>';
+        
+        const histRes = await fetchAPI('/api/engineering/history/chat/' + sessionId);
+        console.log("ENGINEERING HISTORY DATA:", histRes);
+        if (histRes && Array.isArray(histRes) && chatBox) {
+            chatBox.innerHTML = '';
+            if (histRes.length === 0) {
+               chatBox.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding: 20px;">Empty session</div>';
+            }
+            histRes.forEach(msg => {
+                let html = '';
+                if (!msg.type || msg.type === 'message') {
+                    const isUser = msg.sender === 'user';
+                    const bgColor = isUser ? 'var(--primary)' : 'var(--bg-card)';
+                    const color = isUser ? 'white' : 'inherit';
+                    const alignment = isUser ? 'flex-end' : 'flex-start';
+                    html = `<div style="align-self:${alignment}; background-color:${bgColor}; color:${color}; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:85%; line-height:1.6; word-wrap: break-word; white-space: pre-wrap;">${msg.content}</div>`;
+                } else if (msg.type === 'file') {
+                    const isPdf = msg.file_type === 'pdf';
+                    const icon = isPdf ? '<i class="fa-solid fa-file-pdf" style="color:#ef4444; font-size:24px;"></i>' : '<i class="fa-solid fa-image" style="color:#3b82f6; font-size:24px;"></i>';
+                    html = `<div style="align-self:flex-end; background-color:var(--bg-card); color:var(--text-dark); padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:85%; display:flex; align-items:center; gap:12px;">
+                        ${icon}
+                        <div>
+                            <div style="font-weight:600; font-size:13px;">${msg.file_name}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">${(msg.timestamp || '').substring(0,10)}</div>
+                        </div>
+                    </div>`;
+                } else if (msg.type === 'report') {
+                    html = `<div style="align-self:flex-start; background-color:#fefce8; color:#854d0e; padding:16px; border-radius:12px; border:1px solid #fef08a; max-width:85%; width:100%;">
+                        <div style="font-weight:600; margin-bottom:8px;"><i class="fa-solid fa-file-contract"></i> Report: ${msg.title || 'Untitled'}</div>
+                        <div style="font-size:12px; white-space:pre-wrap; max-height: 100px; overflow:hidden;">${(msg.content || '').substring(0,200)}...</div>
+                    </div>`;
+                } else if (msg.type === 'requirement') {
+                    html = `<div style="align-self:flex-start; background-color:#f0fdf4; color:#166534; padding:16px; border-radius:12px; border:1px solid #bbf7d0; max-width:85%; width:100%;">
+                        <div style="font-weight:600; margin-bottom:8px;"><i class="fa-solid fa-list-check"></i> Requirement Profile: ${msg.project_name || 'Unspecified'}</div>
+                        <div style="font-size:12px;">Status: ${msg.status || 'Active'}</div>
+                    </div>`;
+                }
+                chatBox.innerHTML += html;
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        await loadHistoryDrawer('engineering', '/api/engineering/history/list', engSessionId);
+      } catch (err) { console.error(err); }
+    }
+
+    async function switchSandboxSession(sessionId) {
+      if (!token) return;
+      try {
+        localStorage.setItem('sandbox_session_id', sessionId);
+        sandboxSessionId = sessionId;
+        const chatBox = document.getElementById('copilot-chat-box');
+        if (chatBox) chatBox.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding: 20px;">Loading chat...</div>';
+        
+        const histRes = await fetchAPI('/api/sandbox/history/chat/' + sessionId);
+        console.log("SANDBOX HISTORY DATA:", histRes);
+        if (histRes && Array.isArray(histRes) && chatBox) {
+            chatBox.innerHTML = '';
+            if (histRes.length === 0) {
+               chatBox.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding: 20px;">Empty session</div>';
+            }
+            histRes.forEach(msg => {
+                let html = '';
+                const isUser = msg.sender === 'user';
+                const bgColor = isUser ? 'var(--primary)' : 'var(--bg-card)';
+                const color = isUser ? 'white' : 'inherit';
+                const alignment = isUser ? 'flex-end' : 'flex-start';
+                html = `<div style="align-self:${alignment}; background-color:${bgColor}; color:${color}; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:85%; line-height:1.6; word-wrap: break-word; white-space: pre-wrap;">${msg.content}</div>`;
+                chatBox.innerHTML += html;
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        await loadHistoryDrawer('sandbox', '/api/sandbox/history/list', sandboxSessionId);
+      } catch (err) { console.error(err); }
+    }
+
+
+    async function loadEngChatHistory() {
+        if (!engSessionId) return;
+        try {
+            const histRes = await fetchAPI('/api/engineering/history/chat/' + engSessionId);
+            const engChatBox = document.getElementById('engChatBox');
+            if (histRes && Array.isArray(histRes) && engChatBox) {
+                if (histRes.length > 0) {
+                    engChatBox.innerHTML = '';
+                    histRes.forEach(msg => {
+                        const isUser = msg.sender === 'user';
+                        const bgColor = isUser ? 'var(--primary)' : 'var(--bg-card)';
+                        const color = isUser ? 'white' : 'inherit';
+                        const alignment = isUser ? 'flex-end' : 'flex-start';
+                        engChatBox.innerHTML += `<div style="align-self:${alignment}; background-color:${bgColor}; color:${color}; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:85%; line-height:1.6;">${msg.content}</div>`;
+                    });
+                }
+                engChatBox.scrollTop = engChatBox.scrollHeight;
+            }
+        } catch (e) { console.error("Error loading chat history", e); }
+    }
+
+    async function loadEngContext() {
+        if (!engSessionId) return;
+        try {
+            const res = await fetchAPI('/api/engineering/context/' + engSessionId);
+            if (res) console.log("Loaded Context:", res);
+        } catch (e) { console.error("Error loading context", e); }
+    }
+
+    async function loadEngRequirements() {
+        if (!engSessionId) return;
+        try {
+            const res = await fetchAPI('/api/engineering/requirements/' + engSessionId);
+            if (res) console.log("Loaded Requirements:", res);
+        } catch (e) { console.error("Error loading requirements", e); }
+    }
+
+    async function loadEngReports() {
+        if (!engSessionId) return;
+        try {
+            const res = await fetchAPI('/api/reports/session/' + engSessionId);
+            if (res) console.log("Loaded Reports:", res);
+        } catch (e) { console.error("Error loading reports", e); }
+    }
+
+    async function loadEngSessions() {
+        if (!token) return;
+        try {
+            const res = await fetchAPI('/api/engineering/history/list');
+            if (res) console.log("Loaded Sessions:", res);
+        } catch (e) { console.error("Error loading sessions", e); }
+    }
+
+    async function sendEngMessage() {
+      const chatInput = document.getElementById('engChatInput');
+      const text = chatInput.value.trim();
+      if (!text && !currentEngImageBase64) return;
+      
+      const chatBox = document.getElementById('engChatBox');
+      let userMsgHtml = `<div class="message user">${text}</div>`;
+      if (currentEngImageBase64) {
+          userMsgHtml = `<div class="message user"><img src="data:image/jpeg;base64,${currentEngImageBase64}" style="max-height: 100px; border-radius:8px; display: block; margin-bottom: 10px;">${text}</div>`;
+      }
+      chatBox.innerHTML += userMsgHtml;
+      
+      const bodyPayload = { message: text, session_id: engSessionId };
+      if (currentEngImageBase64) {
+          bodyPayload.image_base64 = currentEngImageBase64;
+          clearEngImage();
+      }
+      
+      chatInput.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
+      
+      const typingId = 'typing-' + Date.now();
+      chatBox.innerHTML += `<div id="${typingId}" class="message agent">Analyzing context...</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      
+      try {
+          const res = await fetch('http://localhost:8000/api/engineering/chat', {
+              method: 'POST',
+              headers: { 
+                  'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` 
+              },
+              body: JSON.stringify(bodyPayload)
+          });
+          
+          const typingEl = document.getElementById(typingId);
+          if(typingEl) typingEl.remove();
+
+          if (res.status === 401) {
+              window.location.href = 'index.html';
+              return;
+          }
+
+          if (res.ok) {
+              const msgId = 'msg-' + Date.now();
+              chatBox.innerHTML += `<div id="${msgId}" class="message agent"></div>`;
+              
+              const reader = res.body.getReader();
+              const decoder = new TextDecoder("utf-8");
+              let done = false;
+              
+              while (!done) {
+                  const { value, done: readerDone } = await reader.read();
+                  done = readerDone;
+                  if (value) {
+                      const chunk = decoder.decode(value, { stream: true });
+                      console.log("RAW CHUNK:", chunk);
+                      const lines = chunk.split('\n');
+                      for (const line of lines) {
+                          if (line.startsWith('data: ')) {
+                              const dataStr = line.replace('data: ', '').trim();
+                              if (dataStr === '[DONE]') break;
+                              try {
+                                  const data = JSON.parse(dataStr);
+                                  console.log("PARSED DATA:", data);
+                                  if (data.token) {
+                                      const el = document.getElementById(msgId);
+                                      if (el) {
+                                          el.innerHTML += data.token.replace(/\n/g, '<br>');
+                                          chatBox.scrollTop = chatBox.scrollHeight;
+                                      }
+                                  }
+                              } catch (err) {}
+                          }
+                      }
+                  }
+              }
+          } else {
+              chatBox.innerHTML += `<div class="message agent" style="color: #ef4444; border-color: #ef4444;">Failed to get response from server.</div>`;
+          }
+      } catch (e) {
+          const typingEl = document.getElementById(typingId);
+          if(typingEl) typingEl.remove();
+          chatBox.innerHTML += `<div class="message agent" style="color: #ef4444; border-color: #ef4444;">Communication error.</div>`;
+      }
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    let sandboxSessionId = localStorage.getItem('sandbox_session_id');
+    const API_BASE_SANDBOX = "http://localhost:8000/api/sandbox";
+
+    async function initSandboxSession() {
+      if (!token) return;
+      if (!sandboxSessionId) {
+          try {
+              const response = await fetch(`${API_BASE_SANDBOX}/session`, {
+                  method: 'POST',
+                  headers: { 
+        'Authorization': `Bearer ${token}` }
+              });
+              if (response.ok) {
+                  const data = await response.json();
+                  sandboxSessionId = data.session_id;
+                  localStorage.setItem('sandbox_session_id', sandboxSessionId);
+                  loadSessionsList();
+              }
+          } catch (e) {
+              console.error("Failed to init sandbox session", e);
+          }
+      } else {
+          loadSessionsList();
+          try {
+              const response = await fetch(`${API_BASE_SANDBOX}/history/chat/${sandboxSessionId}`, {
+                  headers: { 
+        'Authorization': `Bearer ${token}` }
+              });
+              if (response.ok) {
+                  const messages = await response.json();
+                  const chatDisplay = document.getElementById('copilot-chat-box');
+                  if (messages.length > 0) {
+                      chatDisplay.innerHTML = ''; // clear welcome screen
+                      messages.forEach(m => {
+                          if(m.sender === 'user') {
+                              chatDisplay.innerHTML += `<div style="align-self:flex-end; background-color:#2563eb; color:white; padding:12px 16px; border-radius:12px; border-bottom-right-radius:0; max-width:85%; line-height:1.5; font-size:13px; box-shadow:0 2px 4px rgba(37,99,235,0.2);">${m.content}</div>`;
+                          } else {
+                              chatDisplay.innerHTML += `<div style="align-self:flex-start; background-color:white; border:1px solid var(--border-color); padding:12px 16px; border-radius:12px; border-bottom-left-radius:0; max-width:85%; line-height:1.5; font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">${m.content.replace(/\n/g, '<br>')}</div>`;
+                          }
+                      });
+                      chatDisplay.scrollTop = chatDisplay.scrollHeight;
+                  }
+              }
+          } catch (e) {
+              console.error("Failed to load chat history", e);
+          }
+      }
+    }
+
+    function toggleCopilot() {
+      const panel = document.getElementById('copilot-panel');
+      panel.classList.toggle('open');
+      if (panel.classList.contains('open') && !sandboxSessionId) {
+          initSandboxSession();
+      }
+    }
+
+    function clearCopilotChat() {
+      const welcomeHtml = `<div id="copilot-welcome" style="background:var(--bg-page); border:1px solid var(--border-color); border-radius:12px; padding:16px;">
+        <div style="font-weight:600; font-size:14px; margin-bottom:8px; color:var(--text-primary);">Welcome to Sandbox Agent</div>
+        <div style="font-size:13px; color:var(--text-secondary); line-height:1.5;">
+          Sandbox Agent helps engineers design workflows, generate architectures, create prompts, plan systems, and prototype industrial AI solutions before implementation.
+        </div>
+        <div style="margin-top:16px;">
+          <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:600; margin-bottom:8px; letter-spacing:0.5px;">Quick Actions</div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <div class="copilot-chip" onclick="sendCopilotChip('Design Database Schema')">Database Schema</div>
+            <div class="copilot-chip" onclick="sendCopilotChip('Create Agent Workflow')">Agent Workflow</div>
+            <div class="copilot-chip" onclick="sendCopilotChip('Generate Prompt Template')">Prompt Template</div>
+            <div class="copilot-chip" onclick="sendCopilotChip('Design API Architecture')">API Architecture</div>
+            <div class="copilot-chip" onclick="sendCopilotChip('Build Industrial Dashboard')">Dashboard Design</div>
+          </div>
+        </div>
+      </div>`;
+      document.getElementById('copilot-chat-box').innerHTML = welcomeHtml;
+    }
+
+    async function sendCopilotChip(text) {
+      document.getElementById('copilot-input').value = text;
+      await sendCopilotMessage();
+    }
+
+    async function sendCopilotMessage() {
+      const chatInput = document.getElementById('copilot-input');
+      const text = chatInput.value.trim();
+      if (!text) return;
+      
+      if (!sandboxSessionId) await initSandboxSession();
+
+      const chatBox = document.getElementById('copilot-chat-box');
+      
+      const welcomeMsg = document.getElementById('copilot-welcome');
+      if (welcomeMsg) welcomeMsg.remove();
+
+      let userMsgHtml = `<div style="align-self:flex-end; background-color:#2563eb; color:white; padding:12px 16px; border-radius:12px; border-bottom-right-radius:0; max-width:85%; line-height:1.5; font-size:13px; box-shadow:0 2px 4px rgba(37,99,235,0.2);">${text}</div>`;
+      chatBox.innerHTML += userMsgHtml;
+      chatInput.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
+      
+      const typingId = 'typing-copilot-' + Date.now();
+      chatBox.innerHTML += `<div id="${typingId}" style="align-self:flex-start; background-color:white; border:1px solid var(--border-color); padding:12px 16px; border-radius:12px; border-bottom-left-radius:0; max-width:85%; line-height:1.5; font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,0.05);"><i class="fa-solid fa-circle-notch fa-spin text-primary" style="margin-right:6px;"></i> Sandbox Agent is thinking...</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      
+      const agentMessageDiv = document.getElementById(typingId);
+      let hasClearedThinking = false;
+
+      try {
+          const response = await fetch(`${API_BASE_SANDBOX}/chat`, {
+              method: 'POST',
+              headers: { 
+                  'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ message: text, session_id: sandboxSessionId })
+          });
+
+          if (response.status === 401) {
+              window.location.href = 'index.html';
+              return;
+          }
+          if (!response.ok) {
+              agentMessageDiv.innerHTML = "Error: " + response.statusText;
+              agentMessageDiv.style.color = "#ef4444";
+              agentMessageDiv.style.borderColor = "#ef4444";
+              return;
+          }
+
+          // Handle SSE
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder("utf-8");
+
+          while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+
+              const chunk = decoder.decode(value, { stream: true });
+              const lines = chunk.split('\n');
+
+              for (const line of lines) {
+                  if (line.startsWith('data: ')) {
+                      const dataStr = line.substring(6);
+                      if (dataStr === '[DONE]') break;
+                      try {
+                          const data = JSON.parse(dataStr);
+                          if (data.error) {
+                              if (!hasClearedThinking) { agentMessageDiv.innerHTML = ''; hasClearedThinking = true; }
+                              agentMessageDiv.innerHTML += "Error: " + data.error;
+                              agentMessageDiv.style.color = "#ef4444";
+                              chatBox.scrollTop = chatBox.scrollHeight;
+                          }
+                          if (data.token) {
+                              if (!hasClearedThinking) { agentMessageDiv.innerHTML = ''; hasClearedThinking = true; }
+                              // simplistic replace of \n, full markdown rendering is better but we follow original
+                              const tokenHtml = data.token.replace(/\n/g, '<br>');
+                              agentMessageDiv.innerHTML += tokenHtml;
+                              chatBox.scrollTop = chatBox.scrollHeight;
+                          }
+                      } catch (e) {
+                          console.error("Error parsing JSON line:", dataStr);
+                      }
+                  }
+              }
+          }
+          agentMessageDiv.id = ''; // remove ID so it stays as a normal message
+          loadSessionsList(); // refresh title if generated
+      } catch (e) {
+          agentMessageDiv.innerHTML = "Communication error. Is the backend running?";
+          agentMessageDiv.style.color = "#ef4444";
+          agentMessageDiv.style.borderColor = "#ef4444";
+      }
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function loadSessionsList() {
+      if (!token) return;
+      try {
+          const response = await fetch(`${API_BASE_SANDBOX}/history/list`, {
+              headers: { 
+        'Authorization': `Bearer ${token}` }
+          });
+          const res = await response.json();
+          const container = document.getElementById('sessionListContainer');
+          container.innerHTML = '';
+          
+          if (!res || res.length === 0) {
+              container.innerHTML = '<div style="font-size: 11px; color: var(--text-muted);">No past sessions found.</div>';
+              return;
+          }
+
+          res.forEach(session => {
+              const dateStr = new Date(typeof session.started_at === 'string' && !session.started_at.endsWith('Z') ? session.started_at + 'Z' : session.started_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+              const sessionName = session.title || 'Sandbox Session';
+              let statusColor = session.status === 'Active' ? '#4da6ff' : '#ffaa00';
+              const isActive = session.session_id === sandboxSessionId;
+              const borderStyle = isActive ? 'border-left: 3px solid var(--primary); background: white;' : 'border-left: 3px solid transparent; background: rgba(255,255,255,0.4);';
+              
+              container.insertAdjacentHTML('beforeend', `
+                  <div class="session-item" style="padding: 10px; border: 1px solid var(--border-default); border-radius: 6px; cursor: pointer; ${borderStyle}" onclick="switchSession('${session.session_id}')">
+                      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                          <strong style="font-size: 11px; display: block; margin-bottom: 4px; color: var(--text-primary); line-height:1.3;">${sessionName}</strong>
+                          <button onclick="deleteSession(event, '${session.session_id}')" style="background: none; border: none; color: #ff4d4d; cursor: pointer;" title="Delete Session"><i class="fa-solid fa-trash" style="font-size: 10px;"></i></button>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 9px; margin-top: 6px;">
+                          <span style="color: var(--text-muted);">${dateStr}</span>
+                          <span style="color: ${statusColor}; font-weight: 600; text-transform: uppercase;">${session.status}</span>
+                      </div>
+                  </div>
+              `);
+          });
+      } catch(err) {
+          console.error("Failed to load session list:", err);
+      }
+    }
+
+    function switchSession(id) {
+      localStorage.setItem('sandbox_session_id', id);
+      sandboxSessionId = id;
+      initSandboxSession(); // reloads chat history without reloading page
+    }
+
+    async function deleteSession(e, id) {
+      e.stopPropagation();
+      if(!confirm("Delete this sandbox session?")) return;
+      try {
+          const response = await fetch(`${API_BASE_SANDBOX}/session/${id}`, {
+              method: 'DELETE',
+              headers: { 
+        'Authorization': `Bearer ${token}` }
+          });
+          if(response.ok) {
+              if(id === sandboxSessionId) {
+                  createNewSession();
+              } else {
+                  loadSessionsList();
+              }
+          }
+      } catch(e) { console.error(e); }
+    }
+
+    async function escalateSandbox() {
+      if(!sandboxSessionId) {
+          alert("No active session to escalate.");
+          return;
+      }
+      try {
+          const response = await fetch(`${API_BASE_SANDBOX}/escalate`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ sandbox_session_id: sandboxSessionId })
+          });
+          
+          if(response.ok) {
+              const data = await response.json();
+              alert("Session successfully escalated to Engineering.");
+              localStorage.setItem('engineering_session_id', data.engineer_session_id);
+              engSessionId = data.engineer_session_id;
+              toggleCopilot(); // close copilot
+              document.querySelector('.nav-item[onclick*="engineering-agent"]').click();
+              
+              // Load the escalated chat history if function exists
+              const engChatBox = document.getElementById('engChatBox');
+              if (engChatBox) engChatBox.innerHTML = '<div class="message agent">Loading escalated context...</div>';
+              setTimeout(async () => {
+                  try {
+                      const histRes = await fetchAPI('/api/engineering/history/chat/' + engSessionId);
+                      if (histRes && Array.isArray(histRes)) {
+                          engChatBox.innerHTML = '';
+                          histRes.forEach(msg => {
+                              const isUser = msg.sender === 'user';
+                              const bgColor = isUser ? 'var(--primary)' : 'var(--bg-card)';
+                              const color = isUser ? 'white' : 'inherit';
+                              const alignment = isUser ? 'flex-end' : 'flex-start';
+                              engChatBox.innerHTML += `<div style="align-self:${alignment}; background-color:${bgColor}; color:${color}; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:85%; line-height:1.6;">${msg.content}</div>`;
+                          });
+                          engChatBox.scrollTop = engChatBox.scrollHeight;
+                      }
+                  } catch (e) {}
+              }, 1000);
+          } else {
+              const err = await response.json();
+              alert("Escalation failed: " + (err.detail || 'Unknown error'));
+          }
+      } catch (err) {
+          console.error(err);
+          alert("Network error during escalation.");
+      }
+    }
+
+    async function resetSandbox() {
+      if (!confirm("Are you sure you want to clear the sandbox knowledge base?")) return;
+      try {
+          const response = await fetch(`${API_BASE_SANDBOX}/reset`, { 
+              method: 'DELETE',
+              headers: { 
+        'Authorization': `Bearer ${token}` }
+          });
+          const result = await response.json();
+          if (response.ok) {
+              alert(result.message);
+              clearCopilotChat();
+              const chatBox = document.getElementById('copilot-chat-box');
+              chatBox.innerHTML += `<div style="align-self:center; background-color:var(--bg-card); color:var(--text-muted); padding:8px 16px; border-radius:12px; font-size:12px; margin-top:16px;">Knowledge base cleared. History reset.</div>`;
+          } else {
+              alert("Error: " + (result.detail || result.message));
+          }
+      } catch (error) {
+          alert("Connection error.");
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProfile();
+      loadDashboardMetrics();
+      initSandboxSession();
+      initEngSession(); // in background
+    });
+  
+    
+    async function openEngineeringHistory() {
+      const panel = document.getElementById('engHistoryPanel');
+      if(panel.style.display === 'none') {
+          panel.style.display = 'flex';
+          document.getElementById('engHistoryList').innerHTML = '<div style="color:var(--text-muted); font-size:13px; text-align:center; padding: 20px;">Loading...</div>';
+          await loadHistoryDrawer('engineering', '/api/engineering/history/list', engSessionId);
+      } else {
+          panel.style.display = 'none';
+      }
+    }
+
+    async function openSandboxHistory() {
+      const panel = document.getElementById('sandboxHistoryPanel');
+      const copilotPanel = document.getElementById('copilot-panel');
+      if(panel.style.display === 'none') {
+          panel.style.display = 'flex';
+          copilotPanel.style.width = '750px';
+          copilotPanel.style.maxWidth = '90vw';
+          document.getElementById('sandboxHistoryList').innerHTML = '<div style="color:var(--text-muted); font-size:13px; text-align:center; padding: 20px;">Loading...</div>';
+          await loadHistoryDrawer('sandbox', '/api/sandbox/history/list', sandboxSessionId);
+      } else {
+          panel.style.display = 'none';
+          copilotPanel.style.width = '420px';
+      }
+    }
+
+    async function deleteSession(type, sessionId, event) {
+        if(event) event.stopPropagation();
+        if(!confirm("Delete this session?")) return;
+        try {
+            const url = type === 'engineering' ? `/api/engineering/session/${sessionId}` : `/api/sandbox/session/${sessionId}`;
+            const response = await fetchAPI(url, { method: 'DELETE' });
+            if(response && response.status === 'success') {
+                // Refresh list
+                if(type === 'engineering') {
+                    await loadHistoryDrawer('engineering', '/api/engineering/history/list', engSessionId);
+                } else {
+                    await loadHistoryDrawer('sandbox', '/api/sandbox/history/list', sandboxSessionId);
+                }
+            }
+        } catch(err) {
+            console.error("Failed to delete session", err);
+        }
+    }
+
+    async function loadHistoryDrawer(type, url, activeSessionId) {
+      if (!token) return;
+      try {
+        const response = await fetchAPI(url);
+        const container = type === 'engineering' ? document.getElementById('engHistoryList') : document.getElementById('sandboxHistoryList');
+        container.innerHTML = '';
+        if (!response || response.length === 0) {
+          container.innerHTML = '<div style="color:var(--text-muted); font-size:13px; text-align:center; padding: 20px;">No past sessions found.</div>';
+          return;
+        }
+        response.forEach(session => {
+          const dateObj = session.started_at ? new Date(typeof session.started_at === 'string' && !session.started_at.endsWith('Z') ? session.started_at + 'Z' : session.started_at) : new Date();
+          const dateStr = dateObj.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+          const title = session.title || (type === 'engineering' ? 'Engineering Session' : 'Sandbox Session');
+          const preview = session.last_message_preview || 'No messages...';
+          const isActive = session.session_id === activeSessionId;
+          const borderStyle = isActive ? 'border-left: 4px solid var(--primary); background: var(--bg-card);' : 'border-left: 4px solid transparent; background: transparent;';
+          
+          container.insertAdjacentHTML('beforeend', `
+            <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s; position: relative; ${borderStyle}" onclick="${type === 'engineering' ? 'switchEngineeringSession' : 'switchSandboxSession'}('${session.session_id}')">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                 <div style="font-weight: 600; font-size: 13px; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;">${title}</div>
+                 <i class="fa-solid fa-trash-can" style="color: #ef4444; font-size: 12px; padding: 4px; border-radius: 4px; cursor: pointer; transition: background 0.2s;" onclick="deleteSession('${type}', '${session.session_id}', event)" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'"></i>
+              </div>
+              <div style="font-size: 11px; color: var(--text-muted); display: flex; gap: 8px; margin-bottom: 4px;">
+                <span>${dateStr}</span>
+              </div>
+              <div style="font-size: 11px; color: #64748b; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                "${preview}"
+              </div>
+            </div>
+          `);
+        });
+      } catch (err) {
+        console.error(err);
+        const container = type === 'engineering' ? document.getElementById('engHistoryList') : document.getElementById('sandboxHistoryList');
+        if(container) container.innerHTML = '<div style="color:#ef4444; font-size:13px; text-align:center;">Failed to load.</div>';
+      }
+    }
+
+
+  
+    async function switchHistorySession(type, sessionId) {
+      if (!token) return;
+      try {
+        if (type === 'engineering') {
+            localStorage.setItem('engineering_session_id', sessionId);
+            engSessionId = sessionId;
+            const chatBox = document.getElementById('engChatBox');
+            if (chatBox) chatBox.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding: 20px;">Loading chat...</div>';
+            
+            const histRes = await fetchAPI('/api/engineering/history/chat/' + sessionId);
+            if (histRes && Array.isArray(histRes) && chatBox) {
+                chatBox.innerHTML = '';
+                if (histRes.length === 0) {
+                   chatBox.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding: 20px;">Empty session</div>';
+                }
+                histRes.forEach(msg => {
+                    let html = '';
+                    if (!msg.type || msg.type === 'message') {
+                        const isUser = msg.sender === 'user';
+                        const bgColor = isUser ? 'var(--primary)' : 'var(--bg-card)';
+                        const color = isUser ? 'white' : 'inherit';
+                        const alignment = isUser ? 'flex-end' : 'flex-start';
+                        html = `<div style="align-self:${alignment}; background-color:${bgColor}; color:${color}; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:85%; line-height:1.6; word-wrap: break-word; white-space: pre-wrap;">${msg.content}</div>`;
+                    } else if (msg.type === 'file') {
+                        const isPdf = msg.file_type === 'pdf';
+                        const icon = isPdf ? '<i class="fa-solid fa-file-pdf" style="color:#ef4444; font-size:24px;"></i>' : '<i class="fa-solid fa-image" style="color:#3b82f6; font-size:24px;"></i>';
+                        html = `<div style="align-self:flex-end; background-color:var(--bg-card); color:var(--text-dark); padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:85%; display:flex; align-items:center; gap:12px;">
+                            ${icon}
+                            <div>
+                                <div style="font-weight:600; font-size:13px;">${msg.file_name}</div>
+                                <div style="font-size:11px; color:var(--text-muted);">${(msg.timestamp || '').substring(0,10)}</div>
+                            </div>
+                        </div>`;
+                    } else if (msg.type === 'report') {
+                        html = `<div style="align-self:flex-start; background-color:#fefce8; color:#854d0e; padding:16px; border-radius:12px; border:1px solid #fef08a; max-width:85%; width:100%;">
+                            <div style="font-weight:600; margin-bottom:8px;"><i class="fa-solid fa-file-contract"></i> Report: ${msg.title || 'Untitled'}</div>
+                            <div style="font-size:12px; white-space:pre-wrap; max-height: 100px; overflow:hidden;">${(msg.content || '').substring(0,200)}...</div>
+                        </div>`;
+                    } else if (msg.type === 'requirement') {
+                        html = `<div style="align-self:flex-start; background-color:#f0fdf4; color:#166534; padding:16px; border-radius:12px; border:1px solid #bbf7d0; max-width:85%; width:100%;">
+                            <div style="font-weight:600; margin-bottom:8px;"><i class="fa-solid fa-list-check"></i> Requirement Profile: ${msg.project_name || 'Unspecified'}</div>
+                            <div style="font-size:12px;">Status: ${msg.status || 'Active'}</div>
+                        </div>`;
+                    } else if (msg.type === 'memory') {
+                        html = `<div style="align-self:center; background-color:#f8fafc; color:#475569; padding:8px 16px; border-radius:20px; border:1px dashed #cbd5e1; font-size:11px; text-align:center; margin: 8px 0;">
+                            <i class="fa-solid fa-brain"></i> Memory stored: ${msg.memory_type} - ${msg.memory_key}
+                        </div>`;
+                    }
+                    chatBox.innerHTML += html;
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        } else if (type === 'sandbox') {
+            localStorage.setItem('sandbox_session_id', sessionId);
+            sandboxSessionId = sessionId;
+            const chatBox = document.getElementById('copilot-chat-box');
+            if (chatBox) chatBox.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding: 20px;">Loading chat...</div>';
+            
+            const histRes = await fetchAPI('/api/sandbox/history/chat/' + sessionId);
+            if (histRes && Array.isArray(histRes) && chatBox) {
+                chatBox.innerHTML = '';
+                if (histRes.length === 0) {
+                   chatBox.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding: 20px;">Empty session</div>';
+                }
+                histRes.forEach(msg => {
+                    let html = '';
+                    if (!msg.type || msg.type === 'message') {
+                        const isUser = msg.sender === 'user';
+                        const bgColor = isUser ? 'var(--primary)' : 'var(--bg-card)';
+                        const color = isUser ? 'white' : 'inherit';
+                        const alignment = isUser ? 'flex-end' : 'flex-start';
+                        html = `<div style="align-self:${alignment}; background-color:${bgColor}; color:${color}; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:85%; line-height:1.6; word-wrap: break-word; white-space: pre-wrap;">${msg.content}</div>`;
+                    } else if (msg.type === 'file') {
+                        const isPdf = msg.file_type === 'pdf';
+                        const icon = isPdf ? '<i class="fa-solid fa-file-pdf" style="color:#ef4444; font-size:24px;"></i>' : '<i class="fa-solid fa-image" style="color:#3b82f6; font-size:24px;"></i>';
+                        html = `<div style="align-self:flex-end; background-color:var(--bg-card); color:var(--text-dark); padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:85%; display:flex; align-items:center; gap:12px;">
+                            ${icon}
+                            <div>
+                                <div style="font-weight:600; font-size:13px;">${msg.file_name}</div>
+                                <div style="font-size:11px; color:var(--text-muted);">${(msg.timestamp || '').substring(0,10)}</div>
+                            </div>
+                        </div>`;
+                    } else if (msg.type === 'report') {
+                        html = `<div style="align-self:flex-start; background-color:#fefce8; color:#854d0e; padding:16px; border-radius:12px; border:1px solid #fef08a; max-width:85%; width:100%;">
+                            <div style="font-weight:600; margin-bottom:8px;"><i class="fa-solid fa-file-contract"></i> Report: ${msg.title || 'Untitled'}</div>
+                            <div style="font-size:12px; white-space:pre-wrap; max-height: 100px; overflow:hidden;">${(msg.content || '').substring(0,200)}...</div>
+                        </div>`;
+                    } else if (msg.type === 'requirement') {
+                        html = `<div style="align-self:flex-start; background-color:#f0fdf4; color:#166534; padding:16px; border-radius:12px; border:1px solid #bbf7d0; max-width:85%; width:100%;">
+                            <div style="font-weight:600; margin-bottom:8px;"><i class="fa-solid fa-list-check"></i> Requirement Profile: ${msg.project_name || 'Unspecified'}</div>
+                            <div style="font-size:12px;">Status: ${msg.status || 'Active'}</div>
+                        </div>`;
+                    } else if (msg.type === 'memory') {
+                        html = `<div style="align-self:center; background-color:#f8fafc; color:#475569; padding:8px 16px; border-radius:20px; border:1px dashed #cbd5e1; font-size:11px; text-align:center; margin: 8px 0;">
+                            <i class="fa-solid fa-brain"></i> Memory stored: ${msg.memory_type} - ${msg.memory_key}
+                        </div>`;
+                    }
+                    chatBox.innerHTML += html;
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+        
+      } catch (err) {
+        console.error("Error switching session", err);
+      }
+    }
+
+  </script>
+<!-- History Modal Structure -->
+<div class="modal-overlay" id="historyModalOverlay">
+<div class="modal" style="width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
+<div class="modal-header">
+<div id="historyModalTitle">Chat History</div>
+<i class="fa-solid fa-xmark close-btn" onclick="closeHistoryModal()"></i>
+</div>
+<div style="margin-bottom: 16px; position: relative;">
+<i class="fa-solid fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+<input id="modalHistorySearch" onkeyup="filterModalHistory()" placeholder="Search by title, date, or messages..." style="width: 100%; padding: 10px 12px 10px 36px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px;" type="text"/>
+</div>
+<div id="historyModalList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+<!-- Dynamically populated -->
+</div>
+</div>
+</div>
+</div></body>
+</html>

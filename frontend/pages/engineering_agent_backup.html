@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    /* Layout */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Top Nav */
+    .top-nav {
+      height: 52px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-6);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      width: 220px;
+    }
+    
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .nav-plant { font-size: 11px; color: var(--text-muted); }
+    
+    .search-bar {
+      position: relative;
+      width: 320px;
+    }
+    
+    .search-bar i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .search-input {
+      width: 100%;
+      height: 32px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      background-color: var(--bg-page);
+      font-size: 13px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+    }
+    
+    .icon-btn {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    
+    .icon-btn:hover { color: var(--text-primary); }
+    
+    .badge-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--status-critical);
+      color: white;
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 50%;
+      height: 14px;
+      min-width: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+    }
+    
+    .avatar {
+      height: 32px;
+      width: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border-default);
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .user-card {
+      padding: var(--spacing-5);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .user-card .avatar { width: 48px; height: 48px; font-size: 18px; margin-bottom: var(--spacing-2); }
+    .user-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .user-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: var(--spacing-1); }
+    
+    .nav-menu {
+      padding: var(--spacing-4) 0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-3) var(--spacing-5);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      gap: var(--spacing-3);
+      transition: background 0.2s, color 0.2s;
+    }
+    
+    .nav-item:hover {
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      color: var(--primary);
+      background-color: var(--status-success-bg);
+      border-right: 3px solid var(--primary);
+    }
+    
+    .nav-item i { width: 16px; text-align: center; }
+    
+    .sidebar-footer {
+      padding: var(--spacing-5);
+      border-top: 1px solid var(--border-default);
+    }
+    
+    .version-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: var(--spacing-4);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex-grow: 1;
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      overflow-y: auto;
+      padding: var(--spacing-6) var(--spacing-8);
+      background-color: var(--bg-page);
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--spacing-6);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .metric-card {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .metric-value {
+      font-size: 32px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      margin: var(--spacing-2) 0;
+    }
+    
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-6);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .list-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-3) 0;
+      border-bottom: 1px solid var(--border-default);
+    }
+    
+    .list-row:last-child { border-bottom: none; }
+    
+    .row-main { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
+    .row-title { font-weight: 500; font-size: 14px; }
+    .row-meta { font-size: 12px; color: var(--text-muted); }
+    
+    .quick-start {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(59, 109, 17, 0.2);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .quick-start-btn {
+      background-color: white;
+      color: var(--primary);
+      padding: 0 var(--spacing-6);
+      height: 48px;
+      font-size: 16px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-2);
+    }
+    
+    .quick-start-btn:hover { background-color: var(--bg-page); }
+
+    .health-stats { display: flex; justify-content: space-between; padding-top: 10px; }
+    .health-stat { text-align: center; }
+    .health-stat-val { font-size: 24px; font-weight: bold; }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+
+  <!-- Top Nav -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div>
+        <div class="nav-title">Maintenance Wizard</div>
+        <div class="nav-plant">Tata Steel &middot; Jamshedpur</div>
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <i class="fa-solid fa-search"></i>
+      <input type="text" class="search-input" placeholder="Search equipment, SOPs, logs...">
+    </div>
+    
+    <div class="nav-actions">
+      <button class="icon-btn">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge-count">3</span>
+      </button>
+      <span class="badge status-info" id="userRole">Engineer</span>
+      <div class="avatar" id="navAvatar">EN</div>
+      <a href="index.html" class="icon-btn" title="Logout" onclick="localStorage.clear();"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar" id="userAvatar">EN</div>
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-id" id="userId">ID: ...</div>
+      </div>
+      
+            <nav class="nav-menu">
+        <a href="home_page_engineer.html" class="nav-item">
+          <i class="fa-solid fa-home"></i> Home Dashboard
+        </a>
+        <a href="engineering_agent.html" class="nav-item active">
+          <i class="fa-solid fa-robot"></i> AI Agent
+        </a>
+        <a href="agent_sandbox.html" class="nav-item">
+          <i class="fa-solid fa-flask"></i> Sandbox
+        </a>
+        <a href="chat.html" class="nav-item">
+          <i class="fa-solid fa-clipboard-check"></i> My Tasks
+        </a>
+        <a href="history.html" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i> Session Logs
+        </a>
+        <a href="upload.html" class="nav-item">
+          <i class="fa-solid fa-file-pdf"></i> Documents
+        </a>
+        <a href="equipment.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i> Equipment Health
+        </a>
+        <a href="safety.html" class="nav-item">
+          <i class="fa-solid fa-shield-halved"></i> Safety Verification
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i> Profile
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="version-info">v2.1.0 &middot; Plant: JSR-01</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+<style>
+
+        .main-content {
+            display: flex;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--bg-page);
+        }
+        .workspace-nav {
+            width: 60px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+        .workspace-nav a { color: var(--text-muted); font-size: 20px; text-decoration: none; }
+        .workspace-nav a:hover { color: var(--text-primary); }
+        .workspace-chat {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .header { height: 60px; border-bottom: 1px solid var(--border-default); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; background: var(--bg-card); }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; background: var(--bg-page); }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 8px; line-height: 1.5; font-size: 14px; }
+        .message.user { align-self: flex-end; background-color: var(--primary); color: white; border-bottom-right-radius: 0; }
+        .message.agent { align-self: flex-start; background-color: var(--bg-card); border: 1px solid var(--border-default); color: var(--text-primary); border-bottom-left-radius: 0; }
+        .input-area { height: 80px; border-top: 1px solid var(--border-default); display: flex; align-items: center; padding: 0 20px; background: var(--bg-card); gap: 10px; flex-shrink: 0; }
+        .input-area input { flex: 1; height: 40px; border: 1px solid var(--border-default); border-radius: 4px; padding: 0 15px; outline: none; background: var(--bg-page); color: var(--text-primary); }
+        .input-area button { height: 40px; padding: 0 20px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        
+        .side-panel { width: 350px; background: var(--bg-card); border-left: 1px solid var(--border-default); display: flex; flex-direction: column; flex-shrink: 0; }
+        .panel-header { height: 60px; border-bottom: 1px solid var(--border-default); display: flex; align-items: center; padding: 0 20px; font-weight: 600; background: var(--bg-card); }
+        .panel-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: var(--bg-page); border: 1px solid var(--border-default); border-radius: 6px; padding: 15px; }
+        .card h3 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+        .context-item { margin-bottom: 10px; font-size: 13px; }
+        .context-item strong { color: var(--text-primary); }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; background: var(--status-warning-bg); color: var(--status-warning); }
+        .badge.complete { background: var(--status-success-bg); color: var(--status-success); }
+
+</style>
+
+      <div class="workspace-nav">
+        <a href="#" onclick="navigateHome(event)" title="Home"><i class="fa-solid fa-home"></i></a>
+        <a href="agent_sandbox.html" title="Sandbox"><i class="fa-solid fa-flask"></i></a>
+        <a href="#" style="color: var(--primary);" title="Engineering Workspace"><i class="fa-solid fa-laptop-code"></i></a>
+    </div>
+    
+    <div class="workspace-chat">
+        <div class="header">
+            <div>
+                <strong style="font-size: 18px;">Engineering Workspace</strong>
+                <span style="margin-left: 10px; font-size: 12px; color: var(--text-muted);">Session: <span id="sessionDisplay">Loading...</span></span>
+            </div>
+            <div>
+                <select id="modelSelect" class="input-field" style="height: 32px; width: 150px;">
+                    <option value="mistral">Mistral (Default)</option>
+                    <option value="llama3">Llama 3</option>
+                    <option value="qwen">Qwen</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="chat-container" id="chatBox">
+            <div class="message agent">Welcome to the Engineering Workspace. I'm connected to your project context. How can we proceed with the requirements today?</div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="chatInput" placeholder="Type a message or clarify requirements...">
+            <button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i> Send</button>
+        </div>
+    </div>
+    
+    <div class="side-panel">
+        <div class="panel-header">
+            <i class="fa-solid fa-layer-group" style="margin-right: 8px;"></i> Project Context
+            <button onclick="refreshContext()" class="btn btn-secondary" style="margin-left: auto; height: 24px; padding: 0 8px; font-size: 11px;"><i class="fa-solid fa-rotate"></i></button>
+        </div>
+        <div class="panel-content">
+            <div class="card" id="sessionHistoryCard">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3>AI Engineering Sessions</h3>
+                    <button onclick="createNewSession()" class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;">+ New</button>
+                </div>
+                <div class="search-bar" style="margin-bottom: 10px; width: 100%;">
+                    <i class="fa-solid fa-search" style="left: 8px;"></i>
+                    <input type="text" id="sessionSearch" class="search-input" placeholder="Search sessions..." onkeyup="filterSessions()" style="height: 28px; font-size: 11px; padding-left: 28px;">
+                </div>
+                <div id="sessionListContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;">
+                    <!-- Session items will be dynamically injected here -->
+                    <div style="font-size: 12px; color: var(--text-muted);">Loading sessions...</div>
+                </div>
+            </div>
+            
+            <div class="card" id="reqCard">
+                <h3>Requirement Profile <span class="badge" id="reqStatus">Loading...</span></h3>
+                <div id="reqDetails" style="font-size: 13px; color: var(--text-secondary);">Initializing...</div>
+            </div>
+            
+            <div class="card" id="memCard">
+                <h3>Agent Memory</h3>
+                <div id="memDetails" style="font-size: 13px; color: var(--text-secondary);">Initializing...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        let sessionId = params.get("session_id") || localStorage.getItem('engineering_session_id');
+        
+        const token = localStorage.getItem('access_token');
+        
+        async function fetchAPI(endpoint, options = {}) {
+            options.headers = {
+                ...options.headers,
+                'Authorization':

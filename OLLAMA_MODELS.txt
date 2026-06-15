@@ -1,0 +1,37 @@
+==================================================
+OLLAMA MODELS SPECIFICATION
+==================================================
+
+Model Name: qwen2.5-coder:7b
+Purpose: Engineering Agent, Root Cause Analysis, Engineering Reports, PDF Analysis, SOP Generation, Requirement Discovery, Safety Analysis, Complex Industrial Reasoning
+Agent Using Model: Engineering Agent
+Input Type: Text, Context
+Output Type: Structured Text, Markdown
+Estimated Response Speed: Moderate (3-5s)
+
+--------------------------------------------------
+
+Model Name: qwen2.5vl:latest
+Purpose: Vision Analysis, Equipment Inspection, Image Understanding, Defect Detection, Visual Diagnostics, Industrial Image Analysis
+Agent Using Model: Vision Service Engine
+Input Type: Image Base64, Text Prompt
+Output Type: Descriptive Text, JSON
+Estimated Response Speed: Moderate (4-6s)
+
+--------------------------------------------------
+
+Model Name: mistral:latest
+Purpose: Sandbox Agent, Fast Chat Responses, Inventory Queries, Work Order Queries, Supervisor Queries, General Engineering Assistance
+Agent Using Model: Sandbox Agent, Quick-Query Router
+Input Type: Text
+Output Type: Conversational Text, JSON
+Estimated Response Speed: Fast (1-2s)
+
+--------------------------------------------------
+
+Model Name: BAAI/bge-small-en-v1.5
+Purpose: PDF Embeddings, ChromaDB Storage, RAG Search, Document Retrieval, Semantic Search, Knowledge Base Queries
+Agent Using Model: Document Ingestion Engine, RAG Retriever
+Input Type: Text Chunks
+Output Type: Dense Vectors (Embeddings)
+Estimated Response Speed: Instant (<1s)

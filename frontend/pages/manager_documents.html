@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global SOPs - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    .app-container { display: flex; height: 100vh; overflow: hidden; }
+    .top-nav { height: 52px; background-color: var(--bg-card); border-bottom: 1px solid var(--border-default); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--spacing-6); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+    .nav-brand { display: flex; align-items: center; gap: var(--spacing-3); width: 220px; }
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .search-bar { position: relative; width: 320px; }
+    .search-input { width: 100%; height: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 12px; background-color: var(--bg-page); }
+    .nav-actions { display: flex; align-items: center; gap: var(--spacing-4); }
+    .avatar { height: 32px; width: 32px; border-radius: 50%; background-color: var(--status-info); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+    .sidebar { width: 220px; background-color: var(--bg-card); border-right: 1px solid var(--border-default); height: calc(100vh - 52px); margin-top: 52px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .user-card { padding: var(--spacing-5); border-bottom: 1px solid var(--border-default); display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .nav-menu { padding: var(--spacing-4) 0; flex-grow: 1; overflow-y: auto; }
+    .nav-item { display: flex; align-items: center; padding: var(--spacing-3) var(--spacing-5); color: var(--text-secondary); text-decoration: none; font-weight: 500; gap: var(--spacing-3); }
+    .nav-item.active { color: var(--primary); background-color: var(--status-success-bg); border-right: 3px solid var(--primary); }
+    .main-content { flex-grow: 1; height: calc(100vh - 52px); margin-top: 52px; overflow-y: auto; padding: var(--spacing-6) var(--spacing-8); background-color: var(--bg-page); }
+    
+    .data-table { width: 100%; border-collapse: collapse; background-color: var(--bg-card); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-card); }
+    .data-table th { background-color: var(--bg-panel); color: var(--text-secondary); font-size: 12px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-strong); font-weight: 600; }
+    .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--border-default); font-size: 13px; vertical-align: middle; }
+    
+    .filter-bar { display: flex; gap: var(--spacing-3); margin-bottom: var(--spacing-6); align-items: center; flex-wrap: wrap; }
+    .filter-input { height: 36px; padding: 0 12px; border: 1px solid var(--border-default); border-radius: var(--radius-md); font-family: var(--font-body); font-size: 13px; }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div class="nav-title">Maintenance Wizard</div>
+    </div>
+    <div class="search-bar"><input type="text" class="search-input" placeholder="Search plant KPIs, reports..."></div>
+    <div class="nav-actions">
+      <span class="badge status-info">Plant Manager</span>
+      <div class="avatar">MK</div>
+      <a href="index.html" style="color: var(--text-secondary)"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar profile-icon" style="width:48px;height:48px;font-size:18px;margin-bottom:8px;">MK</div>
+        <div class="profile-name" style="font-weight:600">Manish Kumar</div>
+        <span class="badge status-info profile-role">Plant Manager</span>
+      </div>
+      <nav class="nav-menu">
+        <a href="home_page_manager.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Plant KPIs</a>
+        <a href="manager_audit_log.html" class="nav-item"><i class="fa-solid fa-file-invoice"></i> Audit Logs</a>
+        <a href="manager_documents.html" class="nav-item active"><i class="fa-solid fa-book"></i> Global SOPs</a>
+        <a href="manager_asset_health.html" class="nav-item"><i class="fa-solid fa-city"></i> Asset Health</a>
+        <a href="manager_users.html" class="nav-item"><i class="fa-solid fa-users-gear"></i> Manage Users</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
+        <h2>Master Knowledge Base</h2>
+        <a href="upload.html" class="btn btn-primary"><i class="fa-solid fa-upload"></i> Upload Company-Wide Policy</a>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Document Name</th>
+            <th>Uploader</th>
+            <th>Upload Date</th>
+            <th>Permissions</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="docs-table-body">
+          <tr><td colspan="5" style="text-align: center;">Loading master documents...</td></tr>
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <script>
+    async function loadDocuments() {
+      const token = localStorage.getItem('access_token');
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/documents/', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const docs = await response.json();
+          const tbody = document.getElementById('docs-table-body');
+          tbody.innerHTML = '';
+          if (docs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No documents found.</td></tr>';
+            return;
+          }
+          docs.forEach(doc => {
+            tbody.innerHTML += `
+              <tr>
+                <td><strong>${doc.filename}</strong></td>
+                <td>${doc.uploaded_by_name}</td>
+                <td>${new Date(typeof doc.uploaded_at === 'string' && !doc.uploaded_at.endsWith('Z') ? doc.uploaded_at + 'Z' : doc.uploaded_at).toLocaleDateString()}</td>
+                <td><span class="badge status-warning">${doc.assigned_roles || 'Global'}</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="height:28px; font-size:12px;" onclick="alert('Permission override opened')">Override Perms</button>
+                  <button class="btn btn-secondary" style="height:28px; font-size:12px; color: var(--status-critical); border-color: var(--status-critical);" onclick="alert('Document deleted')">Delete</button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load documents", e);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadDocuments);
+  </script>
+</body>
+</html>

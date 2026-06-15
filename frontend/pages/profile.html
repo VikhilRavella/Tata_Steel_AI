@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script>
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = 'index.html';
+        } else {
+            const role = (localStorage.getItem('user_role') || 'engineer').toLowerCase();
+            if (role === 'supervisor') {
+                window.location.href = 'home_page_supervisor.html';
+            } else if (role === 'manager') {
+                window.location.href = 'manager_portal.html';
+            } else {
+                localStorage.setItem('engineer_active_section', 'profile');
+                window.location.href = 'home_page_engineer.html';
+            }
+        }
+    </script>
+</head>
+<body>
+    <p>Redirecting to profile configuration...</p>
+</body>
+</html>

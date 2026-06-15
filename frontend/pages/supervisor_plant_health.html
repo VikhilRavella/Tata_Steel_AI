@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plant Health - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    .app-container { display: flex; height: 100vh; overflow: hidden; }
+    .top-nav { height: 52px; background-color: var(--bg-card); border-bottom: 1px solid var(--border-default); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--spacing-6); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+    .nav-brand { display: flex; align-items: center; gap: var(--spacing-3); width: 220px; }
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .search-bar { position: relative; width: 320px; }
+    .search-input { width: 100%; height: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 12px; background-color: var(--bg-page); }
+    .nav-actions { display: flex; align-items: center; gap: var(--spacing-4); }
+    .avatar { height: 32px; width: 32px; border-radius: 50%; background-color: var(--status-warning); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+    .sidebar { width: 220px; background-color: var(--bg-card); border-right: 1px solid var(--border-default); height: calc(100vh - 52px); margin-top: 52px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .user-card { padding: var(--spacing-5); border-bottom: 1px solid var(--border-default); display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .nav-menu { padding: var(--spacing-4) 0; flex-grow: 1; overflow-y: auto; }
+    .nav-item { display: flex; align-items: center; padding: var(--spacing-3) var(--spacing-5); color: var(--text-secondary); text-decoration: none; font-weight: 500; gap: var(--spacing-3); }
+    .nav-item.active { color: var(--primary); background-color: var(--status-success-bg); border-right: 3px solid var(--primary); }
+    .main-content { flex-grow: 1; height: calc(100vh - 52px); margin-top: 52px; overflow-y: auto; padding: var(--spacing-6) var(--spacing-8); background-color: var(--bg-page); }
+    
+    .health-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-6);
+    }
+    
+    .equipment-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-5);
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div class="nav-title">Maintenance Wizard</div>
+    </div>
+    <div class="search-bar"><input type="text" class="search-input" placeholder="Search team, equipment..."></div>
+    <div class="nav-actions">
+      <span class="badge status-warning">Supervisor</span>
+      <div class="avatar profile-icon">SJ</div>
+      <a href="index.html" style="color: var(--text-secondary)"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar profile-icon" style="width:48px;height:48px;font-size:18px;margin-bottom:8px;">SJ</div>
+        <div class="profile-name" style="font-weight:600">Sarah Jenkins</div>
+        <span class="badge status-warning profile-role">Shift Supervisor</span>
+      </div>
+      <nav class="nav-menu">
+        <a href="home_page_supervisor.html" class="nav-item"><i class="fa-solid fa-users"></i> Team Overview</a>
+        <a href="supervisor_escalations.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> Escalations</a>
+        <a href="supervisor_documents.html" class="nav-item"><i class="fa-solid fa-file-pdf"></i> Manage Docs</a>
+        <a href="supervisor_plant_health.html" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Plant Health</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-6);">
+        <h2>Sector Health</h2>
+        <select class="search-input" id="sector-select" style="width: 200px;" onchange="loadSectorHealth(this.value)">
+          <option value="All Sectors">All Sectors</option>
+          <option value="Cold Rolling Mill" selected>Cold Rolling Mill</option>
+          <option value="Iron Making">Iron Making</option>
+          <option value="Utilities">Utilities</option>
+        </select>
+      </div>
+      
+      <div class="card" style="margin-bottom: var(--spacing-6); border-left: 4px solid var(--status-critical);">
+        <h3 style="margin-bottom: var(--spacing-4); color: var(--status-critical);"><i class="fa-solid fa-triangle-exclamation"></i> AI Preventive Maintenance Flags</h3>
+        <p class="text-secondary" style="margin-bottom: var(--spacing-4);">The following assets show acoustic or vibration anomalies that historically precede failure within 48 hours.</p>
+        
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border-default);">
+              <th style="padding: 12px 0;">Asset</th>
+              <th style="padding: 12px 0;">Anomaly Detected</th>
+              <th style="padding: 12px 0;">Confidence</th>
+              <th style="padding: 12px 0;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="predictive-flags-body">
+            <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-bottom: var(--spacing-4)">Aggregated Asset Health</h3>
+      <div id="asset-health-container" class="health-grid">
+        <div style="grid-column: span 3; text-align:center; padding: 20px;">Loading...</div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    async function loadSectorHealth(sectorName) {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+      
+      const flagsBody = document.getElementById('predictive-flags-body');
+      const aggregatesContainer = document.getElementById('asset-health-container');
+      
+      flagsBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>';
+      aggregatesContainer.innerHTML = '<div style="grid-column: span 3; text-align:center; padding: 20px;">Loading...</div>';
+      
+      try {
+        // Fetch predictive flags
+        const flagsRes = await fetch(`http://127.0.0.1:8000/api/supervisor/health/predictive-flags?sector=${encodeURIComponent(sectorName)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (flagsRes.ok) {
+          const flagsData = await flagsRes.json();
+          if (flagsData.length === 0) {
+            flagsBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary);">No predictive anomalies detected.</td></tr>';
+          } else {
+            flagsBody.innerHTML = '';
+            flagsData.forEach(flag => {
+              flagsBody.innerHTML += `
+                <tr style="border-bottom: 1px solid var(--border-default);">
+                  <td style="padding: 12px 0;"><strong>${flag.asset_name}</strong></td>
+                  <td>${flag.anomaly_detected}</td>
+                  <td><span class="badge status-critical">${flag.confidence_score}</span></td>
+                  <td><button class="btn btn-secondary" style="height: 32px;" onclick="alert('Creating Pre-emptive Work Order for ${flag.asset_name}...')">Create Work Order</button></td>
+                </tr>
+              `;
+            });
+          }
+        }
+        
+        // Fetch health aggregates
+        const aggRes = await fetch(`http://127.0.0.1:8000/api/supervisor/health/aggregates?sector=${encodeURIComponent(sectorName)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (aggRes.ok) {
+          const aggData = await aggRes.json();
+          if (aggData.length === 0) {
+            aggregatesContainer.innerHTML = '<div style="grid-column: span 3; text-align:center; padding: 20px; color: var(--text-secondary);">No assets registered in this sector.</div>';
+          } else {
+            aggregatesContainer.innerHTML = '';
+            aggData.forEach(agg => {
+              let colorClass = 'var(--status-success)';
+              if (agg.avg_health <= 80 && agg.avg_health > 50) colorClass = 'var(--status-warning)';
+              if (agg.avg_health <= 50) colorClass = 'var(--status-critical)';
+              
+              aggregatesContainer.innerHTML += `
+                <div class="equipment-card" style="border-top: 4px solid ${colorClass};">
+                  <h4>${agg.category}</h4>
+                  <div style="margin: var(--spacing-4) 0; display: flex; justify-content: space-between;">
+                    <span class="text-secondary">Overall Health</span>
+                    <span style="font-weight: 600; color: ${colorClass};">${agg.avg_health}%</span>
+                  </div>
+                  <div style="width: 100%; background-color: var(--border-default); height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div style="width: ${agg.avg_health}%; height: 100%; background-color: ${colorClass};"></div>
+                  </div>
+                  <p class="text-secondary" style="font-size: 13px; margin-top: var(--spacing-3);">${agg.critical_notes}</p>
+                </div>
+              `;
+            });
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const select = document.getElementById('sector-select');
+      if (select) {
+        loadSectorHealth(select.value);
+      }
+    });
+  </script>
+</body>
+</html>

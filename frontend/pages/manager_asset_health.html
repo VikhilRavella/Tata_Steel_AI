@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Macro Asset Health - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    .app-container { display: flex; height: 100vh; overflow: hidden; }
+    .top-nav { height: 52px; background-color: var(--bg-card); border-bottom: 1px solid var(--border-default); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--spacing-6); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+    .nav-brand { display: flex; align-items: center; gap: var(--spacing-3); width: 220px; }
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .search-bar { position: relative; width: 320px; }
+    .search-input { width: 100%; height: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 12px; background-color: var(--bg-page); }
+    .nav-actions { display: flex; align-items: center; gap: var(--spacing-4); }
+    .avatar { height: 32px; width: 32px; border-radius: 50%; background-color: var(--status-info); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+    .sidebar { width: 220px; background-color: var(--bg-card); border-right: 1px solid var(--border-default); height: calc(100vh - 52px); margin-top: 52px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .user-card { padding: var(--spacing-5); border-bottom: 1px solid var(--border-default); display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .nav-menu { padding: var(--spacing-4) 0; flex-grow: 1; overflow-y: auto; }
+    .nav-item { display: flex; align-items: center; padding: var(--spacing-3) var(--spacing-5); color: var(--text-secondary); text-decoration: none; font-weight: 500; gap: var(--spacing-3); }
+    .nav-item.active { color: var(--primary); background-color: var(--status-success-bg); border-right: 3px solid var(--primary); }
+    .main-content { flex-grow: 1; height: calc(100vh - 52px); margin-top: 52px; overflow-y: auto; padding: var(--spacing-6) var(--spacing-8); background-color: var(--bg-page); }
+    
+    .block-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-6); }
+    .block-card { background-color: var(--bg-card); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--spacing-6); cursor: pointer; transition: transform 0.2s; }
+    .block-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); border-color: var(--primary); }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div class="nav-title">Maintenance Wizard</div>
+    </div>
+    <div class="search-bar"><input type="text" class="search-input" placeholder="Search plant KPIs, reports..."></div>
+    <div class="nav-actions">
+      <span class="badge status-info">Plant Manager</span>
+      <div class="avatar">MK</div>
+      <a href="index.html" style="color: var(--text-secondary)"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar profile-icon" style="width:48px;height:48px;font-size:18px;margin-bottom:8px;">MK</div>
+        <div class="profile-name" style="font-weight:600">Manish Kumar</div>
+        <span class="badge status-info profile-role">Plant Manager</span>
+      </div>
+      <nav class="nav-menu">
+        <a href="home_page_manager.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Plant KPIs</a>
+        <a href="manager_audit_log.html" class="nav-item"><i class="fa-solid fa-file-invoice"></i> Audit Logs</a>
+        <a href="manager_documents.html" class="nav-item"><i class="fa-solid fa-book"></i> Global SOPs</a>
+        <a href="manager_asset_health.html" class="nav-item active"><i class="fa-solid fa-city"></i> Asset Health</a>
+        <a href="manager_users.html" class="nav-item"><i class="fa-solid fa-users-gear"></i> Manage Users</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <h2 style="margin-bottom: var(--spacing-6)">Macro Asset Health by Block</h2>
+
+      <div id="macro-asset-health-container" class="block-grid">
+        <div class="empty-state" style="grid-column: span 2; text-align: center; padding: 20px;">Loading...</div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    async function loadMacroHealth() {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+
+      const container = document.getElementById('macro-asset-health-container');
+      
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/manager/health/blocks', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.length === 0) {
+            container.innerHTML = '<div class="empty-state" style="grid-column: span 2; text-align: center; padding: 20px; color: var(--text-secondary);">No equipment blocks registered in the database.</div>';
+            return;
+          }
+          
+          container.innerHTML = '';
+          data.forEach(block => {
+            let colorClass = 'var(--status-success)';
+            let badgeClass = 'status-success';
+            
+            if (block.avg_health_score <= 80 && block.avg_health_score > 50) {
+              colorClass = 'var(--status-warning)';
+              badgeClass = 'status-warning';
+            }
+            if (block.avg_health_score <= 50 || block.status === 'Critical Alerts') {
+              colorClass = 'var(--status-critical)';
+              badgeClass = 'status-critical';
+            }
+            
+            const borderStyle = block.status === 'Critical Alerts' ? `border-left: 4px solid ${colorClass};` : '';
+            
+            container.innerHTML += `
+              <div class="block-card" style="${borderStyle}" onclick="alert('Drilling down into ${block.block_name} Equipment...')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--spacing-4);">
+                  <h3>${block.block_name}</h3>
+                  <span class="badge ${badgeClass}">${block.status}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-2);">
+                  <span class="text-secondary">Aggregate Health Score</span>
+                  <span style="font-weight: 600; color: ${colorClass};">${block.avg_health_score}%</span>
+                </div>
+                <div style="width: 100%; background-color: var(--border-default); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: var(--spacing-4);">
+                  <div style="width: ${block.avg_health_score}%; height: 100%; background-color: ${colorClass};"></div>
+                </div>
+                <p class="text-secondary" style="font-size: 13px;">${block.status_summary}</p>
+              </div>
+            `;
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load block health", e);
+        container.innerHTML = '<div style="grid-column: span 2; text-align: center; color: var(--status-critical);">Error loading data.</div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadMacroHealth);
+  </script>
+</body>
+</html>

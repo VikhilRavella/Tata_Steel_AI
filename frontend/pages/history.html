@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Logs - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    /* Layout */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Top Nav */
+    .top-nav {
+      height: 52px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-6);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      width: 220px;
+    }
+    
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .nav-plant { font-size: 11px; color: var(--text-muted); }
+    
+    .search-bar {
+      position: relative;
+      width: 320px;
+    }
+    
+    .search-bar i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .search-input {
+      width: 100%;
+      height: 32px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      background-color: var(--bg-page);
+      font-size: 13px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+    }
+    
+    .icon-btn {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    
+    .icon-btn:hover { color: var(--text-primary); }
+    
+    .badge-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--status-critical);
+      color: white;
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 50%;
+      height: 14px;
+      min-width: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+    }
+    
+    .avatar {
+      height: 32px;
+      width: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border-default);
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .user-card {
+      padding: var(--spacing-5);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .user-card .avatar { width: 48px; height: 48px; font-size: 18px; margin-bottom: var(--spacing-2); }
+    .user-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .user-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: var(--spacing-1); }
+    
+    .nav-menu {
+      padding: var(--spacing-4) 0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-3) var(--spacing-5);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      gap: var(--spacing-3);
+      transition: background 0.2s, color 0.2s;
+    }
+    
+    .nav-item:hover {
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      color: var(--primary);
+      background-color: var(--status-success-bg);
+      border-right: 3px solid var(--primary);
+    }
+    
+    .nav-item i { width: 16px; text-align: center; }
+    
+    .sidebar-footer {
+      padding: var(--spacing-5);
+      border-top: 1px solid var(--border-default);
+    }
+    
+    .version-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: var(--spacing-4);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex-grow: 1;
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      overflow-y: auto;
+      padding: var(--spacing-6) var(--spacing-8);
+      background-color: var(--bg-page);
+    }
+
+
+    
+    
+    
+    .filter-bar { display: flex; gap: var(--spacing-3); margin-bottom: var(--spacing-6); align-items: center; flex-wrap: wrap; }
+    .filter-input { height: 36px; padding: 0 12px; border: 1px solid var(--border-default); border-radius: var(--radius-md); font-family: var(--font-body); font-size: 13px; }
+    
+    .data-table { width: 100%; border-collapse: collapse; background-color: var(--bg-card); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-card); }
+    .data-table th { background-color: var(--bg-panel); color: var(--text-secondary); font-size: 12px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-strong); font-weight: 600; }
+    .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--border-default); font-size: 13px; vertical-align: top; }
+    .data-table tr:hover:not(.expandable-row) { background-color: var(--status-info-bg); }
+    
+    .expandable-row { display: none; background-color: var(--bg-page); border-bottom: 2px solid var(--border-strong); }
+    .expandable-row.open { display: table-row; }
+    .row-details { padding: var(--spacing-4); display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6); }
+    .detail-section h4 { font-size: 12px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--spacing-2); }
+  
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div>
+        <div class="nav-title">Maintenance Wizard</div>
+        <div class="nav-plant">Tata Steel &middot; Jamshedpur</div>
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <i class="fa-solid fa-search"></i>
+      <input type="text" class="search-input" placeholder="Search equipment, SOPs, logs...">
+    </div>
+    
+    <div class="nav-actions">
+      <button class="icon-btn">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge-count">3</span>
+      </button>
+      <span class="badge status-info" id="userRole">Engineer</span>
+      <div class="avatar" id="navAvatar">EN</div>
+      <a href="index.html" class="icon-btn" title="Logout" onclick="localStorage.clear();"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar" id="userAvatar">EN</div>
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-id" id="userId">ID: ...</div>
+      </div>
+      
+            <nav class="nav-menu">
+        <a href="home_page_engineer.html" class="nav-item">
+          <i class="fa-solid fa-home"></i> Home Dashboard
+        </a>
+        <a href="engineering_agent.html" class="nav-item">
+          <i class="fa-solid fa-robot"></i> AI Agent
+        </a>
+        <a href="agent_sandbox.html" class="nav-item">
+          <i class="fa-solid fa-flask"></i> Sandbox
+        </a>
+        <a href="chat.html" class="nav-item">
+          <i class="fa-solid fa-clipboard-check"></i> My Tasks
+        </a>
+        <a href="history.html" class="nav-item active">
+          <i class="fa-solid fa-clock-rotate-left"></i> Session Logs
+        </a>
+        <a href="upload.html" class="nav-item">
+          <i class="fa-solid fa-file-pdf"></i> Documents
+        </a>
+        <a href="equipment.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i> Equipment Health
+        </a>
+        <a href="safety.html" class="nav-item">
+          <i class="fa-solid fa-shield-halved"></i> Safety Verification
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i> Profile
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="version-info">v2.1.0 &middot; Plant: JSR-01</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
+        <h2>Session History</h2>
+        <button class="btn btn-secondary"><i class="fa-solid fa-download"></i> Export CSV</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="date" class="filter-input" value="2026-06-06">
+        <input type="text" class="filter-input" placeholder="Search Engineer...">
+        <select class="filter-input">
+          <option>All Equipment</option>
+          <option>Pumps</option>
+          <option>Motors</option>
+        </select>
+        <select class="filter-input">
+          <option>Status: All</option>
+          <option>Resolved</option>
+          <option>In Progress</option>
+          <option>Escalated</option>
+        </select>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Session ID</th>
+            <th>Engineer</th>
+            <th>Equipment</th>
+            <th>Location</th>
+            <th>Start / Duration</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="history-table-body">
+          <tr><td colspan="7" style="text-align: center;">Loading history...</td></tr>
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <script>
+    function toggleRow(id) {
+      const row = document.getElementById(id);
+      if (row) row.classList.toggle('open');
+    }
+
+    async function loadHistory() {
+      const token = localStorage.getItem('access_token');
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/sessions/history/list', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const sessions = await response.json();
+          const tbody = document.getElementById('history-table-body');
+          tbody.innerHTML = '';
+          if (sessions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No session logs found.</td></tr>';
+            return;
+          }
+          sessions.forEach((s, idx) => {
+            const statusClass = s.status === 'active' ? 'status-info' : (s.status === 'resolved' ? 'status-success' : 'status-critical');
+            const statusLabel = s.status === 'active' ? 'In Progress' : (s.status.charAt(0).toUpperCase() + s.status.slice(1));
+            
+            tbody.innerHTML += `
+              <tr>
+                <td class="font-mono">${s.session_id.substring(0,8)}</td>
+                <td>${s.primary_engineer}</td>
+                <td>${s.equipment_id || 'Unknown Equipment'}</td>
+                <td>-</td>
+                <td>${new Date(typeof s.started_at === 'string' && !s.started_at.endsWith('Z') ? s.started_at + 'Z' : s.started_at).toLocaleString()}</td>
+                <td><span class="chip ${statusClass}">${statusLabel}</span></td>
+                <td><button class="btn btn-secondary" style="height: 28px; font-size: 11px;" onclick="toggleRow('details${idx}')">Details <i class="fa-solid fa-chevron-down"></i></button></td>
+              </tr>
+              <tr class="expandable-row" id="details${idx}">
+                <td colspan="7">
+                  <div class="row-details">
+                    <div class="detail-section">
+                      <h4>Task Domain</h4>
+                      <p class="text-sm">${s.task_domain || 'N/A'}</p>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load history", e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadHistory);
+  </script>
+  <script src="../js/dashboard.js?v=2.0"></script>
+</body>
+</html>

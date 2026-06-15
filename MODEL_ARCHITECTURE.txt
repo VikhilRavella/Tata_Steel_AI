@@ -1,0 +1,26 @@
+==================================================
+AI MODEL ARCHITECTURE & ROUTING
+==================================================
+
+User
+  ↓
+Engineering Agent
+  ↓
+Intent Detection
+  ↓
+Model Selection
+
+ROUTING LOGIC
+-------------
+Inventory Lookup         →   Mistral
+Work Orders              →   Mistral
+General Queries          →   Mistral
+PDF Analysis             →   Qwen3-Coder
+Safety Analysis          →   Qwen3-Coder
+Root Cause Analysis      →   Qwen3-Coder
+Vision Analysis          →   Qwen2.5VL
+RAG Search               →   Nomic Embeddings + ChromaDB
+
+==================================================
+END OF ARCHITECTURE
+==================================================

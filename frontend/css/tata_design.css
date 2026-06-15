@@ -1,0 +1,225 @@
+/* =========================================================
+   TATA STEEL ENTERPRISE UI/UX DESIGN SYSTEM
+   =========================================================
+   This stylesheet acts as the master override to ensure
+   absolute UI consistency across all platform pages.
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Tata Brand Palette */
+  --tata-blue: #0055A4;
+  --tata-blue-hover: #004080;
+  --tata-slate: #1E293B;
+  --tata-cool-grey: #F1F5F9;
+  
+  /* Industrial Accent Colors */
+  --tata-danger: #ef4444;
+  --tata-success: #22c55e;
+  
+  /* Layout constraints */
+  --header-height: 70px;
+  --sidebar-width: 260px;
+}
+
+/* =======================================
+   1. GLOBAL OVERRIDES 
+======================================= */
+body, html {
+  background-color: var(--tata-cool-grey) !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  color: var(--tata-slate) !important;
+}
+
+/* =======================================
+   2. HEADER & LOGOUT 
+======================================= */
+/* The top header is fixed globally */
+.top-header, header {
+  background-color: white !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+}
+
+/* Ensure the header right section has room for the fixed logout button */
+.top-header > div:last-child {
+  padding-right: 120px !important;
+}
+
+/* Hardcoded Absolute Position for Logout */
+/* The user requested this specifically to remain anchored */
+.btn-logout, button[onclick*="logout"] {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  z-index: 9999 !important;
+  background-color: var(--tata-danger) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.4) !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: auto !important;
+}
+
+.btn-logout:hover, button[onclick*="logout"]:hover {
+  background-color: #dc2626 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* =======================================
+   3. SIDEBAR NAVIGATION 
+======================================= */
+.sidebar {
+  background-color: var(--tata-slate) !important;
+  color: #cbd5e1 !important;
+  border-right: none !important;
+}
+
+.nav-item {
+  border-left: 4px solid transparent !important;
+  transition: all 0.2s !important;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.nav-item.active {
+  background-color: rgba(0, 85, 164, 0.1) !important; /* Tata Blue light */
+  color: #60a5fa !important;
+  border-left-color: var(--tata-blue) !important;
+  font-weight: 600 !important;
+}
+
+/* =======================================
+   4. GLASS-MORPHISM CARDS 
+======================================= */
+.card, .feat-card, .agent-card, .layer-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06) !important;
+  border-radius: 12px !important;
+  transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+.card:hover, .feat-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05) !important;
+}
+
+/* CSS Grid for reflowing dashboards */
+.dashboard-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  gap: 24px !important;
+}
+
+/* =======================================
+   5. COMPACT DENSE ZEBRA TABLES 
+======================================= */
+table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  background: white !important;
+  font-size: 13px !important; /* Dense readability */
+}
+
+th {
+  background-color: var(--tata-slate) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 10px 14px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  border-bottom: 2px solid #0f172a !important;
+}
+
+td {
+  padding: 10px 14px !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  color: #334155 !important;
+}
+
+/* Zebra Striping */
+tbody tr:nth-child(even) {
+  background-color: #F8FAFC !important;
+}
+
+tbody tr:hover {
+  background-color: #E2E8F0 !important; /* Highlight on hover */
+}
+
+/* =======================================
+   6. INDUSTRIAL STATUS BADGES 
+======================================= */
+/* Hide old badges if needed, force new styles */
+.badge, span[class*="badge"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important; /* Slightly squarer for industrial look */
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Active / Running */
+.badge-active, .badge-success {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+  color: var(--tata-success) !important;
+  border: 1px solid rgba(34, 197, 94, 0.2) !important;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4) !important; /* Glow effect */
+}
+
+/* Stable / Informational */
+.badge-stable, .badge-default {
+  background-color: var(--tata-blue) !important;
+  color: white !important;
+  box-shadow: 0 0 8px rgba(0, 85, 164, 0.4) !important; /* Blue glow */
+}
+
+/* Critical / Danger */
+.badge-critical, .badge-danger {
+  background-color: var(--tata-danger) !important;
+  color: white !important;
+  border: 1px solid #ef4444 !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6) !important; /* Red glow */
+  animation: pulse-red 2s infinite !important;
+}
+
+.badge-warning {
+  background-color: #f59e0b !important;
+  color: white !important;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4) !important;
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* =======================================
+   7. BUTTONS 
+======================================= */
+.btn-primary {
+  background-color: var(--tata-blue) !important;
+  color: white !important;
+  border: none !important;
+  transition: all 0.2s !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--tata-blue-hover) !important;
+  box-shadow: 0 4px 12px rgba(0, 85, 164, 0.3) !important;
+}

@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineer Workspace - Industrial AI Platform</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/rbac.js?v=2.2"></script>
+ 
+  <style>
+    /* Custom reset and structural base */
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #f8fafc; font-family: 'Inter', system-ui, sans-serif; }
+   
+    .app-layout { display: flex; height: 100vh; width: 100vw; }
+   
+    /* Sidebar Navigation */
+    .sidebar { width: 260px; background: #0f172a; color: #cbd5e1; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { padding: 24px; font-size: 18px; font-weight: 700; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 12px; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 16px 0; }
+    .nav-item { padding: 12px 24px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+    .nav-item.active { background: rgba(59,130,246,0.1); color: #3b82f6; border-left-color: #3b82f6; font-weight: 600; }
+    .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+   
+    /* Main Content Area */
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+   
+    /* Top Header */
+    .top-header { height: 70px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+   
+    /* Content Body */
+    .content-area { flex: 1; overflow-y: auto; padding: 32px 32px 100px 32px; position: relative; }
+    .section { display: none; height: 100%; flex-direction: column; }
+    .section.active { display: flex; }
+   
+    .section-title { font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 24px 0; }
+   
+    /* Dashboard Cards */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px; }
+    .card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .card-title { font-size: 14px; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-value { font-size: 32px; font-weight: 700; color: #0f172a; }
+   
+    /* Engineering Agent Split Layout */
+    .eng-workspace { flex: 1; display: flex; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .eng-history-sidebar { width: 320px; border-right: 1px solid #e2e8f0; background: #f8fafc; display: flex; flex-direction: column; }
+    .eng-history-header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #1e293b; display: flex; justify-content: space-between; align-items: center; background: white; }
+    .eng-history-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .eng-chat-area { flex: 1; display: flex; flex-direction: column; background: white; }
+    .eng-chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: #fbfbfc; }
+    .eng-chat-input-container { border-top: 1px solid #e2e8f0; background: white; padding: 16px 24px; }
+   
+    /* Message Bubbles */
+    .msg { padding: 16px 20px; border-radius: 12px; max-width: 85%; font-size: 14px; line-height: 1.6; position: relative; }
+    .msg-user { align-self: flex-end; background: #2563eb; color: white; border-bottom-right-radius: 4px; box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
+    .msg-agent { align-self: flex-start; background: white; color: #1e293b; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+   
+    /* Sandbox Modal */
+    .sandbox-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; }
+    .sandbox-modal { width: 90vw; max-width: 100%; max-width: 1200px; height: 85vh; background: white; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+    .sandbox-header { padding: 16px 24px; background: #0f172a; color: white; display: flex; justify-content: space-between; align-items: center; }
+    .sandbox-workspace { flex: 1; display: flex; overflow: hidden; }
+    .sandbox-history-sidebar { width: 280px; border-right: 1px solid #e2e8f0; background: #f8fafc; display: flex; flex-direction: column; }
+    .sandbox-chat-area { flex: 1; display: flex; flex-direction: column; background: #fbfbfc; }
+   
+    /* Forms & Inputs */
+    .input-field { width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .btn { padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-outline { background: transparent; border: 1px solid #cbd5e1; color: #475569; }
+    .btn-outline:hover { background: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
+    .btn-danger { background: #fee2e2; color: #ef4444; }
+    .btn-danger:hover { background: #fecaca; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    th, td { padding: 16px 20px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    tr:last-child td { border-bottom: none; }
+   
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef9c3; color: #854d0e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-default { background: #f1f5f9; color: #475569; }
+   
+    .session-item { padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s; }
+    .session-item:hover { border-color: #cbd5e1; background: #f8fafc; }
+    .session-item.active { border-left: 4px solid #3b82f6; background: #eff6ff; border-color: #bfdbfe; }
+   
+    .floating-sandbox-btn { position: fixed; bottom: 32px; right: 32px; background: #0f172a; color: white; border: none; border-radius: 50px; padding: 16px 24px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 900; transition: transform 0.2s; }
+    .floating-sandbox-btn:hover { transform: translateY(-4px); background: #1e293b; }
+
+    @keyframes pulse-badge {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
+      50% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    }
+   
+  </style>
+</head>
+<body class="bg-slate-50" style="display: none;">
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+<div class="app-layout">
+ 
+  <!-- LEFT NAVIGATION SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <i class="fa-solid fa-industry" style="color: #3b82f6;"></i>
+      <span>Maintenance Wizard</span>
+    </div>
+   
+    <div class="sidebar-nav">
+      <div class="nav-item active" onclick="showSection('dashboard', this)">
+        <i class="fa-solid fa-house" style="width: 20px;"></i> Dashboard
+      </div>
+      <div class="nav-item" onclick="showSection('engineering-agent', this)">
+        <i class="fa-solid fa-robot" style="width: 20px;"></i> Engineering Agent
+      </div>
+     
+      <div style="padding: 16px 24px 8px 24px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 600; letter-spacing: 1px;">Operations</div>
+     
+      <div class="nav-item" onclick="showSection('equipment', this)">
+        <i class="fa-solid fa-cogs" style="width: 20px;"></i> My Equipment
+      </div>
+      <div class="nav-item" onclick="showSection('work_orders', this)">
+        <i class="fa-solid fa-clipboard-list" style="width: 20px;"></i> Work Orders
+      </div>
+      <div class="nav-item" onclick="showSection('inventory', this)">
+        <i class="fa-solid fa-boxes-stacked" style="width: 20px;"></i> Inventory & Parts
+      </div>
+      <div class="nav-item" onclick="showSection('request_status', this)">
+        <i class="fa-solid fa-list-check" style="width: 20px;"></i> Request Status
+      </div>
+      <div class="nav-item" onclick="showSection('maintenance', this)">
+        <i class="fa-solid fa-history" style="width: 20px;"></i> Maintenance History
+      </div>
+      <div class="nav-item" onclick="showSection('documents', this)">
+        <i class="fa-solid fa-file-pdf" style="width: 20px;"></i> Documents
+      </div>
+     
+      <div style="padding: 16px 24px 8px 24px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 600; letter-spacing: 1px;">Account</div>
+     
+      <div class="nav-item" onclick="showSection('profile', this)">
+        <i class="fa-solid fa-user" style="width: 20px;"></i> Profile
+      </div>
+    </div>
+   
+    <div class="sidebar-footer">
+      <button class="btn btn-outline" style="width: 100%; border-color: rgba(255,255,255,0.2); color: white;" onclick="logout()">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="main-wrapper">
+   
+    <!-- TOP HEADER -->
+    <header class="top-header">
+      <div>
+        <h1 style="font-size: 20px; margin: 0; color: #0f172a;">Industrial AI Platform</h1>
+      </div>
+      <div style="display: flex; align-items: center; gap: 20px;">
+        
+        <!-- Notification Bell -->
+        <div style="position: relative; cursor: pointer;" onclick="toggleNotificationDrawer()">
+          <i class="fa-regular fa-bell" style="font-size: 20px; color: #475569;"></i>
+          <div id="notification-badge" style="display: none; position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">0</div>
+          
+          <!-- Notification Drawer -->
+          <div id="notification-drawer" style="display: none; position: absolute; top: 30px; right: -10px; width: 320px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; z-index: 1000; flex-direction: column; overflow: hidden;">
+            <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+              <span>Notifications</span>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <span onclick="markAllNotificationsRead(event)" style="font-size: 11px; color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: normal;">Mark all as read</span>
+                <i class="fa-solid fa-xmark" style="color: #94a3b8; cursor: pointer;" onclick="event.stopPropagation(); toggleNotificationDrawer()"></i>
+              </div>
+            </div>
+            <div id="notification-list" style="max-height: 300px; overflow-y: auto; padding: 0;">
+              <div style="padding: 24px; text-align: center; color: #94a3b8; font-size: 13px;">No notifications yet</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align: right;">
+          <div id="headerName" style="font-weight: 600; color: #1e293b; font-size: 14px;">Loading...</div>
+          <div id="headerDept" style="font-size: 12px; color: #64748b;">Loading...</div>
+        </div>
+        <div style="width: 40px; height: 40px; border-radius: 20px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #475569;">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </div>
+    </header>
+   
+    <!-- CONTENT BODY -->
+    <div class="content-area">
+     
+      <!-- DASHBOARD SECTION -->
+      <section id="section-dashboard" class="section active">
+        <h2 class="section-title">Engineer Workspace Overview</h2>
+       
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-title">Assigned Equipment</div>
+            <div class="card-value" style="color: #3b82f6;" id="kpi-eq">-</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Open Work Orders</div>
+            <div class="card-value" style="color: #f59e0b;" id="kpi-wo-open">-</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Completed Work Orders</div>
+            <div class="card-value" style="color: #10b981;" id="kpi-wo-done">-</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Pending Requests</div>
+            <div class="card-value" style="color: #8b5cf6;" id="kpi-req">-</div>
+          </div>
+        </div>
+       
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border-left: 4px solid #3b82f6;">
+          <div>
+            <h3 style="margin: 0 0 8px 0; color: #0f172a; font-size: 18px;">Engineering Agent Active</h3>
+            <p style="margin: 0; color: #475569; font-size: 14px; max-width: 600px;">
+              Your intelligent industrial maintenance assistant is ready. Use it for context-aware troubleshooting, multi-modal analysis (images/PDFs), and automated work order generation.
+            </p>
+          </div>
+          <button class="btn btn-primary" onclick="document.querySelectorAll('.nav-item')[1].click()" style="height: 48px; padding: 0 32px; font-size: 16px;">
+            <i class="fa-solid fa-robot"></i> Open Engineering Agent
+          </button>
+        </div>
+      </section>
+
+      <!-- ENGINEERING AGENT SECTION -->
+      <section id="section-engineering-agent" class="section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <div>
+            <h2 class="section-title" style="margin: 0;">Engineering Agent</h2>
+            <div style="color: #64748b; font-size: 14px; margin-top: 4px;">Industrial Maintenance Intelligence Assistant</div>
+          </div>
+          <button class="btn btn-primary" onclick="createNewEngineeringSession()">
+            <i class="fa-solid fa-plus"></i> New Session
+          </button>
+        </div>
+       
+        <div class="eng-workspace">
+          <!-- History Sidebar -->
+          <div class="eng-history-sidebar">
+            <div class="eng-history-header">
+              <span>Session History</span>
+              <button class="btn btn-outline" style="padding: 6px 10px; font-size: 12px; height: auto;" onclick="loadEngHistoryList()"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <div class="eng-history-list" id="engHistoryList">
+              <div style="text-align: center; color: #94a3b8; padding: 20px; font-size: 13px;">Loading sessions...</div>
+            </div>
+          </div>
+         
+          <!-- Chat Workspace -->
+          <div class="eng-chat-area">
+            <div class="eng-chat-messages" id="engChatBox">
+              <div class="msg msg-agent">
+                Welcome to the Engineering Workspace. I am connected to the industrial knowledge base. How can I assist you today?
+              </div>
+            </div>
+           
+            <div class="eng-chat-input-container">
+              <!-- Active Document Banner -->
+              <div id="activeDocBanner" style="display: none; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px;">
+                 <i class="fa-solid fa-file-pdf" style="color: var(--primary);"></i> Active Knowledge Source: <strong id="activeDocName"></strong>
+                 <button onclick="clearActiveDoc()" style="margin-left: 5px; background: none; border: none; color: var(--danger); cursor: pointer;"><i class="fa-solid fa-times"></i></button>
+              </div>
+              <!-- Image Preview -->
+              <div id="engImagePreviewContainer" style="display: none; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; align-items: flex-end; gap: 12px;">
+                <img id="engImagePreview" style="max-height: 80px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="clearEngImage()">Remove</button>
+              </div>
+             
+              <!-- Input Flex -->
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <input type="file" id="engImageUpload" accept="image/jpeg, image/png, image/webp" style="display: none;" onchange="handleEngFileSelect(event)">
+                <button class="btn btn-outline" style="width: 48px; height: 48px; padding: 0; flex-shrink: 0;" onclick="document.getElementById('engImageUpload').click()" title="Upload Image">
+                  <i class="fa-solid fa-paperclip" style="font-size: 18px;"></i>
+                </button>
+                <button class="btn btn-outline" style="width: 48px; height: 48px; padding: 0; flex-shrink: 0; color: var(--primary); border-color: var(--primary);" onclick="openDocsModal()" title="Verified Company Documents">
+                  <i class="fa-solid fa-file-pdf" style="font-size: 18px;"></i>
+                </button>
+                <input type="text" id="engChatInput" class="input-field" style="flex: 1; min-width: 0; height: 48px; font-size: 15px;" placeholder="Describe the issue, ask a question, or upload an image/PDF..." onkeypress="if(event.key === 'Enter') sendEngMessage()">
+                <button class="btn btn-primary" style="height: 48px; padding: 0 32px; flex-shrink: 0;" onclick="sendEngMessage()">
+                  <i class="fa-solid fa-paper-plane"></i> Send
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+     
+      <!-- OTHER SECTIONS -->
+      <section id="section-equipment" class="section">
+        <h2 class="section-title">My Equipment</h2>
+        <div class="card" style="padding: 0;">
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Plant</th><th>Block</th><th>Status</th><th>Criticality</th><th>Supervisor</th><th>Last Maint</th></tr></thead>
+            <tbody id="equipment-table-body"><tr><td colspan="9" style="text-align:center; padding: 32px; color: #64748b;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="section-work_orders" class="section">
+        <h2 class="section-title">Work Orders</h2>
+        <div class="card" style="padding: 0;">
+          <table>
+            <thead><tr><th>ID</th><th>Title</th><th>Equipment</th><th>Priority</th><th>Status</th><th>Created</th><th>Assigned By</th><th>Action</th></tr></thead>
+            <tbody id="work_orders-table-body"><tr><td colspan="8" style="text-align:center; padding: 32px; color: #64748b;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="section-inventory" class="section">
+        <h2 class="section-title">Inventory & Parts</h2>
+        <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+          <input type="text" id="inv-search-input" class="input-field" placeholder="Search part name or number..." style="max-width: 400px;" onkeyup="if(event.key==='Enter') loadInventorySearch()">
+          <button class="btn btn-primary" onclick="loadInventorySearch()"><i class="fa-solid fa-search"></i> Search</button>
+        </div>
+        <div class="card" style="padding: 0;">
+          <table>
+            <thead><tr><th>Part #</th><th>Name</th><th>Category</th><th>Qty</th><th>Min Qty</th><th>Warehouse</th><th>Location</th><th>Supplier</th></tr></thead>
+            <tbody id="inventory-table-body"><tr><td colspan="8" style="text-align:center; padding: 32px; color: #64748b;">Search for parts...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="section-request_status" class="section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h2 class="section-title" style="margin: 0;">Request Status</h2>
+          <button class="btn btn-primary" onclick="loadRequestStatus()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+        </div>
+       
+        <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+          <input type="text" id="req-search-input" class="input-field" placeholder="Search by part name or number..." style="max-width: 300px;" onkeyup="filterRequestStatus()">
+          <select id="req-status-filter" class="input-field" style="max-width: 200px;" onchange="filterRequestStatus()">
+            <option value="ALL">All Statuses</option>
+            <option value="PENDING">Pending (Yellow)</option>
+            <option value="APPROVED">Approved (Green)</option>
+            <option value="REJECTED">Rejected (Red)</option>
+          </select>
+        </div>
+
+        <h3 style="margin-bottom: 12px; color: #1e293b;">Active Requests</h3>
+        <div class="card" style="padding: 0; margin-bottom: 24px;">
+          <table>
+            <thead><tr><th>Transaction ID</th><th>Part #</th><th>Part Name</th><th>Qty</th><th>Status</th><th>Created</th></tr></thead>
+            <tbody id="req-pending-body"><tr><td colspan="6" style="text-align:center; padding: 32px; color: #64748b;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-bottom: 12px; color: #1e293b;">Approved Requests</h3>
+        <div class="card" style="padding: 0; margin-bottom: 24px;">
+          <table>
+            <thead><tr><th>Transaction ID</th><th>Part #</th><th>Part Name</th><th>Qty</th><th>Status</th><th>Approved Time</th><th>Approved By</th></tr></thead>
+            <tbody id="req-approved-body"><tr><td colspan="7" style="text-align:center; padding: 32px; color: #64748b;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-bottom: 12px; color: #1e293b;">Rejected Requests</h3>
+        <div class="card" style="padding: 0; margin-bottom: 24px;">
+          <table>
+            <thead><tr><th>Transaction ID</th><th>Part #</th><th>Part Name</th><th>Qty</th><th>Status</th><th>Rejection Reason</th><th>Rejected By</th></tr></thead>
+            <tbody id="req-rejected-body"><tr><td colspan="7" style="text-align:center; padding: 32px; color: #64748b;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="section-maintenance" class="section">
+        <h2 class="section-title">Maintenance History</h2>
+        <div class="card" style="padding: 0;">
+          <table>
+            <thead><tr><th>ID</th><th>Equipment</th><th>Date</th><th>Description</th><th>Performed By</th><th>Status</th></tr></thead>
+            <tbody id="maintenance-table-body"><tr><td colspan="6" style="text-align:center; padding: 32px; color: #64748b;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="section-documents" class="section">
+        <h2 class="section-title">Documents & Manuals</h2>
+        <div class="card" style="padding: 0;">
+          <table>
+            <thead><tr><th>Filename</th><th>Date</th></tr></thead>
+            <tbody id="documents-table-body"><tr><td colspan="2" style="text-align:center; padding: 32px; color: #64748b;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="section-profile" class="section">
+        <h2 class="section-title">My Profile</h2>
+        <div class="card" style="max-width: 650px; position: relative;">
+          <div id="profile-success-msg" style="display:none; position:absolute; top: -16px; left: 50%; transform: translateX(-50%); background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Profile Updated Successfully</div>
+          
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            <!-- Profile Header Row -->
+            <div style="display: flex; gap: 20px; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 20px;">
+              <div id="profHeaderDetails">
+                <h3 id="profHeaderFullName" style="margin: 0 0 4px 0; font-size: 18px; color: #1e293b;">Engineer</h3>
+                <span id="profHeaderRoleBadge" style="font-size: 11px; background: #eff6ff; color: #1d4ed8; padding: 2px 8px; border-radius: 20px; font-weight: bold;">ENGINEER</span>
+              </div>
+            </div>
+
+            <!-- Profile Info Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <div style="grid-column: span 2; font-weight: bold; font-size: 14px; color: var(--primary); margin-top: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+                Employee Information
+              </div>
+
+              <div>
+                <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;">Name <span style="color:red">*</span></label>
+                <input type="text" id="profName" class="input-field" required disabled>
+              </div>
+
+              <div>
+                <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;">Email <span style="color:red">*</span></label>
+                <input type="email" id="profEmail" class="input-field" required disabled>
+              </div>
+
+              <div>
+                <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;">Phone Number <span style="color:red">*</span></label>
+                <input type="text" id="profPhone" class="input-field" required disabled>
+              </div>
+
+              <div>
+                <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;">Employee ID</label>
+                <input type="text" id="profEmpId" class="input-field" disabled style="background:#f1f5f9;">
+              </div>
+
+              <div>
+                <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;">Role</label>
+                <input type="text" id="profRole" class="input-field" disabled style="background:#f1f5f9;">
+              </div>
+
+              <div>
+                <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;">Department</label>
+                <input type="text" id="profDept" class="input-field" disabled style="background:#f1f5f9;">
+              </div>
+
+              <div>
+                <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;">Plant</label>
+                <input type="text" id="profPlant" class="input-field" disabled style="background:#f1f5f9;">
+              </div>
+
+              <div>
+                <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;">User ID</label>
+                <input type="text" id="profUserId" class="input-field" disabled style="background:#f1f5f9;">
+              </div>
+
+              <div>
+                <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;">Supervisor Name</label>
+                <input type="text" id="profSupervisorName" class="input-field" disabled style="background:#f1f5f9;">
+              </div>
+
+              <!-- Form Buttons -->
+              <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                <button class="btn btn-outline" onclick="setProfileMode(true)" id="profEditBtn" style="height: 40px; padding: 0 20px;">
+                  <i class="fa-solid fa-pen-to-square"></i> Edit Profile
+                </button>
+                <button class="btn btn-secondary" onclick="cancelProfileEdit()" id="profCancelBtn" style="display: none; height: 40px; padding: 0 20px;">
+                  Cancel
+                </button>
+                <button class="btn btn-primary" onclick="saveProfile()" id="profSaveBtn" style="display: none; height: 40px; padding: 0 20px;">
+                  <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- FLOATING SANDBOX BUTTON -->
+<button class="floating-sandbox-btn" onclick="openSandboxModal()">
+  <i class="fa-solid fa-flask"></i> Sandbox Agent
+</button>
+
+<!-- SANDBOX MODAL OVERLAY -->
+<div class="sandbox-overlay" id="sandbox-modal-overlay">
+  <div class="sandbox-modal">
+    <!-- Header -->
+    <div class="sandbox-header">
+      <div style="display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 600;">
+        <i class="fa-solid fa-flask" style="color: #3b82f6;"></i> Sandbox Workspace
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button class="btn btn-outline" style="border-color: rgba(255,255,255,0.2); color: white; padding: 6px 12px; font-size: 12px;" onclick="escalateSandbox()"><i class="fa-solid fa-arrow-up-right-from-square"></i> Escalate to Engineering</button>
+        <button class="btn btn-outline" style="border-color: rgba(255,255,255,0.2); color: white; padding: 6px 12px; font-size: 12px;" onclick="resetSandbox()"><i class="fa-solid fa-trash-can"></i> Clear KB</button>
+        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="createNewSandboxSession()"><i class="fa-solid fa-plus"></i> New Session</button>
+        <button class="btn" style="background: transparent; color: white; padding: 6px;" onclick="closeSandboxModal()"><i class="fa-solid fa-xmark" style="font-size: 20px;"></i></button>
+      </div>
+    </div>
+   
+    <!-- Split Workspace -->
+    <div class="sandbox-workspace">
+      <!-- Sidebar -->
+      <div class="sandbox-history-sidebar">
+        <div style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #1e293b; background: white;">
+          Sandbox History
+        </div>
+        <div style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;" id="sandboxHistoryList">
+           <div style="text-align: center; color: #94a3b8; padding: 20px; font-size: 13px;">Loading sessions...</div>
+        </div>
+      </div>
+     
+      <!-- Chat Area -->
+      <div class="sandbox-chat-area">
+        <div style="flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;" id="sandboxChatBox">
+          <div class="msg msg-agent">
+            <strong>Welcome to the Sandbox Agent!</strong><br><br>
+            I am your Industrial Design & Planning workspace. Use me to generate database schemas, API architectures, workflow diagrams, and prompt templates before implementing them in the main system.
+          </div>
+        </div>
+       
+        <div id="sandboxVoiceStatus" style="padding: 0 24px; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: 500; display: none;"></div>
+        <div style="border-top: 1px solid #e2e8f0; background: white; padding: 16px 24px;">
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button id="sandboxVoiceBtn" class="btn btn-outline" style="height: 48px; padding: 0 20px; flex-shrink: 0; color: #64748b; border-color: #cbd5e1;" onclick="toggleSandboxVoice()">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+            <input type="text" id="sandboxChatInput" class="input-field" style="flex: 1; min-width: 0; height: 48px; font-size: 15px;" placeholder="Describe your architecture or workflow needs..." onkeypress="if(event.key === 'Enter') sendSandboxMessage()">
+            <button class="btn btn-primary" style="height: 48px; padding: 0 32px; flex-shrink: 0;" onclick="sendSandboxMessage()">
+              <i class="fa-solid fa-paper-plane"></i> Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS (Rebuilt completely clean) -->
+<script>
+const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+let engSessionId = localStorage.getItem('engineering_session_id');
+let sandboxSessionId = localStorage.getItem('sandbox_session_id');
+let currentEngImageBase64 = null;
+
+async function fetchAPI(url, options = {}) {
+  if (!options.headers) options.headers = {};
+  options.headers['Authorization'] = `Bearer ${token}`;
+  try {
+    const response = await fetch(url.startsWith('http') ? url : 'http://localhost:8000' + url, options);
+    if (response.status === 401) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('token');
+      window.location.href = 'index.html';
+      return null;
+    }
+    return await response.json();
+  } catch (e) {
+    console.error("API Fetch Error:", e);
+    return null;
+  }
+}
+
+async function showSection(sectionId, element) {
+  localStorage.setItem('engineer_active_section', sectionId);
+  // Update nav UI
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (!element) element = document.querySelector(`.nav-item[onclick*="'${sectionId}'"]`) || document.querySelector(`.nav-item[onclick*='"${sectionId}"']`);
+  if (element) element.classList.add('active');
+ 
+  // Update section UI
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(`section-${sectionId}`);
+  if (target) target.classList.add('active');
+
+  // Trigger data loads
+  if(sectionId === 'dashboard') loadDashboardMetrics();
+  if(sectionId === 'engineering-agent') {
+    if (!engSessionId) await initEngSession();
+    await loadEngChatHistory();
+    await loadEngHistoryList();
+  }
+  if(sectionId === 'equipment') loadMyEquipment();
+  if(sectionId === 'work_orders') loadMyWorkOrders();
+  if(sectionId === 'inventory') loadInventorySearch();
+  if(sectionId === 'request_status') loadRequestStatus();
+  if(sectionId === 'maintenance') loadMaintenanceHistory();
+  if(sectionId === 'documents') loadDocuments();
+  if(sectionId === 'profile') loadProfile();
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('access_token');
+  window.location.href = 'index.html';
+}
+
+/* ================================
+   DATA LOADERS (Preserved logic)
+   ================================ */
+let currentProfileImageBase64 = null;
+let originalProfileData = null;
+
+function setProfileMode(isEdit) {
+  document.getElementById('profName').disabled = !isEdit;
+  document.getElementById('profEmail').disabled = !isEdit;
+  document.getElementById('profPhone').disabled = !isEdit;
+  
+  document.getElementById('profEditBtn').style.display = isEdit ? 'none' : 'inline-flex';
+  document.getElementById('profCancelBtn').style.display = isEdit ? 'inline-flex' : 'none';
+  document.getElementById('profSaveBtn').style.display = isEdit ? 'inline-flex' : 'none';
+}
+
+function cancelProfileEdit() {
+  if (originalProfileData) {
+    document.getElementById('profName').value = originalProfileData.full_name || '';
+    document.getElementById('profEmail').value = originalProfileData.email || '';
+    document.getElementById('profPhone').value = originalProfileData.phone_number || '';
+  }
+  setProfileMode(false);
+}
+
+async function loadProfile() {
+  const p = await fetchAPI('/api/profile');
+  if(p) {
+    originalProfileData = p;
+    document.getElementById('headerName').innerText = p.full_name || 'Engineer';
+    document.getElementById('headerDept').innerText = `${p.department || 'N/A'} | ${p.plant || 'N/A'}`;
+    document.getElementById('profHeaderFullName').innerText = p.full_name || 'Engineer';
+    
+    // Populate form fields
+    document.getElementById('profName').value = p.full_name || '';
+    document.getElementById('profEmail').value = p.email || '';
+    document.getElementById('profPhone').value = p.phone_number || '';
+    
+    // Populate readonly fields
+    document.getElementById('profEmpId').value = p.employee_id || '';
+    document.getElementById('profRole').value = p.role || '';
+    document.getElementById('profDept').value = p.department || '';
+    document.getElementById('profPlant').value = p.plant || '';
+    document.getElementById('profUserId').value = p.id || '';
+    document.getElementById('profSupervisorName').value = p.supervisor_name || 'N/A';
+    
+    setProfileMode(false);
+  }
+}
+
+async function saveProfile() {
+  const full_name = document.getElementById('profName').value;
+  const email = document.getElementById('profEmail').value;
+  const phone_number = document.getElementById('profPhone').value;
+  
+  if (!full_name || !email || !phone_number) {
+      alert("Please fill all required fields.");
+      return;
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+      alert("Invalid email format. E.g. user@domain.com");
+      return;
+  }
+
+  const phoneRegex = /^\+?[0-9\s\-()]{7,20}$/;
+  if (!phoneRegex.test(phone_number)) {
+      alert("Invalid phone number format. E.g. +91 9123456780");
+      return;
+  }
+  
+  const btn = document.getElementById('profSaveBtn');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+  btn.disabled = true;
+  
+  const payload = {
+    full_name,
+    email,
+    phone_number
+  };
+  
+  const res = await fetchAPI('/api/profile/update', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+  });
+  
+  btn.innerHTML = originalHtml;
+  btn.disabled = false;
+  
+  if (res && res.status === 'success') {
+      const msg = document.getElementById('profile-success-msg');
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+      await loadProfile(); // Refresh profile state
+  } else {
+      alert("Failed to update profile.");
+  }
+}
+
+// Notifications Logic
+let notificationPolling = null;
+
+function toggleNotificationDrawer() {
+  const drawer = document.getElementById('notification-drawer');
+  drawer.style.display = drawer.style.display === 'none' ? 'flex' : 'none';
+  if (drawer.style.display === 'flex') {
+    loadNotifications();
+  }
+}
+
+async function loadNotifications() {
+  const res = await fetchAPI('/api/notifications');
+  if (res && res.notifications) {
+    // Update badge
+    const badge = document.getElementById('notification-badge');
+    const hasCritical = res.notifications.some(n => !n.is_read && n.type && (n.type.toUpperCase().includes('CRITICAL') || n.type.toUpperCase().includes('HIGH RISK')));
+    if (res.unread_count > 0) {
+      badge.innerText = res.unread_count;
+      badge.style.display = 'flex';
+      if (hasCritical) {
+        badge.style.background = '#ef4444';
+        badge.style.animation = 'pulse-badge 1.5s infinite';
+      } else {
+        badge.style.background = '#ef4444';
+        badge.style.animation = '';
+      }
+    } else {
+      badge.style.display = 'none';
+      badge.style.animation = '';
+    }
+    
+    // Update list
+    const list = document.getElementById('notification-list');
+    if (res.notifications.length === 0) {
+      list.innerHTML = '<div style="padding: 24px; text-align: center; color: #94a3b8; font-size: 13px;">No notifications yet</div>';
+    } else {
+      list.innerHTML = res.notifications.map(n => {
+        const isCritical = n.type && n.type.toUpperCase().includes('CRITICAL');
+        const isHighRisk = n.type && n.type.toUpperCase().includes('HIGH RISK');
+        const isAlert = isCritical || isHighRisk;
+        
+        let bgColor = n.is_read ? '' : 'background:#eff6ff;';
+        let borderLeft = '';
+        let iconHtml = '';
+        let typeColor = '#1e293b';
+        
+        if (isCritical) {
+          bgColor = n.is_read ? 'background:#fff5f5;' : 'background:#fee2e2;';
+          borderLeft = 'border-left: 4px solid #ef4444;';
+          iconHtml = '<span style="color:#ef4444; margin-right:6px;">🚨</span>';
+          typeColor = '#dc2626';
+        } else if (isHighRisk) {
+          bgColor = n.is_read ? 'background:#fffbeb;' : 'background:#fef3c7;';
+          borderLeft = 'border-left: 4px solid #f59e0b;';
+          iconHtml = '<span style="color:#f59e0b; margin-right:6px;">⚠️</span>';
+          typeColor = '#d97706';
+        }
+        
+        return `
+        <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; ${bgColor} ${borderLeft} ${n.is_read ? 'opacity:0.7;' : ''} cursor:pointer; transition:background 0.2s;" onclick="markNotificationRead(${n.id}, event)">
+          <div style="font-weight: 700; font-size: 13px; color: ${typeColor}; margin-bottom: 4px; display:flex; align-items:center;">
+            ${iconHtml}${n.type}${isAlert && !n.is_read ? ' <span style=\"margin-left:8px;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;color:white;background:' + (isCritical ? '#ef4444' : '#f59e0b') + ';\">NEW</span>' : ''}
+          </div>
+          <div style="font-size: 12px; color: #475569; margin-bottom: 4px; line-height: 1.4;">${n.message}</div>
+          <div style="font-size: 10px; color: #94a3b8;">${new Date(n.timestamp + 'Z').toLocaleString()}</div>
+        </div>
+        `;
+      }).join('');
+    }
+  }
+}
+
+async function markNotificationRead(id, event) {
+  if (event) event.stopPropagation();
+  await fetchAPI('/api/notifications/' + id + '/read', { method: 'PUT' });
+  loadNotifications();
+}
+
+async function markAllNotificationsRead(event) {
+  if (event) event.stopPropagation();
+  await fetchAPI('/api/notifications/read-all', { method: 'PUT' });
+  loadNotifications();
+}
+
+// Start Notification Polling (Every 30 seconds as requested)
+function startNotificationPolling() {
+  loadNotifications(); // Initial load
+  if (!notificationPolling) {
+    notificationPolling = setInterval(loadNotifications, 30000);
+  }
+}
+
+// Initialize Polling when page loads
+window.addEventListener('DOMContentLoaded', () => {
+  if (token) startNotificationPolling();
+});
+
+async function loadDashboardMetrics() {
+  const data = await fetchAPI('/api/engineer/dashboard-metrics');
+  if(data) {
+    document.getElementById('kpi-eq').innerText = data.assigned_equipment || 0;
+    document.getElementById('kpi-wo-open').innerText = data.open_work_orders || 0;
+    document.getElementById('kpi-wo-done').innerText = data.completed_work_orders || 0;
+    document.getElementById('kpi-req').innerText = data.pending_requests || 0;
+  }
+}
+
+async function loadMyEquipment() {
+  const data = await fetchAPI('/api/engineer/equipment');
+  const tbody = document.getElementById('equipment-table-body');
+  if(!data) return;
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td>${d.equipment_id}</td><td>${d.equipment_name}</td><td>${d.equipment_type}</td>
+      <td>${d.plant}</td><td>${d.block}</td>
+      <td><span class="badge ${d.status === 'Running' ? 'badge-success' : (d.status === 'Maintenance' ? 'badge-warning' : 'badge-danger')}">${d.status}</span></td>
+      <td>${d.criticality}</td><td>${d.assigned_supervisor}</td><td>${d.last_maintenance}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="9" style="text-align:center; padding: 32px;">No data available</td></tr>';
+}
+
+async function loadMyWorkOrders() {
+  const data = await fetchAPI('/api/engineer/work-orders');
+  const tbody = document.getElementById('work_orders-table-body');
+  if(!data) return;
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td>${d.id}</td><td>${d.title}</td><td>${d.equipment_name}</td>
+      <td><span class="badge badge-default">${d.priority}</span></td>
+      <td><span class="badge ${d.status === 'Open' ? 'badge-warning' : 'badge-success'}">${d.status}</span></td>
+      <td>${new Date(typeof d.created_at === 'string' && !d.created_at.endsWith('Z') ? d.created_at + 'Z' : d.created_at).toLocaleDateString()}</td><td>${d.assigned_by}</td>
+      <td><button class="btn btn-outline" style="padding: 4px 8px; font-size: 12px;">View</button></td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center; padding: 32px;">No data available</td></tr>';
+}
+
+async function loadMaintenanceHistory() {
+  const data = await fetchAPI('/api/engineer/maintenance');
+  const tbody = document.getElementById('maintenance-table-body');
+  if(!data) return;
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td>${d.id}</td><td>${d.equipment_name}</td><td>${new Date(typeof d.date === 'string' && !d.date.endsWith('Z') ? d.date + 'Z' : d.date).toLocaleDateString()}</td>
+      <td>${d.description}</td><td>${d.performed_by}</td>
+      <td><span class="badge ${d.status === 'Completed' ? 'badge-success' : 'badge-warning'}">${d.status}</span></td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center; padding: 32px;">No data available</td></tr>';
+}
+
+async function loadInventorySearch() {
+  const q = document.getElementById('inv-search-input').value || '';
+  const data = await fetchAPI(`/api/inventory/search?q=${encodeURIComponent(q)}`);
+  const tbody = document.getElementById('inventory-table-body');
+  if(!data) return;
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td>${d.part_number}</td><td>${d.part_name}</td><td>${d.part_category || 'N/A'}</td>
+      <td><span class="${d.stock_qty <= d.minimum_stock ? 'badge badge-danger' : 'badge badge-success'}">${d.stock_qty}</span></td>
+      <td>${d.minimum_stock}</td><td>${d.warehouse || 'N/A'}</td>
+      <td>${d.rack || 'N/A'} / ${d.bin || 'N/A'}</td><td>${d.supplier || 'N/A'}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center; padding: 32px;">No data available</td></tr>';
+}
+
+let allRequests = [];
+
+async function loadRequestStatus() {
+  const data = await fetchAPI('/api/engineer/inventory-requests');
+  if(!data) return;
+  allRequests = data;
+  renderRequestStatus(data);
+}
+
+function filterRequestStatus() {
+  const q = document.getElementById('req-search-input').value.toLowerCase();
+  const statusFilter = document.getElementById('req-status-filter').value;
+ 
+  const filtered = allRequests.filter(r => {
+    const matchQ = r.part_name.toLowerCase().includes(q) || r.part_number.toLowerCase().includes(q);
+    const matchStatus = statusFilter === 'ALL' || r.status === statusFilter;
+    return matchQ && matchStatus;
+  });
+  renderRequestStatus(filtered);
+}
+
+function renderRequestStatus(data) {
+  const pending = data.filter(r => r.status === 'PENDING');
+  const approved = data.filter(r => r.status === 'APPROVED');
+  const rejected = data.filter(r => r.status === 'REJECTED');
+ 
+  document.getElementById('req-pending-body').innerHTML = pending.map(d => `
+    <tr>
+      <td>${d.transaction_id.substring(0,8)}...</td>
+      <td>${d.part_number}</td>
+      <td>${d.part_name}</td>
+      <td>${d.quantity}</td>
+      <td><span class="badge badge-warning">PENDING</span></td>
+      <td>${new Date(typeof d.timestamp === 'string' && !d.timestamp.endsWith('Z') ? d.timestamp + 'Z' : d.timestamp).toLocaleString()}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center; padding: 32px;">No active requests</td></tr>';
+ 
+  document.getElementById('req-approved-body').innerHTML = approved.map(d => `
+    <tr>
+      <td>${d.transaction_id.substring(0,8)}...</td>
+      <td>${d.part_number}</td>
+      <td>${d.part_name}</td>
+      <td>${d.quantity}</td>
+      <td><span class="badge badge-success">APPROVED</span></td>
+      <td>${d.approved_at ? new Date(typeof d.approved_at === 'string' && !d.approved_at.endsWith('Z') ? d.approved_at + 'Z' : d.approved_at).toLocaleString() : 'N/A'}</td>
+      <td>${d.approved_by || 'N/A'}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="7" style="text-align:center; padding: 32px;">No approved requests</td></tr>';
+ 
+  document.getElementById('req-rejected-body').innerHTML = rejected.map(d => `
+    <tr>
+      <td>${d.transaction_id.substring(0,8)}...</td>
+      <td>${d.part_number}</td>
+      <td>${d.part_name}</td>
+      <td>${d.quantity}</td>
+      <td><span class="badge badge-danger">REJECTED</span></td>
+      <td>${d.rejection_reason || 'N/A'}</td>
+      <td>${d.approved_by || 'N/A'}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="7" style="text-align:center; padding: 32px;">No rejected requests</td></tr>';
+}
+
+async function loadDocuments() {
+  const data = await fetchAPI('/api/company-documents/approved');
+  const tbody = document.getElementById('documents-table-body');
+  if(!data) return;
+  tbody.innerHTML = data.map(d => {
+    let url = d.file_path ? 'http://localhost:8000/' + d.file_path.replace(/\\/g, '/').replace('backend/storage/company_documents', 'company_documents') : '#';
+    return `
+    <tr>
+      <td><a href="${url}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: none;">${d.filename}</a></td>
+      <td>${new Date(typeof d.upload_date === 'string' && !d.upload_date.endsWith('Z') ? d.upload_date + 'Z' : d.upload_date).toLocaleDateString()}</td>
+    </tr>
+  `}).join('') || '<tr><td colspan="2" style="text-align:center; padding: 32px;">No documents available</td></tr>';
+}
+
+/* ================================
+   ENGINEERING AGENT LOGIC
+   ================================ */
+async function initEngSession() {
+  try {
+    const res = await fetchAPI('/api/engineering/session', { method: 'POST' });
+    if (res && res.session_id) {
+        engSessionId = res.session_id;
+        localStorage.setItem('engineering_session_id', engSessionId);
+    }
+  } catch (e) { console.error("Failed to init eng session", e); }
+}
+
+async function createNewEngineeringSession() {
+  localStorage.removeItem('engineering_session_id');
+  engSessionId = null;
+  document.getElementById('engChatBox').innerHTML = '<div class="msg msg-agent">Welcome to the Engineering Workspace. I am connected to the industrial knowledge base. How can I assist you today?</div>';
+  await initEngSession();
+  await loadEngHistoryList();
+}
+
+function handleEngFileSelect(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const result = e.target.result;
+      document.getElementById('engImagePreview').src = result;
+      document.getElementById('engImagePreviewContainer').style.display = 'flex';
+      currentEngImageBase64 = result.split(',')[1];
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function clearEngImage() {
+  currentEngImageBase64 = null;
+  document.getElementById('engImagePreviewContainer').style.display = 'none';
+  document.getElementById('engImageUpload').value = '';
+}
+
+function renderMessage(msg, isEng = true) {
+  if (!msg.type || msg.type === 'message') {
+    const isUser = msg.sender === 'user';
+    const cls = isUser ? 'msg-user' : 'msg-agent';
+    let content = msg.content || '';
+    if (!isUser) {
+        content = content.replace(/\[(?:RESPONSE_TRIGGER|WORK_ORDER_TRIGGER|REPORT_TRIGGER|INVENTORY_REQUEST_TRIGGER|INVENTORY_APPROVAL_TRIGGER|INVENTORY_RETURN_TRIGGER|PART_CARD|DOCUMENT_QA|ENGINEERING_ANALYSIS|CONTEXTUAL_EVIDENCE|VISION_ANALYSIS)[\s\S]*?\]/gi, '').trim();
+    }
+   
+    let languageBadge = "";
+    if (msg.message_type === "voice" && msg.detected_language) {
+        const flags = { 'en': '🇬🇧 English', 'hi': '🇮🇳 Hindi', 'te': '🇮🇳 Telugu', 'ta': '🇮🇳 Tamil', 'kn': '🇮🇳 Kannada', 'ml': '🇮🇳 Malayalam', 'mr': '🇮🇳 Marathi', 'gu': '🇮🇳 Gujarati', 'bn': '🇮🇳 Bengali', 'pa': '🇮🇳 Punjabi' };
+        languageBadge = `<span style="font-size:10px; background:#e2e8f0; color:#475569; padding:2px 6px; border-radius:4px; margin-left:8px;">🎤 ${flags[msg.detected_language] || msg.detected_language}</span>`;
+    }
+   
+    return `<div class="msg ${cls}">${content.replace(/\n/g, '<br>')}${languageBadge}</div>`;
+  } else if (msg.type === 'file') {
+    const isPdf = msg.file_type === 'pdf';
+    const icon = isPdf ? '<i class="fa-solid fa-file-pdf" style="color:#ef4444; font-size:24px;"></i>' : '<i class="fa-solid fa-image" style="color:#3b82f6; font-size:24px;"></i>';
+    return `<div class="msg msg-user" style="display:flex; align-items:center; gap:12px; background:white; color:#0f172a; border:1px solid #cbd5e1;">
+      ${icon}<div><div style="font-weight:600; font-size:13px;">${msg.file_name}</div><div style="font-size:11px; color:#64748b;">Uploaded File</div></div>
+    </div>`;
+  } else if (msg.type === 'report') {
+    return `<div class="msg msg-agent" style="background:#fefce8; border-color:#fef08a; color:#854d0e; width:100%;">
+      <div style="font-weight:600; margin-bottom:8px;"><i class="fa-solid fa-file-contract"></i> Report: ${msg.title || 'Untitled'}</div>
+      <div style="font-size:12px; white-space:pre-wrap; max-height: 100px; overflow:hidden;">${(msg.content || '').substring(0,200)}...</div>
+    </div>`;
+  } else if (msg.type === 'requirement') {
+    return `<div class="msg msg-agent" style="background:#f0fdf4; border-color:#bbf7d0; color:#166534; width:100%;">
+      <div style="font-weight:600; margin-bottom:8px;"><i class="fa-solid fa-list-check"></i> Requirement Profile: ${msg.project_name || 'Unspecified'}</div>
+      <div style="font-size:12px;">Status: ${msg.status || 'Active'}</div>
+    </div>`;
+  }
+  return '';
+}
+
+async function loadEngChatHistory() {
+  if (!engSessionId) return;
+  const chatBox = document.getElementById('engChatBox');
+  chatBox.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">Loading chat history...</div>';
+  const histRes = await fetchAPI('/api/engineering/history/chat/' + engSessionId);
+  chatBox.innerHTML = '';
+  if (histRes && Array.isArray(histRes)) {
+    if (histRes.length === 0) {
+      chatBox.innerHTML = '<div class="msg msg-agent">Welcome to the Engineering Workspace. I am connected to the industrial knowledge base. How can I assist you today?</div>';
+    } else {
+      histRes.forEach(msg => chatBox.innerHTML += renderMessage(msg, true));
+    }
+  } else {
+      chatBox.innerHTML = '<div class="msg msg-agent" style="color:red;">Error loading history.</div>';
+  }
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function loadEngHistoryList() {
+  const container = document.getElementById('engHistoryList');
+  container.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">Refreshing...</div>';
+  const res = await fetchAPI('/api/engineering/history/list');
+  container.innerHTML = '';
+  if (!res || res.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b; font-size:13px;">No past sessions</div>';
+    return;
+  }
+  res.forEach(session => {
+    const isActive = session.session_id === engSessionId;
+    const dateStr = new Date(typeof session.started_at === 'string' && !session.started_at.endsWith('Z') ? session.started_at + 'Z' : session.started_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour:'2-digit', minute:'2-digit'});
+    container.insertAdjacentHTML('beforeend', `
+      <div class="session-item ${isActive ? 'active' : ''}" onclick="switchEngSession('${session.session_id}')">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+          <strong style="font-size:13px; color:#1e293b; max-width:80%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${session.title || 'Engineering Session'}</strong>
+          <i class="fa-solid fa-trash-can" style="color:#ef4444; font-size:12px; cursor:pointer;" onclick="deleteSession('engineering', '${session.session_id}', event)"></i>
+        </div>
+        <div style="font-size:11px; color:#64748b; margin-bottom:4px;">${dateStr}</div>
+        <div style="font-size:11px; color:#94a3b8; font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${session.last_message_preview || 'No messages'}</div>
+      </div>
+    `);
+  });
+}
+
+async function switchEngSession(id) {
+  localStorage.setItem('engineering_session_id', id);
+  engSessionId = id;
+  await loadEngChatHistory();
+  await loadEngHistoryList();
+}
+
+async function sendEngMessage() {
+  const chatInput = document.getElementById('engChatInput');
+  const text = chatInput.value.trim();
+  if (!text && !currentEngImageBase64) return;
+ 
+  if (!engSessionId) {
+      await initEngSession();
+  }
+
+  // Use local text correction API before sending message
+  if (text) {
+      try {
+          const tcRes = await fetch('http://localhost:8000/api/text-correction', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: text })
+          });
+          if (tcRes.ok) {
+              const tcData = await tcRes.json();
+              text = tcData.corrected;
+          }
+      } catch (e) {
+          console.error('Text correction API failed:', e);
+      }
+  }
+
+  const chatBox = document.getElementById('engChatBox');
+  if (currentEngImageBase64) {
+      chatBox.innerHTML += `<div class="msg msg-user"><img src="data:image/jpeg;base64,${currentEngImageBase64}" style="max-height: 100px; border-radius:8px; display: block; margin-bottom: 10px;">${text}</div>`;
+  } else {
+      chatBox.innerHTML += `<div class="msg msg-user">${text}</div>`;
+  }
+ 
+  const bodyPayload = { message: text, session_id: engSessionId };
+  if (currentEngImageBase64) {
+      bodyPayload.image_base64 = currentEngImageBase64;
+      clearEngImage();
+  }
+  if (selectedDocumentId) {
+      bodyPayload.document_id = selectedDocumentId;
+  }
+ 
+  chatInput.value = '';
+  chatBox.scrollTop = chatBox.scrollHeight;
+ 
+  let msgLower = text.toLowerCase();
+  let loadingText = 'Analyzing context...';
+  if (selectedDocumentId) {
+      loadingText = '📄 Reading selected document...';
+  } else if (currentEngImageBase64 || msgLower.includes('image') || msgLower.includes('photo')) {
+      loadingText = '🖼️ Analyzing uploaded image...';
+  } else if (msgLower.match(/inventory|stock|spare|part|bearing/)) {
+      loadingText = '📦 Checking inventory database...';
+  } else if (msgLower.match(/work order|task|maintenance/)) {
+      loadingText = '🔧 Loading assigned work orders...';
+  }
+
+  const typingId = 'typing-' + Date.now();
+  chatBox.innerHTML += `<div id="${typingId}" class="msg msg-agent"><i class="fa-solid fa-circle-notch fa-spin" style="color:#3b82f6; margin-right:8px;"></i> <span id="${typingId}-text">${loadingText}</span></div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
+ 
+  try {
+      const res = await fetch('http://localhost:8000/api/engineering/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(bodyPayload)
+      });
+     
+     
+
+      if (res.status === 401) { window.location.href = 'index.html'; return; }
+      if (res.status === 404) {
+          localStorage.removeItem('engineering_session_id');
+          engSessionId = null;
+          chatBox.innerHTML += `<div class="msg msg-agent" style="color: #ef4444; border-color: #ef4444;">Session expired. Please try again.</div>`;
+          return;
+      }
+
+     
+      if (res.ok) {
+          const msgId = typingId;
+          const typingEl = document.getElementById(msgId);
+          if (typingEl) {
+              let genText = selectedDocumentId ? '📚 Analyzing maintenance content...' : 'Generating response...';
+              typingEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-primary" style="margin-right:6px;"></i> ${genText}`;
+          }
+         
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder("utf-8");
+          let done = false;
+          let buffer = '';
+          window.engFullMessage = '';
+         
+          while (!done) {
+              const { value, done: readerDone } = await reader.read();
+              done = readerDone;
+              if (value) {
+                  buffer += decoder.decode(value, { stream: true });
+                  const lines = buffer.split('\n');
+                  buffer = lines.pop();
+                  for (const line of lines) {
+                      if (line.startsWith('data: ')) {
+                          const dataStr = line.replace('data: ', '').trim();
+                          if (dataStr === '[DONE]') break;
+                          try {
+                              const data = JSON.parse(dataStr);
+                              if (data.token) {
+                                  if (!window.engFullMessage) window.engFullMessage = '';
+                                  window.engFullMessage += data.token;
+                                  const el = document.getElementById(msgId);
+                                  if (el) {
+                                      let cleanMessage = window.engFullMessage.replace(/\[(?:RESPONSE_TRIGGER|WORK_ORDER_TRIGGER|REPORT_TRIGGER|INVENTORY_REQUEST_TRIGGER|INVENTORY_APPROVAL_TRIGGER|INVENTORY_RETURN_TRIGGER|PART_CARD|DOCUMENT_QA|ENGINEERING_ANALYSIS|CONTEXTUAL_EVIDENCE|VISION_ANALYSIS|System:)[\s\S]*?(?:\]|$)/gi, '');
+                                      if (cleanMessage.trim() !== '') {
+                                          if (el.innerHTML.includes('Generating response...')) el.innerHTML = '';
+                                          el.innerHTML = cleanMessage.replace(/\n/g, '<br>');
+                                          chatBox.scrollTop = chatBox.scrollHeight;
+                                      }
+                                  }
+                              }
+                          } catch (err) {}
+                      }
+                  }
+              }
+          }
+          loadEngHistoryList();
+      } else {
+          chatBox.innerHTML += `<div class="msg msg-agent" style="color: #ef4444; border-color: #ef4444;">Failed to get response from server.</div>`;
+      }
+  } catch (e) {
+      const typingEl = document.getElementById(typingId);
+      if(typingEl) typingEl.remove();
+      chatBox.innerHTML += `<div class="msg msg-agent" style="color: #ef4444; border-color: #ef4444;">Communication error.</div>`;
+  }
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+/* ================================
+   SANDBOX AGENT LOGIC
+   ================================ */
+function openSandboxModal() {
+  document.getElementById('sandbox-modal-overlay').style.display = 'flex';
+  if (!sandboxSessionId) {
+      initSandboxSession();
+  } else {
+      loadSandboxChatHistory();
+      loadSandboxHistoryList();
+  }
+}
+
+function closeSandboxModal() {
+  document.getElementById('sandbox-modal-overlay').style.display = 'none';
+}
+
+async function initSandboxSession() {
+  try {
+    const res = await fetchAPI('/api/sandbox/session', { method: 'POST' });
+    if (res && res.session_id) {
+        sandboxSessionId = res.session_id;
+        localStorage.setItem('sandbox_session_id', sandboxSessionId);
+        await loadSandboxChatHistory();
+        await loadSandboxHistoryList();
+    }
+  } catch (e) { console.error("Failed to init sandbox session", e); }
+}
+
+async function createNewSandboxSession() {
+  localStorage.removeItem('sandbox_session_id');
+  sandboxSessionId = null;
+  document.getElementById('sandboxChatBox').innerHTML = '<div class="msg msg-agent"><strong>Welcome to the Sandbox Agent!</strong><br><br>I am your Industrial Design & Planning workspace.</div>';
+  await initSandboxSession();
+}
+
+async function loadSandboxChatHistory() {
+  if (!sandboxSessionId) return;
+  const chatBox = document.getElementById('sandboxChatBox');
+  chatBox.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">Loading sandbox history...</div>';
+  const histRes = await fetchAPI('/api/sandbox/history/chat/' + sandboxSessionId);
+  chatBox.innerHTML = '';
+  if (histRes && Array.isArray(histRes)) {
+    if (histRes.length === 0) {
+      chatBox.innerHTML = '<div class="msg msg-agent"><strong>Welcome to the Sandbox Agent!</strong><br><br>I am your Industrial Design & Planning workspace.</div>';
+    } else {
+      histRes.forEach(msg => chatBox.innerHTML += renderMessage(msg, false));
+    }
+  }
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function loadSandboxHistoryList() {
+  const container = document.getElementById('sandboxHistoryList');
+  container.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">Refreshing...</div>';
+  const res = await fetchAPI('/api/sandbox/history/list');
+  container.innerHTML = '';
+  if (!res || res.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b; font-size:13px;">No past sessions</div>';
+    return;
+  }
+  res.forEach(session => {
+    const isActive = session.session_id === sandboxSessionId;
+    const dateStr = new Date(typeof session.started_at === 'string' && !session.started_at.endsWith('Z') ? session.started_at + 'Z' : session.started_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour:'2-digit', minute:'2-digit'});
+    container.insertAdjacentHTML('beforeend', `
+      <div class="session-item ${isActive ? 'active' : ''}" onclick="switchSandboxSession('${session.session_id}')">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+          <strong style="font-size:13px; color:#1e293b; max-width:80%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${session.title || 'Sandbox Session'}</strong>
+          <i class="fa-solid fa-trash-can" style="color:#ef4444; font-size:12px; cursor:pointer;" onclick="deleteSession('sandbox', '${session.session_id}', event)"></i>
+        </div>
+        <div style="font-size:11px; color:#64748b; margin-bottom:4px;">${dateStr}</div>
+        <div style="font-size:11px; color:#94a3b8; font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${session.last_message_preview || 'No messages'}</div>
+      </div>
+    `);
+  });
+}
+
+async function switchSandboxSession(id) {
+  localStorage.setItem('sandbox_session_id', id);
+  sandboxSessionId = id;
+  await loadSandboxChatHistory();
+  await loadSandboxHistoryList();
+}
+
+async function sendSandboxMessage(messageType = "text", detectedLanguage = null) {
+  const chatInput = document.getElementById('sandboxChatInput');
+  const text = chatInput.value.trim();
+  if (!text) return;
+ 
+  if (!sandboxSessionId) {
+      await initSandboxSession();
+  }
+
+  const chatBox = document.getElementById('sandboxChatBox');
+ 
+  let languageBadge = "";
+  if (messageType === "voice" && detectedLanguage) {
+      const flags = { 'en': '🇬🇧 English', 'hi': '🇮🇳 Hindi', 'te': '🇮🇳 Telugu', 'ta': '🇮🇳 Tamil', 'kn': '🇮🇳 Kannada', 'ml': '🇮🇳 Malayalam', 'mr': '🇮🇳 Marathi', 'gu': '🇮🇳 Gujarati', 'bn': '🇮🇳 Bengali', 'pa': '🇮🇳 Punjabi' };
+      languageBadge = `<span style="font-size:10px; background:#e2e8f0; color:#475569; padding:2px 6px; border-radius:4px; margin-left:8px;">🎤 ${flags[detectedLanguage] || detectedLanguage}</span>`;
+  }
+ 
+  chatBox.innerHTML += `<div class="msg msg-user">${text}${languageBadge}</div>`;
+  chatInput.value = '';
+  chatBox.scrollTop = chatBox.scrollHeight;
+ 
+  const typingId = 'typing-sand-' + Date.now();
+  chatBox.innerHTML += `<div id="${typingId}" class="msg msg-agent"><i class="fa-solid fa-circle-notch fa-spin" style="color:#3b82f6; margin-right:8px;"></i> Designing...</div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
+ 
+  try {
+      const payload = { message: text, session_id: sandboxSessionId };
+      if (messageType === "voice") {
+          payload.message_type = "voice";
+          payload.detected_language = detectedLanguage;
+      }
+      const res = await fetch('http://localhost:8000/api/sandbox/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(payload)
+      });
+     
+      const typingEl = document.getElementById(typingId);
+      if(typingEl) typingEl.remove();
+      if (res.status === 401) { window.location.href = 'index.html'; return; }
+      if (res.status === 404) {
+          localStorage.removeItem('sandbox_session_id');
+          sandboxSessionId = null;
+          chatBox.innerHTML += `<div class="msg msg-agent" style="color: #ef4444; border-color: #ef4444;">Session expired. Please try again.</div>`;
+          return;
+      }
+      if (res.ok) {
+          const msgId = 'msg-' + Date.now();
+          chatBox.innerHTML += `<div id="${msgId}" class="msg msg-agent"></div>`;
+         
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder("utf-8");
+          let done = false;
+          let buffer = '';
+          window.sandFullMessage = '';
+         
+          let currentSentence = '';
+          let isFirstUtterance = true;
+          window.ttsUtterances = [];
+          window.isVoiceStopped = false;
+         
+          while (!done) {
+              const { value, done: readerDone } = await reader.read();
+              done = readerDone;
+              if (value) {
+                  buffer += decoder.decode(value, { stream: true });
+                  const lines = buffer.split('\n');
+                  buffer = lines.pop();
+                  for (const line of lines) {
+                      if (line.startsWith('data: ')) {
+                          const dataStr = line.replace('data: ', '').trim();
+                          if (dataStr === '[DONE]') {
+                              if (messageType === "voice" && currentSentence.trim() && !window.isVoiceStopped) {
+                                  let textToSpeak = currentSentence.replace(/\[.*?\]/g, '').trim();
+                                  if (textToSpeak) {
+                                      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                                      if (detectedLanguage) utterance.lang = detectedLanguage === 'en' ? 'en-US' : detectedLanguage + '-IN';
+                                      window.ttsUtterances.push(utterance);
+                                      utterance.onend = () => {
+                                          const statusEl = document.getElementById('sandboxVoiceStatus');
+                                          if(statusEl) statusEl.style.display = 'none';
+                                      };
+                                      window.speechSynthesis.speak(utterance);
+                                  }
+                              } else if (messageType === "voice" && window.ttsUtterances.length > 0 && !window.isVoiceStopped) {
+                                  window.ttsUtterances[window.ttsUtterances.length - 1].onend = () => {
+                                       const statusEl = document.getElementById('sandboxVoiceStatus');
+                                       if(statusEl) statusEl.style.display = 'none';
+                                  };
+                              }
+                              break;
+                          }
+                          try {
+                              const data = JSON.parse(dataStr);
+                              if (data.token) {
+                                  if (!window.sandFullMessage) window.sandFullMessage = '';
+                                  window.sandFullMessage += data.token;
+                                 
+                                  if (messageType === "voice" && !window.isVoiceStopped) {
+                                      currentSentence += data.token;
+                                      if (/[.!?;:\n]$/.test(data.token)) {
+                                          let textToSpeak = currentSentence.replace(/\[.*?\]/g, '').trim();
+                                          if (textToSpeak) {
+                                              if (isFirstUtterance) {
+                                                  window.speechSynthesis.cancel();
+                                                  isFirstUtterance = false;
+                                                  const statusEl = document.getElementById('sandboxVoiceStatus');
+                                                  if (statusEl) {
+                                                      statusEl.innerHTML = `
+                                                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                                                              <span><i class="fa-solid fa-volume-high text-primary"></i> 🔊 Speaking...</span>
+                                                              <button onclick="stopSandboxVoice()" style="background: transparent; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer; color: #ef4444;"><i class="fa-solid fa-stop"></i> Stop Speaking</button>
+                                                          </div>
+                                                      `;
+                                                      statusEl.style.display = 'block';
+                                                  }
+                                              }
+                                              const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                                              if (detectedLanguage) utterance.lang = detectedLanguage === 'en' ? 'en-US' : detectedLanguage + '-IN';
+                                              window.ttsUtterances.push(utterance);
+                                              window.speechSynthesis.speak(utterance);
+                                          }
+                                          currentSentence = '';
+                                      }
+                                  }
+                                 
+                                  const el = document.getElementById(msgId);
+                                  if (el) {
+                                      let cleanMessage = window.sandFullMessage.replace(/\[(?:RESPONSE_TRIGGER|WORK_ORDER_TRIGGER|REPORT_TRIGGER|INVENTORY_REQUEST_TRIGGER|INVENTORY_APPROVAL_TRIGGER|INVENTORY_RETURN_TRIGGER|PART_CARD|DOCUMENT_QA|ENGINEERING_ANALYSIS|CONTEXTUAL_EVIDENCE|VISION_ANALYSIS)[\s\S]*?(?:\]|$)/gi, '');
+                                      el.innerHTML = cleanMessage.replace(/\n/g, '<br>');
+                                      chatBox.scrollTop = chatBox.scrollHeight;
+                                  }
+                              }
+                          } catch (err) {}
+                      }
+                  }
+              }
+          }
+          loadSandboxHistoryList();
+      } else {
+          chatBox.innerHTML += `<div class="msg msg-agent" style="color: #ef4444; border-color: #ef4444;">Failed to get response from server.</div>`;
+      }
+  } catch (e) {
+      const typingEl = document.getElementById(typingId);
+      if(typingEl) typingEl.remove();
+      chatBox.innerHTML += `<div class="msg msg-agent" style="color: #ef4444; border-color: #ef4444;">Communication error.</div>`;
+  }
+  chatBox.scrollTop = chatBox.scrollHeight;
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+/* ================================
+   SANDBOX VOICE LOGIC
+   ================================ */
+let sandboxMediaRecorder;
+let sandboxAudioChunks = [];
+let isSandboxRecording = false;
+
+function stopSandboxVoice() {
+    window.isVoiceStopped = true;
+    window.speechSynthesis.cancel();
+    window.ttsUtterances = [];
+    const statusEl = document.getElementById('sandboxVoiceStatus');
+    if (statusEl) statusEl.style.display = 'none';
+}
+
+async function toggleSandboxVoice() {
+    const btn = document.getElementById('sandboxVoiceBtn');
+    const statusEl = document.getElementById('sandboxVoiceStatus');
+   
+    if (isSandboxRecording) {
+        // Stop recording
+        sandboxMediaRecorder.stop();
+        btn.classList.remove('btn-danger');
+        btn.classList.add('btn-outline');
+        btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+        isSandboxRecording = false;
+        statusEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-primary"></i> 📝 Converting Speech...';
+    } else {
+        // Start recording
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            sandboxMediaRecorder = new MediaRecorder(stream);
+            sandboxAudioChunks = [];
+           
+            sandboxMediaRecorder.ondataavailable = e => {
+                if (e.data.size > 0) sandboxAudioChunks.push(e.data);
+            };
+           
+            sandboxMediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(sandboxAudioChunks, { type: 'audio/webm' });
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'voice.webm');
+               
+                try {
+                    const res = await fetch('http://localhost:8000/api/sandbox/voice/transcribe', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        document.getElementById('sandboxChatInput').value = data.transcription;
+                        statusEl.innerHTML = '<i class="fa-solid fa-check text-success"></i> Speech processed.';
+                        setTimeout(() => statusEl.style.display = 'none', 2000);
+                        sendSandboxMessage("voice", data.detected_language);
+                    } else {
+                        statusEl.innerHTML = '<span class="text-danger">Failed to process speech.</span>';
+                    }
+                } catch (e) {
+                    statusEl.innerHTML = '<span class="text-danger">Network error during speech to text.</span>';
+                }
+               
+                // Stop all tracks to release mic
+                stream.getTracks().forEach(track => track.stop());
+            };
+           
+            sandboxMediaRecorder.start();
+            isSandboxRecording = true;
+            btn.classList.remove('btn-outline');
+            btn.classList.add('btn-danger');
+            btn.innerHTML = '<i class="fa-solid fa-square"></i>';
+            statusEl.style.display = 'block';
+            statusEl.innerHTML = '<i class="fa-solid fa-microphone text-danger"></i> 🎤 Listening...';
+        } catch (err) {
+            console.error("Microphone access denied:", err);
+            statusEl.style.display = 'block';
+            statusEl.innerHTML = '<span class="text-danger">Microphone unavailable. Please type your message.</span>';
+        }
+    }
+}
+
+/* ================================
+   SHARED FUNCTIONS
+   ================================ */
+async function deleteSession(type, id, event) {
+  event.stopPropagation();
+  if(!confirm("Delete this session forever?")) return;
+  try {
+    const url = type === 'engineering' ? `/api/engineering/session/${id}` : `/api/sandbox/session/${id}`;
+    const res = await fetchAPI(url, { method: 'DELETE' });
+    if(res) {
+      if(type === 'engineering') {
+        if(id === engSessionId) await createNewEngineeringSession();
+        else await loadEngHistoryList();
+      } else {
+        if(id === sandboxSessionId) await createNewSandboxSession();
+        else await loadSandboxHistoryList();
+      }
+    }
+  } catch(e) { console.error("Error deleting session", e); }
+}
+
+async function escalateSandbox() {
+  if(!sandboxSessionId) { alert("No active session to escalate."); return; }
+  try {
+    const response = await fetchAPI('/api/sandbox/escalate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sandbox_session_id: sandboxSessionId })
+    });
+    if(response && response.engineer_session_id) {
+      alert("Session successfully escalated to Engineering.");
+      closeSandboxModal();
+      localStorage.setItem('engineering_session_id', response.engineer_session_id);
+      engSessionId = response.engineer_session_id;
+      showSection('engineering-agent', document.querySelectorAll('.nav-item')[1]);
+    } else {
+      alert("Escalation failed.");
+    }
+  } catch(e) { console.error(e); alert("Network error during escalation."); }
+}
+
+async function resetSandbox() {
+  if (!confirm("Clear sandbox knowledge base?")) return;
+  try {
+    const res = await fetchAPI('/api/sandbox/reset', { method: 'DELETE' });
+    if (res) {
+      alert("Knowledge base cleared.");
+      document.getElementById('sandboxChatBox').innerHTML += `<div class="msg msg-agent" style="color:#64748b; font-size:12px; font-style:italic;">Knowledge base cleared. History reset.</div>`;
+    }
+  } catch(e) {}
+}
+
+// Initial Load
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!token) {
+    window.location.href = 'index.html';
+    return;
+  }
+ 
+  // Validate token via profile fetch
+  const p = await fetchAPI('/api/profile');
+  if (!p) return; // fetchAPI already redirects if 401
+ 
+  // Show page after validation
+  document.body.style.display = 'block';
+ 
+  // Populate headers and initialize profile form
+  await loadProfile();
+ 
+  const activeSection = localStorage.getItem('engineer_active_section') || 'dashboard';
+  showSection(activeSection);
+});
+
+let selectedDocumentId = null;
+
+function openDocsModal() {
+    document.getElementById('docsModal').style.display = 'flex';
+    fetchApprovedDocs();
+}
+
+function closeDocsModal() {
+    document.getElementById('docsModal').style.display = 'none';
+}
+
+async function fetchApprovedDocs() {
+    const list = document.getElementById('docsList');
+    list.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading documents...</div>';
+    try {
+        const res = await fetchAPI('/api/company-documents/approved');
+        if (!res) throw new Error("API returned null");
+        const docs = res;
+       
+        if (docs.length === 0) {
+            list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">No approved documents available.</div>';
+            return;
+        }
+       
+        let html = '';
+        docs.forEach(d => {
+            html += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid var(--border-default); border-radius:6px; background:var(--bg-card); margin-bottom:10px;">
+                <div>
+                    <div style="font-weight:600; font-size:14px; color:#f1f5f9;">${d.filename}</div>
+                    <div style="font-size:11px; color:var(--text-muted);">Uploaded: ${new Date(typeof d.upload_date === 'string' && !d.upload_date.endsWith('Z') ? d.upload_date + 'Z' : d.upload_date).toLocaleDateString()}</div>
+                </div>
+                <button class="btn btn-primary" style="padding:4px 12px; font-size:12px;" onclick="useDocument(${d.id}, '${d.filename}')">Use Document</button>
+            </div>
+            `;
+        });
+        list.innerHTML = html;
+    } catch (e) {
+        console.error("fetchApprovedDocs error:", e);
+        list.innerHTML = `<div style="color:var(--danger); padding:10px;">Error loading documents: ${e.message}</div>`;
+    }
+}
+
+function useDocument(id, filename) {
+    selectedDocumentId = id;
+    const banner = document.getElementById('activeDocBanner');
+    const nameEl = document.getElementById('activeDocName');
+    if (banner && nameEl) {
+        banner.style.display = 'block';
+        nameEl.innerText = filename;
+    }
+    closeDocsModal();
+}
+
+function clearActiveDoc() {
+    selectedDocumentId = null;
+    document.getElementById('activeDocBanner').style.display = 'none';
+}
+</script>
+
+<div id="docsModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:var(--bg-panel); width:600px; max-width:90%; padding:20px; border-radius:8px; border:1px solid var(--border-default);">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;"><i class="fa-solid fa-file-pdf"></i> Verified Company Documents</h3>
+            <button onclick="closeDocsModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Select a company-approved document to use as the active knowledge source for this session.</p>
+        <div id="docsList" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+            <!-- Docs will be injected here -->
+        </div>
+        <div style="margin-top:20px; text-align:right;">
+            <button class="btn btn-secondary" onclick="closeDocsModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+

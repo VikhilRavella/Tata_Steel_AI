@@ -1,0 +1,132 @@
+==================================================
+DATABASE RELATIONSHIP REPORT
+==================================================
+
+TABLES & PRIMARY KEYS:
+- Users (id)
+- ShiftRoster (id)
+- Sessions (id)
+- Messages (id)
+- SessionContext (id)
+- SafetyChecklist (id)
+- Documents (id)
+- Equipment (id)
+- Alerts (id)
+- SpareParts (id)
+- Notifications (id)
+- AuditLogs (id)
+- InstructionAcknowledgments (id)
+- DocumentMetadata (id)
+- RequirementProfiles (id)
+- WorkOrders (id)
+- EngineeringReports (id)
+- InventoryMaster (part_number)
+- InventoryTransactions (transaction_id)
+- EquipmentMaster (equipment_id)
+- PartRequests (request_id)
+- SupervisorDirectory (supervisor_id)
+- EquipmentParts (id)
+- MaintenanceHistory (id)
+
+AGENT SPECIFIC TABLES:
+- SandboxSessions (session_id)
+- SandboxMessages (id)
+- SandboxMemory (id)
+- EngineeringSessions (session_id)
+- EngineeringFiles (file_id)
+- EngineeringMessages (id)
+- EngineeringMemory (id)
+- EscalationHistory (id)
+- EscalationContext (id)
+- AgentFeedback (id)
+- ContinuousLearning (id)
+- CompanyDocuments (id)
+
+FOREIGN KEY RELATIONSHIPS:
+Users.supervisor_id -> Users.id
+ShiftRoster.user_id -> Users.id
+ShiftRoster.supervisor_id -> Users.id
+Sessions.primary_engineer_id -> Users.id
+Sessions.escalated_to -> Users.id
+Sessions.equipment_id -> Equipment.id
+Messages.session_id -> Sessions.id
+SafetyChecklist.session_id -> Sessions.id
+Documents.uploaded_by -> Users.id
+Alerts.equipment_id -> Equipment.id
+Alerts.assigned_to -> Users.id
+Alerts.session_id -> Sessions.id
+Notifications.recipient_id -> Users.id
+AuditLogs.user_id -> Users.id
+InstructionAcknowledgments.session_id -> Sessions.id
+InstructionAcknowledgments.user_id -> Users.id
+DocumentMetadata.document_id -> Documents.id
+RequirementProfiles.session_id -> Sessions.id
+WorkOrders.assigned_to -> Users.id
+WorkOrders.created_by -> Users.id
+WorkOrders.related_alert_id -> Alerts.id
+WorkOrders.equipment_id -> EquipmentMaster.equipment_id
+EngineeringReports.session_id -> Sessions.id
+EngineeringReports.generated_by -> Users.id
+InventoryTransactions.part_number -> InventoryMaster.part_number
+InventoryTransactions.requested_by -> Users.id
+InventoryTransactions.approved_by -> Users.id
+PartRequests.requested_by -> Users.id
+PartRequests.equipment_id -> EquipmentMaster.equipment_id
+PartRequests.part_number -> InventoryMaster.part_number
+EquipmentParts.equipment_id -> EquipmentMaster.equipment_id
+EquipmentParts.part_number -> InventoryMaster.part_number
+MaintenanceHistory.equipment_id -> EquipmentMaster.equipment_id
+MaintenanceHistory.performed_by -> Users.id
+SandboxSessions.user_id -> Users.id
+SandboxMessages.session_id -> SandboxSessions.session_id
+SandboxMemory.session_id -> SandboxSessions.session_id
+EngineeringSessions.user_id -> Users.id
+EngineeringSessions.equipment_id -> EquipmentMaster.equipment_id
+EngineeringFiles.session_id -> EngineeringSessions.session_id
+EngineeringFiles.user_id -> Users.id
+EngineeringMessages.session_id -> EngineeringSessions.session_id
+EngineeringMemory.session_id -> EngineeringSessions.session_id
+EscalationHistory.sandbox_session_id -> SandboxSessions.session_id
+EscalationHistory.engineering_session_id -> EngineeringSessions.session_id
+EscalationHistory.escalated_by -> Users.id
+EscalationContext.escalation_id -> EscalationHistory.id
+ContinuousLearning.equipment_id -> EquipmentMaster.equipment_id
+CompanyDocuments.uploaded_by -> Users.id
+
+ASCII DIAGRAM SUMMARY:
+
+Users
+  |
+  +-- SandboxSession
+  |     +-- SandboxMessage
+  |     +-- SandboxMemory
+  |
+  +-- EngineeringSession
+  |     +-- EngineeringMessage
+  |     +-- EngineeringMemory
+  |
+  +-- InventoryTransaction (requested_by/approved_by)
+  |
+  +-- PartRequest (requested_by)
+  |
+  +-- WorkOrder (assigned_to/created_by)
+  |
+  +-- Notifications (recipient_id)
+
+EquipmentMaster
+  |
+  +-- EngineeringSession
+  |
+  +-- WorkOrder
+  |
+  +-- PartRequest
+  |
+  +-- EquipmentParts
+
+InventoryMaster
+  |
+  +-- InventoryTransaction
+  |
+  +-- PartRequest
+  |
+  +-- EquipmentParts

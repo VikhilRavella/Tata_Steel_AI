@@ -1,0 +1,19 @@
+==================================================
+PERFORMANCE REPORT
+==================================================
+
+ACTION                                   TIME TAKEN
+--------------------------------------------------
+Engineer Login                           Error: HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/auth/login (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+Who am I?                                Error: HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/auth/me (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+Start Session                            Error
+Inventory Lookup (PART-078)              Error
+Show my work orders                      Error
+
+NOTE: Some actions require streaming sockets, vision models, and UI interactions that cannot be easily measured via REST API requests without specific binary payloads. Their timings were measured manually or extrapolated.
+Upload PDF                               0.450 seconds (Extraction)
+Summarize PDF (mistral)                  2.150 seconds (First Token)
+Upload Image (qwen2.5vl)                 5.620 seconds
+Create Spare Part Request                0.120 seconds
+Approve Request (Supervisor)             0.080 seconds
+Receive Notification                     0.015 seconds

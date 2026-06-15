@@ -1,0 +1,62 @@
+==================================================
+PROJECT STRUCTURE REPORT
+==================================================
+
+FRONTEND FILES
+frontend/
+├── pages/
+│   ├── login.html
+│   ├── home_page_engineer.html
+│   ├── home_page_supervisor.html
+│   ├── manager_dashboard.html
+│   └── agent_sandbox.html
+├── assets/
+│   └── [Images and PDF documents]
+├── css/
+│   └── styles.css
+└── js/
+    └── [Scripts inside HTML files, legacy scripts in root]
+
+BACKEND FILES
+backend/
+├── main.py
+├── database.py
+├── models/
+│   └── __init__.py
+├── routers/
+│   ├── auth.py
+│   ├── engineering_agent.py
+│   ├── sandbox.py
+│   ├── inventory.py
+│   ├── supervisor.py
+│   ├── manager_portal.py
+│   └── reports.py
+├── services/
+│   ├── ai_service.py
+│   ├── document_service.py
+│   ├── memory_service.py
+│   ├── ollama_service.py
+│   ├── pdf_service.py
+│   ├── requirement_discovery.py
+│   ├── transfer_service.py
+│   ├── vision_service.py
+│   └── voice_service.py
+├── utils/
+│   └── [Utility functions]
+└── storage/
+    └── [Uploads, chromadb]
+
+DATABASE FILES
+- maintenance.db (SQLite)
+- chroma_db/ (Vector Store)
+
+AGENTS
+- Engineering Agent (qwen2.5-coder:7b) -> backend/routers/engineering_agent.py
+- Sandbox Agent (mistral:latest) -> backend/routers/sandbox.py
+
+RAG
+- ChromaDB Vector Store
+- Document Service -> backend/services/document_service.py
+
+VISION
+- Vision Diagnostics -> backend/services/vision_service.py (qwen2.5vl)

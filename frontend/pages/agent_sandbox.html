@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    /* Layout */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Top Nav */
+    .top-nav {
+      height: 52px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-6);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      width: 220px;
+    }
+    
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .nav-plant { font-size: 11px; color: var(--text-muted); }
+    
+    .search-bar {
+      position: relative;
+      width: 320px;
+    }
+    
+    .search-bar i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .search-input {
+      width: 100%;
+      height: 32px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      background-color: var(--bg-page);
+      font-size: 13px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+    }
+    
+    .icon-btn {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    
+    .icon-btn:hover { color: var(--text-primary); }
+    
+    .badge-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--status-critical);
+      color: white;
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 50%;
+      height: 14px;
+      min-width: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+    }
+    
+    .avatar {
+      height: 32px;
+      width: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border-default);
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .user-card {
+      padding: var(--spacing-5);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .user-card .avatar { width: 48px; height: 48px; font-size: 18px; margin-bottom: var(--spacing-2); }
+    .user-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .user-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: var(--spacing-1); }
+    
+    .nav-menu {
+      padding: var(--spacing-4) 0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-3) var(--spacing-5);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      gap: var(--spacing-3);
+      transition: background 0.2s, color 0.2s;
+    }
+    
+    .nav-item:hover {
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      color: var(--primary);
+      background-color: var(--status-success-bg);
+      border-right: 3px solid var(--primary);
+    }
+    
+    .nav-item i { width: 16px; text-align: center; }
+    
+    .sidebar-footer {
+      padding: var(--spacing-5);
+      border-top: 1px solid var(--border-default);
+    }
+    
+    .version-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: var(--spacing-4);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex-grow: 1;
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      overflow-y: auto;
+      padding: var(--spacing-6) var(--spacing-8);
+      background-color: var(--bg-page);
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--spacing-6);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .metric-card {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .metric-value {
+      font-size: 32px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      margin: var(--spacing-2) 0;
+    }
+    
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-6);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .list-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-3) 0;
+      border-bottom: 1px solid var(--border-default);
+    }
+    
+    .list-row:last-child { border-bottom: none; }
+    
+    .row-main { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
+    .row-title { font-weight: 500; font-size: 14px; }
+    .row-meta { font-size: 12px; color: var(--text-muted); }
+    
+    .quick-start {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(59, 109, 17, 0.2);
+      margin-bottom: var(--spacing-6);
+    }
+    
+    .quick-start-btn {
+      background-color: white;
+      color: var(--primary);
+      padding: 0 var(--spacing-6);
+      height: 48px;
+      font-size: 16px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-2);
+    }
+    
+    .quick-start-btn:hover { background-color: var(--bg-page); }
+
+    .health-stats { display: flex; justify-content: space-between; padding-top: 10px; }
+    .health-stat { text-align: center; }
+    .health-stat-val { font-size: 24px; font-weight: bold; }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+
+  <!-- Top Nav -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div>
+        <div class="nav-title">Maintenance Wizard</div>
+        <div class="nav-plant">Tata Steel &middot; Jamshedpur</div>
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <i class="fa-solid fa-search"></i>
+      <input type="text" class="search-input" placeholder="Search equipment, SOPs, logs...">
+    </div>
+    
+    <div class="nav-actions">
+      <button class="icon-btn">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge-count">3</span>
+      </button>
+      <span class="badge status-info" id="userRole">Engineer</span>
+      <div class="avatar" id="navAvatar">EN</div>
+      <a href="index.html" class="icon-btn" title="Logout" onclick="localStorage.clear();"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar" id="userAvatar">EN</div>
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-id" id="userId">ID: ...</div>
+      </div>
+      
+            <nav class="nav-menu">
+        <a href="home_page_engineer.html" class="nav-item">
+          <i class="fa-solid fa-home"></i> Home Dashboard
+        </a>
+        <a href="engineering_agent.html" class="nav-item">
+          <i class="fa-solid fa-robot"></i> AI Agent
+        </a>
+        <a href="agent_sandbox.html" class="nav-item active">
+          <i class="fa-solid fa-flask"></i> Sandbox
+        </a>
+        <a href="chat.html" class="nav-item">
+          <i class="fa-solid fa-clipboard-check"></i> My Tasks
+        </a>
+        <a href="history.html" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i> Session Logs
+        </a>
+        <a href="upload.html" class="nav-item">
+          <i class="fa-solid fa-file-pdf"></i> Documents
+        </a>
+        <a href="equipment.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i> Equipment Health
+        </a>
+        <a href="safety.html" class="nav-item">
+          <i class="fa-solid fa-shield-halved"></i> Safety Verification
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i> Profile
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="version-info">v2.1.0 &middot; Plant: JSR-01</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+<style>
+
+        .main-content {
+            display: flex;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--bg-page);
+        }
+        .sandbox-panel {
+            width: 300px;
+            background-color: var(--bg-card);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border-right: 1px solid var(--border-default);
+            flex-shrink: 0;
+        }
+        .sandbox-chat {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-page);
+        }
+        .sandbox-panel h2 { font-size: 1.2rem; margin-bottom: 10px; color: var(--primary); }
+        .upload-section { background: var(--bg-card); padding: 15px; border-radius: 8px; border: 1px solid var(--border-default); }
+        .upload-section input[type="file"] { margin-bottom: 10px; width: 100%; font-size: 13px; color: var(--text-primary); }
+        .sandbox-panel button { background-color: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
+        .sandbox-panel button.danger { background-color: var(--status-critical); }
+        
+        .chat-display { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message { max-width: 80%; padding: 15px; border-radius: 8px; line-height: 1.5; white-space: pre-wrap; font-size: 14px; }
+        .message.user { align-self: flex-end; background-color: var(--primary); color: white; border-bottom-right-radius: 0; }
+        .message.agent { align-self: flex-start; background-color: var(--bg-card); border: 1px solid var(--border-default); color: var(--text-primary); border-bottom-left-radius: 0; }
+        
+        .input-area { padding: 20px; background-color: var(--bg-card); border-top: 1px solid var(--border-default); display: flex; gap: 10px; }
+        .input-area input { flex-grow: 1; padding: 12px 15px; border-radius: 6px; border: 1px solid var(--border-default); background-color: var(--bg-page); color: var(--text-primary); outline: none; }
+        .input-area input:focus { border-color: var(--primary); }
+        #send-btn { background: var(--primary); color: white; border: none; padding: 0 30px; border-radius: 6px; cursor: pointer; font-weight: 600; width: auto; }
+
+</style>
+
+      <div class="sandbox-panel">
+        <div>
+            <h2 style="margin-bottom: 5px;">AI Sandbox (SLM)</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Idea Exploration Workspace using a Small Language Model.</p>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border: 1px solid var(--border-default); margin-bottom: 15px;">
+                <strong style="color: var(--primary); font-size: 0.9rem;">Features:</strong>
+                <ul style="list-style: none; padding-left: 5px; margin: 5px 0 0 0; font-size: 0.85rem; color: var(--text-primary); line-height: 1.6;">
+                    <li><i class="fa-solid fa-check" style="color: #4ade80; margin-right: 5px;"></i> Simple Chat</li>
+                    <li><i class="fa-solid fa-check" style="color: #4ade80; margin-right: 5px;"></i> Requirement Gathering</li>
+                    <li><i class="fa-solid fa-check" style="color: #4ade80; margin-right: 5px;"></i> Brainstorming</li>
+                    <li><i class="fa-solid fa-check" style="color: #4ade80; margin-right: 5px;"></i> Architecture Discussion</li>
+                    <li><i class="fa-solid fa-check" style="color: #4ade80; margin-right: 5px;"></i> Project Planning</li>
+                    <li><i class="fa-solid fa-check" style="color: #4ade80; margin-right: 5px;"></i> Feature Discussion</li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(255,0,0,0.05); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,0,0,0.2);">
+                <strong style="color: var(--status-critical); font-size: 0.9rem;">NO:</strong>
+                <ul style="list-style: none; padding-left: 5px; margin: 5px 0 0 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                    <li><i class="fa-solid fa-xmark" style="color: var(--status-critical); margin-right: 5px;"></i> PDF Upload</li>
+                    <li><i class="fa-solid fa-xmark" style="color: var(--status-critical); margin-right: 5px;"></i> RAG</li>
+                    <li><i class="fa-solid fa-xmark" style="color: var(--status-critical); margin-right: 5px;"></i> Vision Analysis</li>
+                    <li><i class="fa-solid fa-xmark" style="color: var(--status-critical); margin-right: 5px;"></i> Inventory Analysis</li>
+                    <li><i class="fa-solid fa-xmark" style="color: var(--status-critical); margin-right: 5px;"></i> Safety Analysis</li>
+                </ul>
+            </div>
+        </div>
+
+
+        <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-primary" onclick="escalateSandbox()" style="width: 100%; padding: 12px; font-weight: bold; background-color: var(--status-critical); border-color: var(--status-critical); color: white; border-radius: 4px;">Escalate to Engineering Agent</button>
+            <button class="danger" onclick="resetSandbox()" style="width: 100%;">Clear Context/History</button>
+        </div>
+    </div>
+
+    <div class="sandbox-chat">
+        <div class="chat-display" id="chat-display">
+            <div class="message agent">Welcome to the AI Sandbox. Start testing prompts or escalate to the Engineering Agent.</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="chat-input" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+            <button id="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <div class="history-panel" style="width: 300px; background-color: var(--bg-card); padding: 20px; border-left: 1px solid var(--border-default); display: flex; flex-direction: column; gap: 15px; flex-shrink: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 1.2rem; color: var(--primary); margin: 0;">Session History</h2>
+            <button onclick="createNewSession()" style="background-color: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">+ New</button>
+        </div>
+        <div class="search-bar" style="width: 100%; position: relative;">
+            <i class="fa-solid fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+            <input type="text" id="sessionSearch" class="search-input" placeholder="Search sessions..." onkeyup="filterSessions()" style="width: 100%; padding: 8px 10px 8px 30px; border: 1px solid var(--border-default); border-radius: 6px; background-color: var(--bg-page); color: var(--text-primary); outline: none;">
+        </div>
+        <div id="sessionListContainer" style="overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-size: 12px; color: var(--text-muted);">Loading sessions...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8000/api/sandbox";
+
+        let sandboxSessionId = localStorage.getItem('sandbox_session_id');
+
+        async function initSandboxSession() {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+            if (!sandboxSessionId) {
+                try {
+                    const response = await fetch(`${API_BASE}/session`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        sandboxSessionId = data.session_id;
+                        localStorage.setItem('sandbox_session_id', sandboxSessionId);
+                        loadSessionsList();
+                    }
+                } catch (e) {
+                    console.error("Failed to init sandbox session", e);
+                }
+            } else {
+                loadSessionsList();
+                try {
+                    const response = await fetch(`${API_BASE}/history/chat/${sandboxSessionId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        const messages = await response.json();
+                        const chatDisplay = document.getElementById('chat-display');
+                        if (messages.length > 0) {
+                            chatDisplay.innerHTML = '';
+                            messages.forEach(m => {
+                                const msgDiv = appendMessage(m.sender, '');
+                                msgDiv.innerHTML = marked.parse(m.content);
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to load chat history", e);
+                }
+            }
+        }
+        
+        window.addEventListener('DOMContentLoaded', initSandboxSession);
+
+
+
+        async function escalateSandbox() {
+            if(!sandboxSessionId) return;
+            const escalateBtn = document.querySelector('button[onclick="escalateSandbox()"]');
+            if (escalateBtn) {
+                escalateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Escalating...';
+                escalateBtn.disabled = true;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/api/sandbox/escalate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ sandbox_session_id: sandboxSessionId })
+                });
+                
+                if(response.ok) {
+                    const data = await response.json();
+                    alert("Session successfully escalated to Engineering.");
+                    window.location.href = `engineering_agent.html?session_id=${data.engineer_session_id}`;
+                } else {
+                    const err = await response.json();
+                    alert("Escalation failed: " + (err.detail || 'Unknown error'));
+                    if (escalateBtn) {
+                        escalateBtn.innerHTML = 'Escalate to Engineering Agent';
+                        escalateBtn.disabled = false;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Network error during escalation.");
+                if (escalateBtn) {
+                    escalateBtn.innerHTML = 'Escalate to Engineering Agent';
+                    escalateBtn.disabled = false;
+                }
+            }
+        }
+
+        async function resetSandbox() {
+            if (!confirm("Are you sure you want to clear the sandbox knowledge base?")) return;
+            const token = localStorage.getItem('access_token');
+            
+            try {
+                const response = await fetch(`${API_BASE}/reset`, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message);
+                    document.getElementById('chat-display').innerHTML = '<div class="message agent">Knowledge base cleared. History reset.</div>';
+                } else {
+                    alert("Error: " + (result.detail || result.message));
+                }
+            } catch (error) {
+                alert("Connection error.");
+                console.error("Sandbox API Error:", error);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const inputField = document.getElementById('chat-input');
+            const message = inputField.value.trim();
+            const token = localStorage.getItem('access_token');
+            if (!message) return;
+            
+            if (!sandboxSessionId) await initSandboxSession();
+
+            // Clear input
+            inputField.value = '';
+
+            // Add User Message to UI
+            appendMessage('user', message);
+
+            // Create Agent Message Container
+            const agentMessageDiv = appendMessage('agent', 'Thinking...');
+            let hasClearedThinking = false;
+            
+            try {
+                const response = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ message: message, session_id: sandboxSessionId })
+                });
+
+                if (!response.ok) {
+                    agentMessageDiv.textContent = "Error: " + response.statusText;
+                    return;
+                }
+
+                // Handle SSE
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let buffer = '';
+                let rawContent = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    if (value) {
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+
+                        for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const dataStr = line.substring(6);
+                            if (dataStr === '[DONE]') {
+                                break;
+                            }
+                            try {
+                                const data = JSON.parse(dataStr);
+                                if (data.error) {
+                                    if (!hasClearedThinking) { agentMessageDiv.textContent = ''; hasClearedThinking = true; }
+                                    agentMessageDiv.textContent += "Error: " + data.error;
+                                    scrollToBottom();
+                                }
+                                if (data.token) {
+                                    if (!hasClearedThinking) { agentMessageDiv.innerHTML = ''; hasClearedThinking = true; }
+                                    rawContent += data.token;
+                                    agentMessageDiv.innerHTML = marked.parse(rawContent);
+                                    scrollToBottom();
+                                }
+                            } catch (e) {
+                                console.error("Error parsing JSON line:", dataStr);
+                            }
+                        }
+                    }
+                }
+                loadSessionsList();
+            } catch (error) {
+                agentMessageDiv.textContent = "Connection error.";
+                console.error("Sandbox API Error:", error);
+            }
+        }
+
+        function appendMessage(sender, text) {
+            const chatDisplay = document.getElementById('chat-display');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            if(sender === 'agent' && text !== 'Thinking...') {
+                msgDiv.innerHTML = marked.parse(text);
+            } else {
+                msgDiv.textContent = text;
+            }
+            chatDisplay.appendChild(msgDiv);
+            scrollToBottom();
+            return msgDiv;
+        }
+
+        function scrollToBottom() {
+            const chatDisplay = document.getElementById('chat-display');
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+
+        async function loadSessionsList() {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+            try {
+                const response = await fetch(`${API_BASE}/history/list`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const res = await response.json();
+                
+                const container = document.getElementById('sessionListContainer');
+                container.innerHTML = '';
+                
+                if (!res || res.length === 0) {
+                    container.innerHTML = '<div style="font-size: 11px; color: var(--text-muted);">No past sessions found.</div>';
+                    return;
+                }
+
+                res.forEach(session => {
+                    const dateStr = new Date(typeof session.started_at === 'string' && !session.started_at.endsWith('Z') ? session.started_at + 'Z' : session.started_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    const sessionName = session.title || 'Sandbox Session';
+                    let statusColor = session.status === 'Active' ? '#4da6ff' : '#ffaa00';
+                    
+                    const isActive = session.session_id === sandboxSessionId;
+                    const borderStyle = isActive ? 'border-left: 3px solid var(--primary); background: var(--bg-card);' : 'border-left: 3px solid transparent;';
+                    
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="session-item" style="padding: 10px; border: 1px solid var(--border-default); border-radius: 6px; cursor: pointer; background: var(--bg-page); ${borderStyle}" onclick="switchSession('${session.session_id}')">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <strong style="font-size: 12px; display: block; margin-bottom: 4px; color: var(--text-primary);">${sessionName}</strong>
+                                <button onclick="deleteSession(event, '${session.session_id}')" style="background: none; border: none; color: #ff4d4d; cursor: pointer;" title="Delete Session"><i class="fa-solid fa-trash" style="font-size: 10px;"></i></button>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 10px; margin-top: 8px;">
+                                <span style="color: var(--text-muted);">${dateStr}</span>
+                                <span style="color: ${statusColor}; font-weight: 600; text-transform: uppercase;">${session.status}</span>
+                            </div>
+                        </div>
+                    `);
+                });
+            } catch(err) {
+                console.error("Failed to load session list:", err);
+            }
+        }
+
+        async function deleteSession(e, id) {
+            e.stopPropagation();
+            if(!confirm("Delete this sandbox session?")) return;
+            const token = localStorage.getItem('access_token');
+            try {
+                const response = await fetch(`${API_BASE}/session/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if(response.ok) {
+                    if(id === sandboxSessionId) {
+                        createNewSession();
+                    } else {
+                        loadSessionsList();
+                    }
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        function switchSession(id) {
+            localStorage.setItem('sandbox_session_id', id);
+            window.location.reload();
+        }
+
+        function createNewSession() {
+            localStorage.removeItem('sandbox_session_id');
+            window.location.reload();
+        }
+
+        function filterSessions() {
+            const query = document.getElementById('sessionSearch').value.toLowerCase();
+            const items = document.querySelectorAll('.session-item');
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(query) ? 'block' : 'none';
+            });
+        }
+    </script>
+    
+    </main>
+  </div>
+
+</body>
+</html>

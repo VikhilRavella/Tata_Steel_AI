@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maintenance Wizard — Tata Steel Industrial AI Platform</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+--primary: #f97316;
+--primary-dark: #ea580c;
+--accent: #22c55e;
+--blue: #3b82f6;
+--bg-dark: #050505;
+--bg-panel: #0a0a0a;
+--card-bg: rgba(255,255,255,0.04);
+--card-border: rgba(255,255,255,0.08);
+--text-main: #f8fafc;
+--text-muted: #64748b;
+--danger: #ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg-dark);color:var(--text-main);min-height:100vh;overflow-x:hidden;}
+.noise{position:fixed;top:0;left:0;width:100%;height:100%;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");opacity:0.4;pointer-events:none;z-index:0;}
+.glow-orange{position:fixed;width:800px;height:800px;background:radial-gradient(circle,rgba(249,115,22,0.08) 0%,transparent 70%);top:-300px;right:-200px;z-index:0;pointer-events:none;}
+.glow-blue{position:fixed;width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,0.06) 0%,transparent 70%);bottom:-200px;left:-100px;z-index:0;pointer-events:none;}
+.container{position:relative;z-index:10;}
+/* TOP NAV */
+nav{display:flex;justify-content:space-between;align-items:center;padding:20px 60px;border-bottom:1px solid var(--card-border);}
+.nav-brand{display:flex;align-items:center;gap:15px;}
+.nav-brand-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:white;}
+.nav-titles{display:flex;flex-direction:column;}
+.nav-main-title{font-size:18px;font-weight:700;color:white;}
+.nav-sub-title{font-size:12px;color:var(--text-muted);font-weight:500;}
+.nav-right{display:flex;align-items:center;gap:24px;}
+.nav-dev-info{display:flex;flex-direction:column;align-items:flex-end;font-size:12px;}
+.status-dot{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--accent);margin-top:2px;font-weight:600;}
+.dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3};}
+.btn-login{background:var(--primary);color:white;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-login:hover{background:var(--primary-dark);transform:translateY(-1px);}
+/* HERO */
+.hero{padding:80px 60px 40px;max-width: 100%; max-width: 1200px;margin:0 auto;text-align:center;}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);color:var(--primary);font-size:12px;font-weight:600;padding:6px 16px;border-radius:20px;margin-bottom:32px;letter-spacing:1px;text-transform:uppercase;}
+.hero h1{font-size:56px;font-weight:800;line-height:1.1;margin-bottom:24px;letter-spacing:-2px;}
+.hero h1 span{background:linear-gradient(135deg,var(--primary),#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-statement{font-size:20px;font-weight:600;color:white;margin-bottom:24px;line-height:1.5;}
+.hero-sub{font-size:16px;color:var(--text-muted);max-width:800px;margin:0 auto 48px;line-height:1.7;}
+.hero-actions{display:flex;justify-content:center;gap:16px;margin-bottom:60px;}
+.btn-primary{background:var(--primary);color:white;border:none;padding:16px 40px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px;}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 20px 40px rgba(249,115,22,0.3);}
+.btn-secondary{background:transparent;color:white;border:1px solid var(--card-border);padding:16px 40px;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px;}
+.btn-secondary:hover{border-color:rgba(255,255,255,0.3);background:var(--card-bg);}
+/* STATS */
+.stats{display:flex;justify-content:center;gap:48px;padding:40px 60px;border-top:1px solid var(--card-border);border-bottom:1px solid var(--card-border);margin:0 60px;}
+.stat{text-align:center;}
+.stat-num{font-size:36px;font-weight:800;background:linear-gradient(135deg,var(--primary),#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-label{font-size:12px;color:var(--text-muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px;}
+/* TICKER */
+.ticker{background:rgba(249,115,22,0.05);border-top:1px solid rgba(249,115,22,0.1);border-bottom:1px solid rgba(249,115,22,0.1);padding:12px 0;overflow:hidden;margin:40px 0;}
+.ticker-inner{display:flex;animation:ticker 40s linear infinite;width:max-content;}
+.ticker-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);padding:0 40px;white-space:nowrap;}
+.ticker-item i{color:var(--primary);}
+@keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+/* SECTION SHARED */
+.section{padding:60px;max-width: 100%; max-width: 1200px;margin:0 auto;}
+.section-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--primary);font-weight:600;margin-bottom:12px;}
+.section-title{font-size:36px;font-weight:800;margin-bottom:8px;letter-spacing:-1px;}
+.section-sub{font-size:16px;color:var(--text-muted);margin-bottom:48px;line-height:1.6;}
+/* AGENTS SECTION */
+.agents-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:60px;}
+.agent-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:32px;transition:all 0.3s;position:relative;overflow:hidden;}
+.agent-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),#fbbf24);}
+.agent-card.blue::before{background:linear-gradient(90deg,var(--blue),#818cf8);}
+.agent-card:hover{border-color:rgba(249,115,22,0.3);transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,0.3);}
+.agent-card.blue:hover{border-color:rgba(59,130,246,0.3);}
+.agent-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.agent-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(249,115,22,0.1);color:var(--primary);}
+.agent-icon.blue{background:rgba(59,130,246,0.1);color:var(--blue);}
+.agent-name{font-size:20px;font-weight:700;}
+.agent-type{font-size:12px;color:var(--text-muted);font-weight:600;margin-top:2px;}
+.agent-desc{font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:20px;}
+.agent-features{display:flex;flex-wrap:wrap;gap:8px;}
+.feature-tag{background:rgba(255,255,255,0.05);border:1px solid var(--card-border);font-size:11px;color:var(--text-muted);padding:6px 12px;border-radius:6px;font-weight:500;}
+.feature-tag.active{background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.2);color:var(--primary);}
+.feature-tag.blue{background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.2);color:var(--blue);}
+/* FLOW DIAGRAM */
+.flow{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:40px;margin-bottom:60px;}
+.flow-title{font-size:18px;font-weight:700;margin-bottom:32px;text-align:center;}
+.flow-steps{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.flow-step{text-align:center;padding:10px;}
+.flow-box{background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);border-radius:10px;padding:12px 16px;font-size:13px;font-weight:600;color:var(--primary);white-space:nowrap;}
+.flow-box.blue{background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.2);color:var(--blue);}
+.flow-box.green{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.2);color:var(--accent);}
+.flow-arrow{color:var(--text-muted);font-size:14px;padding:0 4px;}
+/* LAYER GRID */
+.layer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:60px;}
+.layer-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:24px;transition:all 0.2s;}
+.layer-card:hover{border-color:rgba(255,255,255,0.2);transform:translateY(-2px);}
+.layer-title{font-size:16px;font-weight:700;margin-bottom:12px;color:white;display:flex;align-items:center;gap:8px;}
+.layer-title i{color:var(--primary);}
+.layer-content{font-size:13px;color:var(--text-muted);line-height:1.6;}
+.layer-list{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
+.layer-list span{background:rgba(255,255,255,0.05);padding:4px 8px;border-radius:4px;font-size:11px;color:var(--text-muted);}
+/* NETWORK FLOW */
+.network-flow{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:40px;margin-bottom:60px;text-align:center;}
+.network-title{font-size:24px;font-weight:700;margin-bottom:16px;}
+.network-sub{font-size:14px;color:var(--text-muted);max-width:800px;margin:0 auto 32px;line-height:1.6;}
+.network-path{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;}
+.network-node{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 16px;font-size:12px;font-weight:600;color:var(--text-main);}
+.network-node.highlight{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:var(--accent);}
+.network-arrow{color:var(--text-muted);font-size:12px;}
+/* FEATURES GRID */
+.features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:60px;}
+.feat-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:24px;transition:all 0.2s;}
+.feat-card:hover{border-color:rgba(249,115,22,0.3);transform:translateY(-2px);}
+.feat-icon{width:40px;height:40px;border-radius:10px;background:rgba(249,115,22,0.1);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:16px;margin-bottom:16px;}
+.feat-name{font-size:14px;font-weight:600;margin-bottom:6px;line-height:1.3;}
+/* MEMORY SECTION */
+.memory-section{background:linear-gradient(135deg,rgba(249,115,22,0.05),rgba(59,130,246,0.05));border:1px solid var(--card-border);border-radius:16px;padding:40px;margin-bottom:60px;text-align:center;}
+.memory-title{font-size:28px;font-weight:800;margin-bottom:12px;}
+.memory-sub{font-size:15px;color:var(--text-muted);max-width:600px;margin:0 auto 32px;line-height:1.6;}
+.memory-sources{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:32px;}
+.mem-source{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:6px 16px;font-size:12px;color:var(--text-muted);}
+.memory-benefits{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;}
+.mem-benefit{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--accent);}
+/* LOGIN SECTION */
+.login-wrapper{background:var(--card-bg);border:1px solid var(--card-border);border-radius:24px;padding:48px;max-width:440px;margin:0 auto 60px;backdrop-filter:blur(20px);}
+.login-title{font-size:24px;font-weight:700;text-align:center;margin-bottom:8px;}
+.login-sub{font-size:14px;color:var(--text-muted);text-align:center;margin-bottom:32px;}
+.form-group{position:relative;margin-bottom:20px;}
+.form-input{width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:16px;font-size:15px;color:white;transition:all 0.2s;}
+.form-input:focus{outline:none;border-color:var(--primary);background:rgba(0,0,0,0.5);}
+.form-input::placeholder{color:var(--text-muted);}
+.pass-toggle{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--text-muted);cursor:pointer;}
+.btn-submit{width:100%;background:var(--primary);color:white;border:none;border-radius:8px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;}
+.btn-submit:hover{background:var(--primary-dark);box-shadow:0 10px 30px rgba(249,115,22,0.3);}
+.error-msg{color:var(--danger);font-size:13px;text-align:center;margin-top:8px;display:none;}
+.quick-login{margin-top:24px;padding-top:24px;border-top:1px solid var(--card-border);}
+.quick-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);text-align:center;margin-bottom:12px;}
+.quick-cards{display:flex;gap:10px;justify-content:center;}
+.quick-card{background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:8px;padding:8px 16px;font-size:12px;color:var(--text-muted);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;}
+.quick-card:hover{border-color:var(--primary);color:var(--primary);background:rgba(249,115,22,0.05);}
+.spinner{border:3px solid rgba(255,255,255,0.2);border-radius:50%;border-top:3px solid white;width:18px;height:18px;animation:spin 1s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* FOOTER */
+footer{border-top:1px solid var(--card-border);padding:40px 60px;display:flex;justify-content:space-between;align-items:center;}
+.footer-col{display:flex;flex-direction:column;gap:8px;}
+.footer-brand{font-size:16px;font-weight:700;color:white;display:flex;align-items:center;gap:8px;}
+.footer-text{font-size:12px;color:var(--text-muted);}
+.footer-tags{display:flex;gap:12px;align-items:center;}
+.footer-tag{background:rgba(255,255,255,0.05);padding:4px 10px;border-radius:4px;font-size:11px;color:var(--text-muted);}
+@media (max-width:900px){
+  .features-grid{grid-template-columns:1fr 1fr;}
+  .agents-grid{grid-template-columns:1fr;}
+  .layer-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:24px;text-align:center;}
+  .footer-tags{flex-wrap:wrap;justify-content:center;}
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+<div class="noise"></div>
+<div class="glow-orange"></div>
+<div class="glow-blue"></div>
+<div class="container">
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-brand-icon"><i class="fa-solid fa-industry"></i></div>
+    <div class="nav-titles">
+      <div class="nav-main-title">Maintenance Wizard</div>
+      <div class="nav-sub-title">Industrial Maintenance Intelligence Platform</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-dev-info">
+      <div style="color:white;font-weight:500;">Developed By: Vikhil Ravella</div>
+      <div class="status-dot"><div class="dot"></div> Ollama Connected</div>
+    </div>
+    <button class="btn-login" onclick="document.getElementById('loginSection').scrollIntoView({behavior:'smooth'})">
+      <i class="fa-solid fa-right-to-bracket"></i> Login
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag"><i class="fa-solid fa-bolt"></i> Tata Steel · Jamshedpur · Agentic AI Platform</div>
+  <h1>Industrial Maintenance<br><span>Intelligence Platform</span></h1>
+  <div class="hero-statement">
+    Transforming Equipment Data, Maintenance Knowledge,<br>Inventory Intelligence, and Engineering Decisions<br>into One Unified System.
+  </div>
+  <p class="hero-sub">An integrated industrial maintenance platform combining AI-assisted troubleshooting, maintenance knowledge retrieval, inventory intelligence, workflow automation, safety verification, equipment monitoring, and engineering decision support.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="document.getElementById('loginSection').scrollIntoView({behavior:'smooth'})">
+      <i class="fa-solid fa-right-to-bracket"></i> Access Platform
+    </button>
+    <button class="btn-secondary" onclick="document.getElementById('agentsSection').scrollIntoView({behavior:'smooth'})">
+      <i class="fa-solid fa-diagram-project"></i> View Architecture
+    </button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">12+</div><div class="stat-label">AI Features</div></div>
+  <div class="stat"><div class="stat-num">2</div><div class="stat-label">Agent Layers</div></div>
+  <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Local · Private</div></div>
+  <div class="stat"><div class="stat-num">0ms</div><div class="stat-label">Cloud Dependency</div></div>
+  <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Continuous Learning</div></div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Maintenance Knowledge Search</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Continuous Memory · Cross Session Learning</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Multi Agent Transfer · Sandbox to Engineering</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> LOTO Verification · Safety Compliance</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Inventory Intelligence · Spare Parts Tracking</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Root Cause Analysis · Equipment Diagnostics</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Work Order Generation · Automated Workflows</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Maintenance Knowledge Search</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Continuous Memory · Cross Session Learning</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Multi Agent Transfer · Sandbox to Engineering</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> LOTO Verification · Safety Compliance</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Inventory Intelligence · Spare Parts Tracking</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Root Cause Analysis · Equipment Diagnostics</span>
+    <span class="ticker-item"><i class="fa-solid fa-circle-check"></i> Work Order Generation · Automated Workflows</span>
+  </div>
+</div>
+
+<!-- AGENTS -->
+<div class="section" id="agentsSection">
+  <div class="section-label">Agent Architecture</div>
+  <div class="section-title">Multi-Agent Industrial Intelligence Architecture</div>
+  <div class="section-sub">A two-layer AI architecture that separates rapid operational assistance from deep industrial reasoning while maintaining complete context transfer and continuous learning.</div>
+  
+  <div class="agents-grid">
+    <div class="agent-card">
+      <div class="agent-header">
+        <div class="agent-icon"><i class="fa-solid fa-flask"></i></div>
+        <div>
+          <div class="agent-name">Sandbox Agent</div>
+          <div class="agent-type">Small Language Model (SLM)</div>
+        </div>
+      </div>
+      <div class="agent-desc">Fast operational workspace for engineers.</div>
+      <div class="agent-features">
+        <span class="feature-tag active">Engineering Discussions</span>
+        <span class="feature-tag active">Requirement Gathering</span>
+        <span class="feature-tag active">Troubleshooting Support</span>
+        <span class="feature-tag active">Maintenance Planning</span>
+        <span class="feature-tag active">Inventory Questions</span>
+        <span class="feature-tag active">Workflow Design</span>
+        <span class="feature-tag active">Context Collection</span>
+        <span class="feature-tag active">Agent Escalation</span>
+      </div>
+    </div>
+    
+    <div class="agent-card blue">
+      <div class="agent-header">
+        <div class="agent-icon blue"><i class="fa-solid fa-microchip"></i></div>
+        <div>
+          <div class="agent-name">Engineering Agent</div>
+          <div class="agent-type">Large Language Model (LLM)</div>
+        </div>
+      </div>
+      <div class="agent-desc">Advanced industrial reasoning and execution workspace.</div>
+      <div class="agent-features">
+        <span class="feature-tag blue">Root Cause Analysis</span>
+        <span class="feature-tag blue">Maintenance Diagnostics</span>
+        <span class="feature-tag blue">Equipment Health Evaluation</span>
+        <span class="feature-tag blue">Work Order Recommendation</span>
+        <span class="feature-tag blue">Safety Verification</span>
+        <span class="feature-tag blue">Inventory Intelligence</span>
+        <span class="feature-tag blue">Maintenance Knowledge Search</span>
+        <span class="feature-tag blue">Escalation Recommendations</span>
+        <span class="feature-tag blue">Maintenance History Analysis</span>
+        <span class="feature-tag blue">Engineering Decision Support</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSFER FLOW -->
+  <div class="flow">
+    <div class="flow-title">Multi-Agent Transfer Flow</div>
+    <div class="flow-steps">
+      <div class="flow-step"><div class="flow-box">Engineer Query</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box">Sandbox Agent (SLM)</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box">Requirement Understanding</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box">Context Capture</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box">Memory Save</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box blue">Engineering Agent (LLM)</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box blue">Root Cause Analysis</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box blue">Work Order Recommendation</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box green">Supervisor Approval</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box green">Execution Tracking</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box green">Feedback Collection</div></div>
+      <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="flow-step"><div class="flow-box green">Continuous Learning</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- INTELLIGENCE LAYER -->
+<div class="section">
+  <div class="section-label">Architecture</div>
+  <div class="section-title">Industrial AI Intelligence Layer</div>
+  <div class="section-sub">The platform combines multiple intelligence layers into a single industrial maintenance ecosystem.</div>
+  
+  <div class="layer-grid">
+    <div class="layer-card">
+      <div class="layer-title"><i class="fa-solid fa-flask"></i> SLM Layer</div>
+      <div class="layer-content">Fast operational assistance</div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-title"><i class="fa-solid fa-microchip"></i> LLM Layer</div>
+      <div class="layer-content">Advanced engineering reasoning</div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-title"><i class="fa-solid fa-book-open"></i> Knowledge Layer</div>
+      <div class="layer-list">
+        <span>Maintenance manuals</span>
+        <span>SOPs</span>
+        <span>Procedures</span>
+      </div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-title"><i class="fa-solid fa-project-diagram"></i> Workflow Layer</div>
+      <div class="layer-list">
+        <span>Work Orders</span>
+        <span>Approvals</span>
+        <span>Escalations</span>
+      </div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-title"><i class="fa-solid fa-database"></i> Data Layer</div>
+      <div class="layer-list">
+        <span>Users & Equipment</span>
+        <span>Inventory</span>
+        <span>Maintenance History & Audit Logs</span>
+      </div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-title"><i class="fa-solid fa-brain"></i> Learning Layer</div>
+      <div class="layer-list">
+        <span>Feedback</span>
+        <span>Outcomes</span>
+        <span>Continuous Improvement</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DATABASE INTELLIGENCE -->
+<div class="section">
+  <div class="network-flow">
+    <div class="network-title">Connected Industrial Knowledge Network</div>
+    <div class="network-sub">Every component of the platform is connected through a unified industrial database architecture enabling intelligent querying, traceability, maintenance analytics, and operational decision support.</div>
+    <div class="network-path">
+      <div class="network-node">Users</div>
+      <div class="network-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="network-node">Supervisors</div>
+      <div class="network-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="network-node">Equipment</div>
+      <div class="network-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="network-node">Equipment BOM</div>
+      <div class="network-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="network-node">Inventory</div>
+      <div class="network-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="network-node highlight">Work Orders</div>
+      <div class="network-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="network-node highlight">Maintenance History</div>
+      <div class="network-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="network-node highlight">Audit Logs</div>
+      <div class="network-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="network-node highlight">Continuous Learning</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section">
+  <div class="section-label">Platform Capabilities</div>
+  <div class="section-title">Everything in One Platform</div>
+  <div class="section-sub">No switching between tools. Every industrial intelligence capability connected.</div>
+  
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-robot"></i></div>
+      <div class="feat-name">AI Engineering Assistant</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-book-open"></i></div>
+      <div class="feat-name">Maintenance Knowledge Search</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+      <div class="feat-name">Root Cause Analysis</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+      <div class="feat-name">Equipment Health Monitoring</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+      <div class="feat-name">Inventory Intelligence</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+      <div class="feat-name">Work Order Automation</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
+      <div class="feat-name">Supervisor Escalation Workflow</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="feat-name">Safety Verification</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+      <div class="feat-name">Maintenance History Intelligence</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-list-check"></i></div>
+      <div class="feat-name">Audit & Compliance Tracking</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-chart-line"></i></div>
+      <div class="feat-name">Industrial Decision Support</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon"><i class="fa-solid fa-brain"></i></div>
+      <div class="feat-name">Continuous Learning & Feedback</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTINUOUS LEARNING -->
+<div class="section">
+  <div class="memory-section">
+    <div class="memory-title">Continuous Learning & Feedback Engine</div>
+    <div class="memory-sub">The platform improves through operational feedback and maintenance outcomes.</div>
+    
+    <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:12px;">Learning Sources</div>
+    <div class="memory-sources">
+      <div class="mem-source">Engineer Feedback</div>
+      <div class="mem-source">Supervisor Reviews</div>
+      <div class="mem-source">Maintenance Results</div>
+      <div class="mem-source">Equipment Performance</div>
+      <div class="mem-source">Inventory Usage</div>
+      <div class="mem-source">Escalation Outcomes</div>
+      <div class="mem-source">Work Order Completion Data</div>
+    </div>
+    
+    <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:12px;">Benefits</div>
+    <div class="memory-benefits">
+      <div class="mem-benefit"><i class="fa-solid fa-check-circle"></i> Improved Recommendations</div>
+      <div class="mem-benefit"><i class="fa-solid fa-check-circle"></i> Better Diagnostics</div>
+      <div class="mem-benefit"><i class="fa-solid fa-check-circle"></i> Reduced Downtime</div>
+      <div class="mem-benefit"><i class="fa-solid fa-check-circle"></i> Smarter Decision Support</div>
+      <div class="mem-benefit"><i class="fa-solid fa-check-circle"></i> Knowledge Retention</div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="section" id="loginSection">
+  <div class="section-label">Access Portal</div>
+  <div class="section-title" style="text-align:center">Secure Login</div>
+  <div class="section-sub" style="text-align:center;margin-bottom:32px">Enter your credentials to access the platform</div>
+  <div class="login-wrapper">
+    <div class="login-title">Access Platform</div>
+    <div class="login-sub">Select a role to enter the Industrial Maintenance Intelligence Platform</div>
+    
+    <div id="loginError" class="error-msg" style="margin-bottom:16px;"></div>
+    
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      
+      <!-- Manager Card -->
+      <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:12px; padding:20px; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--card-border)'">
+        <div style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <i class="fa-solid fa-user-tie" style="color:var(--primary)"></i> Manager Portal
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:16px; font-family:monospace;">
+          Employee ID: MGR001<br>Password: Manager@123
+        </div>
+        <button class="btn-submit" style="font-size:14px; padding:10px;" onclick="autoLogin('MGR001', 'Manager@123', this)">
+          <span><i class="fa-solid fa-right-to-bracket"></i> Login as Manager</span>
+          <div class="spinner" style="display:none; width:14px; height:14px;"></div>
+        </button>
+      </div>
+
+      <!-- Supervisor Card -->
+      <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:12px; padding:20px; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--card-border)'">
+        <div style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <i class="fa-solid fa-user-check" style="color:var(--primary)"></i> Supervisor Portal
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:16px; font-family:monospace;">
+          Employee ID: SUP001<br>Password: Supervisor@123
+        </div>
+        <button class="btn-submit" style="font-size:14px; padding:10px;" onclick="autoLogin('SUP001', 'Supervisor@123', this)">
+          <span><i class="fa-solid fa-right-to-bracket"></i> Login as Supervisor</span>
+          <div class="spinner" style="display:none; width:14px; height:14px;"></div>
+        </button>
+      </div>
+
+      <!-- Engineer Card -->
+      <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:12px; padding:20px; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--card-border)'">
+        <div style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <i class="fa-solid fa-helmet-safety" style="color:var(--primary)"></i> Engineer Portal
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:16px; font-family:monospace;">
+          Employee ID: ENG001<br>Password: Engineer@123
+        </div>
+        <button class="btn-submit" style="font-size:14px; padding:10px;" onclick="autoLogin('ENG001', 'Engineer@123', this)">
+          <span><i class="fa-solid fa-right-to-bracket"></i> Login as Engineer</span>
+          <div class="spinner" style="display:none; width:14px; height:14px;"></div>
+        </button>
+      </div>
+
+    </div>
+    
+    <div style="margin-top:32px; padding-top:32px; border-top:1px solid var(--card-border);">
+      <div style="font-size:16px; font-weight:700; text-align:center; margin-bottom:16px;">Or Login with your own credentials</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <input type="text" id="customEmpId" placeholder="Employee ID (e.g. ENG002)" style="padding:12px; border-radius:8px; border:1px solid var(--card-border); background:var(--bg-panel); color:white; font-size:14px; outline:none;">
+        <input type="password" id="customPassword" placeholder="Password" style="padding:12px; border-radius:8px; border:1px solid var(--card-border); background:var(--bg-panel); color:white; font-size:14px; outline:none;">
+        <button class="btn-primary" style="justify-content:center; padding:12px; font-size:14px;" onclick="manualLogin(this)">
+          <span><i class="fa-solid fa-right-to-bracket"></i> Login</span>
+          <div class="spinner" style="display:none; width:14px; height:14px;"></div>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-col">
+    <div class="footer-brand"><i class="fa-solid fa-industry" style="color:var(--primary)"></i> Maintenance Wizard</div>
+    <div class="footer-text">Industrial Maintenance Intelligence Platform</div>
+    <div class="footer-text" style="color:white;font-weight:500;">Developed By: Vikhil Ravella</div>
+  </div>
+  
+  <div class="footer-col" style="align-items:center;">
+    <div class="footer-text"><i class="fa-solid fa-microchip" style="color:var(--primary)"></i> Powered By: Ollama Local Models</div>
+  </div>
+  
+  <div class="footer-tags">
+    <div class="footer-tag">Role-Based Access Control</div>
+    <div class="footer-tag">Audit Logging Enabled</div>
+    <div class="footer-tag">Industrial Operations Platform</div>
+  </div>
+</footer>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+
+function manualLogin(btnElement) {
+  const empId = document.getElementById('customEmpId').value.trim();
+  const password = document.getElementById('customPassword').value.trim();
+  if (!empId || !password) {
+    const errorMsg = document.getElementById('loginError');
+    errorMsg.textContent = 'Please enter both Employee ID and Password';
+    errorMsg.style.display = 'block';
+    return;
+  }
+  autoLogin(empId, password, btnElement);
+}
+
+async function autoLogin(empId, password, btnElement) {
+  const span = btnElement.querySelector('span');
+  const spinner = btnElement.querySelector('.spinner');
+  const errorMsg = document.getElementById('loginError');
+
+  errorMsg.style.display = 'none';
+  btnElement.disabled = true;
+  span.style.display = 'none';
+  spinner.style.display = 'block';
+
+  try {
+    const response = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({employee_id: empId, password: password})
+    });
+    if (!response.ok) throw new Error('Invalid Employee ID or Password');
+    const data = await response.json();
+
+    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('user_role', data.role);
+    localStorage.setItem('user_name', data.name);
+    localStorage.setItem('employee_id', data.employee_id);
+
+    spinner.style.display = 'none';
+    span.innerHTML = '<i class="fa-solid fa-check"></i> Success';
+    span.style.display = 'inline-block';
+    btnElement.style.background = 'var(--accent)';
+
+    setTimeout(() => {
+      const roleStr = (data.role || '').toLowerCase();
+      if (roleStr === 'manager') window.location.href = 'manager_portal.html';
+      else if (roleStr === 'supervisor') window.location.href = 'home_page_supervisor.html';
+      else window.location.href = 'home_page_engineer.html';
+    }, 800);
+
+  } catch (error) {
+    btnElement.disabled = false;
+    spinner.style.display = 'none';
+    span.style.display = 'inline-block';
+    errorMsg.textContent = error.message.includes('fetch') ? 'Cannot reach server. Check backend is running.' : error.message;
+    errorMsg.style.display = 'block';
+  }
+}
+</script>
+</body>
+</html>

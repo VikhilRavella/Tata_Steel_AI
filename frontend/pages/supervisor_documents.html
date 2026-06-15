@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Docs - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    .app-container { display: flex; height: 100vh; overflow: hidden; }
+    .top-nav { height: 52px; background-color: var(--bg-card); border-bottom: 1px solid var(--border-default); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--spacing-6); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+    .nav-brand { display: flex; align-items: center; gap: var(--spacing-3); width: 220px; }
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .search-bar { position: relative; width: 320px; }
+    .search-input { width: 100%; height: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 12px; background-color: var(--bg-page); }
+    .nav-actions { display: flex; align-items: center; gap: var(--spacing-4); }
+    .avatar { height: 32px; width: 32px; border-radius: 50%; background-color: var(--status-warning); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+    .sidebar { width: 220px; background-color: var(--bg-card); border-right: 1px solid var(--border-default); height: calc(100vh - 52px); margin-top: 52px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .user-card { padding: var(--spacing-5); border-bottom: 1px solid var(--border-default); display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .nav-menu { padding: var(--spacing-4) 0; flex-grow: 1; overflow-y: auto; }
+    .nav-item { display: flex; align-items: center; padding: var(--spacing-3) var(--spacing-5); color: var(--text-secondary); text-decoration: none; font-weight: 500; gap: var(--spacing-3); }
+    .nav-item.active { color: var(--primary); background-color: var(--status-success-bg); border-right: 3px solid var(--primary); }
+    .main-content { flex-grow: 1; height: calc(100vh - 52px); margin-top: 52px; overflow-y: auto; padding: var(--spacing-6) var(--spacing-8); background-color: var(--bg-page); }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div class="nav-title">Maintenance Wizard</div>
+    </div>
+    <div class="search-bar"><input type="text" class="search-input" placeholder="Search team, equipment..."></div>
+    <div class="nav-actions">
+      <span class="badge status-warning">Supervisor</span>
+      <div class="avatar profile-icon">SJ</div>
+      <a href="index.html" style="color: var(--text-secondary)"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar profile-icon" style="width:48px;height:48px;font-size:18px;margin-bottom:8px;">SJ</div>
+        <div class="profile-name" style="font-weight:600">Sarah Jenkins</div>
+        <span class="badge status-warning profile-role">Shift Supervisor</span>
+      </div>
+      <nav class="nav-menu">
+        <a href="home_page_supervisor.html" class="nav-item"><i class="fa-solid fa-users"></i> Team Overview</a>
+        <a href="supervisor_escalations.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> Escalations</a>
+        <a href="supervisor_documents.html" class="nav-item active"><i class="fa-solid fa-file-pdf"></i> Manage Docs</a>
+        <a href="supervisor_plant_health.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Plant Health</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-6);">
+        <h2>Team Document Library</h2>
+        <a href="upload.html" class="btn btn-primary"><i class="fa-solid fa-upload"></i> Upload New SOP</a>
+      </div>
+      
+      <div class="card">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border-default);">
+              <th style="padding: 12px 0;">Document Name</th>
+              <th style="padding: 12px 0;">Category</th>
+              <th style="padding: 12px 0;">Assigned Engineers</th>
+              <th style="padding: 12px 0;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="document-table-body">
+            <tr><td colspan="4" style="text-align: center;">Loading team documents...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    async function loadTeamDocuments() {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/documents/team', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const tbody = document.getElementById('document-table-body');
+          tbody.innerHTML = '';
+          
+          if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No documents found in the database.</td></tr>';
+            return;
+          }
+          
+          data.forEach(doc => {
+            let rolesBadge = doc.assigned_roles;
+            if (rolesBadge) {
+              try {
+                const parsed = JSON.parse(rolesBadge);
+                rolesBadge = parsed.join(', ');
+              } catch(e) {}
+            } else {
+              rolesBadge = 'Unassigned';
+            }
+            
+            tbody.innerHTML += `
+              <tr style="border-bottom: 1px solid var(--border-default);">
+                <td style="padding: 12px 0;"><i class="fa-solid fa-file-pdf" style="color: var(--status-critical); margin-right: 8px;"></i> ${doc.filename}</td>
+                <td>${doc.category || 'General'}</td>
+                <td><span class="badge status-info">${rolesBadge}</span></td>
+                <td><button class="btn btn-secondary" style="height: 32px;" onclick="alert('Assignment Manager Opened')">Assign</button></td>
+              </tr>
+            `;
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load documents", err);
+        document.getElementById('document-table-body').innerHTML = '<tr><td colspan="4" style="text-align:center; color: red;">Failed to load documents.</td></tr>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadTeamDocuments);
+  </script>
+</body>
+</html>

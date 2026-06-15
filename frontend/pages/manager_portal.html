@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Portal | Maintenance Wizard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+--primary: #0066CC;
+--primary-dark: #004999;
+--primary-light: #3385d6;
+--accent: #FF6B00;
+--accent-light: #ff8533;
+--success: #16a34a;
+--warning: #d97706;
+--danger: #dc2626;
+--bg: #060a12;
+--bg-panel: #0c1220;
+--bg-card: #111827;
+--border: rgba(255,255,255,0.07);
+--border-hover: rgba(0,102,204,0.4);
+--text: #f1f5f9;
+--text-muted: #64748b;
+--text-dim: #94a3b8;
+--sidebar-w: 260px;
+--topbar-h: 60px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:14px;}
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--bg-panel);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;}
+.sidebar-logo{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;flex-shrink:0;}
+.logo-text{font-size:15px;font-weight:700;color:white;}
+.logo-sub{font-size:11px;color:var(--text-muted);}
+.sidebar-user{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.user-avatar{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent-light));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0;}
+.user-name{font-size:13px;font-weight:600;}
+.user-role{font-size:11px;color:var(--accent);font-weight:500;}
+.sidebar-section-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);padding:16px 24px 8px;font-weight:600;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:4px 12px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;color:var(--text-dim);font-size:13px;font-weight:500;transition:all 0.2s;margin-bottom:2px;}
+.nav-item:hover{background:rgba(0,102,204,0.1);color:var(--text);}
+.nav-item.active{background:rgba(0,102,204,0.15);color:var(--primary-light);border-left:2px solid var(--primary);}
+.nav-item i{width:16px;text-align:center;font-size:13px;}
+.sidebar-footer{padding:16px 24px;border-top:1px solid var(--border);}
+.tata-badge{display:flex;align-items:center;gap:8px;background:rgba(0,102,204,0.1);border:1px solid rgba(0,102,204,0.2);border-radius:8px;padding:8px 12px;}
+.tata-dot{width:8px;height:8px;background:var(--success);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;};}
+.tata-text{font-size:11px;color:var(--text-muted);}
+.tata-name{font-size:12px;font-weight:600;color:var(--primary-light);}
+/* MAIN */
+.main-wrapper{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+/* TOPBAR */
+.topbar{height:var(--topbar-h);background:var(--bg-panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:50;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.page-title{font-size:15px;font-weight:600;color:var(--text);}
+.breadcrumb{font-size:12px;color:var(--text-muted);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.status-pill{display:flex;align-items:center;gap:6px;background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.2);color:#4ade80;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;}
+.status-dot{width:6px;height:6px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite;}
+.btn{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-dim);transition:all 0.2s;}
+.btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+.btn-primary{background:var(--primary);color:white;border-color:var(--primary);}
+.btn-primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
+.btn-outline{background:transparent;color:var(--danger);border-color:rgba(220,38,38,0.3);}
+.btn-outline:hover{background:rgba(220,38,38,0.1);}
+/* CONTENT */
+.content-area{flex:1;padding:28px 32px;overflow-y:auto;}
+.section{display:none;}
+.section.active{display:block;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.section-title{font-size:20px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px;}
+.section-title i{color:var(--primary);font-size:18px;}
+.section-sub{font-size:13px;color:var(--text-muted);margin-top:2px;}
+/* DASHBOARD CARDS */
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;transition:all 0.2s;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),var(--primary-light));}
+.card:hover{border-color:var(--border-hover);transform:translateY(-2px);}
+.card-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-weight:600;margin-bottom:10px;}
+.card-value{font-size:32px;font-weight:800;color:var(--text);}
+.card-icon{position:absolute;top:20px;right:20px;font-size:24px;color:rgba(0,102,204,0.2);}
+/* TABLE */
+.table-container{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.clean-table{width:100%;border-collapse:collapse;}
+.clean-table thead tr{background:rgba(0,102,204,0.08);border-bottom:1px solid var(--border);}
+.clean-table th{padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);font-weight:600;text-align:left;white-space:nowrap;}
+.clean-table td{padding:12px 16px;font-size:13px;color:var(--text-dim);border-bottom:1px solid rgba(255,255,255,0.03);}
+.clean-table tr:last-child td{border-bottom:none;}
+.clean-table tbody tr:hover{background:rgba(0,102,204,0.04);}
+.clean-table tbody tr:hover td{color:var(--text);}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;}
+.badge-success{background:rgba(22,163,74,0.1);color:#4ade80;border:1px solid rgba(22,163,74,0.2);}
+.badge-warning{background:rgba(217,119,6,0.1);color:#fbbf24;border:1px solid rgba(217,119,6,0.2);}
+.badge-danger{background:rgba(220,38,38,0.1);color:#f87171;border:1px solid rgba(220,38,38,0.2);}
+.badge-default{background:rgba(255,255,255,0.05);color:var(--text-dim);border:1px solid var(--border);}
+/* ACTION BUTTONS */
+.action-btn{padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid;transition:all 0.2s;}
+.delete-btn{background:rgba(220,38,38,0.1);color:#f87171;border-color:rgba(220,38,38,0.2);}
+.delete-btn:hover{background:rgba(220,38,38,0.2);}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+.modal{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:440px;box-shadow:0 25px 50px rgba(0,0,0,0.5);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.modal-header span{font-size:16px;font-weight:700;}
+.close-btn{width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;transition:all 0.2s;}
+.close-btn:hover{background:rgba(220,38,38,0.1);color:#f87171;border-color:rgba(220,38,38,0.2);}
+.form-control{width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--text);transition:border-color 0.2s;}
+.form-control:focus{outline:none;border-color:var(--primary);}
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted);}
+.empty-state i{font-size:40px;color:rgba(0,102,204,0.2);margin-bottom:16px;display:block;}
+.empty-state p{font-size:14px;}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2);}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fa-solid fa-industry"></i></div>
+        <div>
+            <div class="logo-text">Maintenance Wizard</div>
+            <div class="logo-sub">Manager Portal</div>
+        </div>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar">M</div>
+        <div>
+            <div class="user-name" id="sidebar-username">Manager</div>
+            <div class="user-role">Plant Manager · JSR-01</div>
+        </div>
+    </div>
+    <div class="sidebar-section-label">Overview</div>
+    <div class="sidebar-nav">
+        <div class="nav-item active" onclick="showSection('dashboard',this)"><i class="fa-solid fa-chart-line"></i> Dashboard</div>
+        <div class="sidebar-section-label" style="padding-left:0">People</div>
+        <div class="nav-item" onclick="showSection('engineers',this)"><i class="fa-solid fa-users-gear"></i> Engineer Management</div>
+        <div class="nav-item" onclick="showSection('supervisors',this)"><i class="fa-solid fa-user-tie"></i> Supervisor Management</div>
+        <div class="sidebar-section-label" style="padding-left:0">Assets</div>
+        <div class="nav-item" onclick="showSection('equipment',this)"><i class="fa-solid fa-city"></i> Equipment Registry</div>
+        <div class="nav-item" onclick="showSection('equipment_parts',this)"><i class="fa-solid fa-cogs"></i> Equipment BOM</div>
+        <div class="nav-item" onclick="showSection('inventory',this)"><i class="fa-solid fa-boxes-stacked"></i> Inventory</div>
+        <div class="sidebar-section-label" style="padding-left:0">Operations</div>
+        <div class="nav-item" onclick="showSection('work_orders',this)"><i class="fa-solid fa-clipboard-list"></i> Work Orders</div>
+        <div class="nav-item" onclick="showSection('maintenance',this)"><i class="fa-solid fa-toolbox"></i> Maintenance History</div>
+        <div class="sidebar-section-label" style="padding-left:0">Compliance</div>
+        <div class="nav-item" onclick="showSection('documents',this)"><i class="fa-solid fa-file-pdf"></i> Document Library</div>
+        <div class="nav-item" onclick="showSection('audit',this)"><i class="fa-solid fa-file-invoice"></i> Audit Logs</div>
+    </div>
+    <div class="sidebar-footer">
+        <div class="tata-badge">
+            <div class="tata-dot"></div>
+            <div>
+                <div class="tata-name">Tata Steel · Jamshedpur</div>
+                <div class="tata-text">AI Platform v2.1 · Online</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="main-wrapper">
+    <div class="topbar">
+        <div class="topbar-left">
+        <i class="fa-solid fa-bars mobile-menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active'); document.querySelector('.sidebar-overlay').classList.toggle('active');"></i>
+            <div>
+                <div class="page-title" id="page-title">Dashboard Overview</div>
+                <div class="breadcrumb">Manager Portal · <span id="breadcrumb-section">Dashboard</span></div>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="status-pill"><div class="status-dot"></div> AI Online</div>
+            <button onclick="localStorage.clear();sessionStorage.clear();window.location.href='index.html'" class="btn btn-outline"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+    </div>
+<div class="content-area">
+
+    <div id="section-dashboard" class="section active">
+        <div class="section-header">
+            <div>
+                <div class="section-title"><i class="fa-solid fa-chart-line"></i> Dashboard Overview</div>
+                <div class="section-sub">Real-time plant operations summary</div>
+            </div>
+            <button class="btn btn-primary" onclick="fetchDashboard()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+        <div class="dashboard-grid" id="dashboard-cards"></div>
+    </div>
+
+    <div id="section-engineers" class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title"><i class="fa-solid fa-users-gear"></i> Engineer Management</div>
+                <div class="section-sub">Manage all field engineers and assignments</div>
+            </div>
+            <button class="btn btn-primary" onclick="openUploadModal('engineers', '/api/manager_portal/engineers/upload')"><i class="fa-solid fa-upload"></i> Upload CSV</button>
+        </div>
+        <div class="table-container">
+            <table class="clean-table">
+                <thead><tr><th>ID</th><th>Emp ID</th><th>Name</th><th>Department</th><th>Supervisor</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="engineers-table-body"><tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-users-gear"></i><p>Loading engineers...</p></div></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-supervisors" class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title"><i class="fa-solid fa-user-tie"></i> Supervisor Management</div>
+                <div class="section-sub">Manage supervisors and team assignments</div>
+            </div>
+            <div style="display:flex;gap:8px">
+                <button class="btn" onclick="openUploadModal('supervisor_mapping', '/api/manager_portal/supervisors/mapping/upload')"><i class="fa-solid fa-users"></i> Upload Eng Mapping</button>
+                <button class="btn btn-primary" onclick="openUploadModal('supervisors', '/api/manager_portal/supervisors/upload')"><i class="fa-solid fa-upload"></i> Upload CSV</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="clean-table">
+                <thead><tr><th>ID</th><th>Name</th><th>Dept</th><th>Plant</th><th>Block</th><th>Engineers</th><th>Equipment</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="supervisors-table-body"><tr><td colspan="9"><div class="empty-state"><i class="fa-solid fa-user-tie"></i><p>Loading supervisors...</p></div></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-equipment" class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title"><i class="fa-solid fa-city"></i> Equipment Registry</div>
+                <div class="section-sub">All plant equipment and health status</div>
+            </div>
+            <div style="display:flex;gap:8px">
+                <button class="btn" onclick="openUploadModal('supervisor_mapping', '/api/manager_portal/supervisors/mapping/upload')"><i class="fa-solid fa-user-tie"></i> Sup Eq Mapping</button>
+                <button class="btn btn-primary" onclick="openUploadModal('equipment', '/api/manager_portal/equipment/upload')"><i class="fa-solid fa-upload"></i> Upload CSV</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="clean-table">
+                <thead><tr><th>Eq ID</th><th>Name</th><th>Type</th><th>Location</th><th>Plant</th><th>Block</th><th>Area</th><th>Status</th><th>Criticality</th><th>Manufacturer</th><th>Model</th><th>Supervisor</th><th>Actions</th></tr></thead>
+                <tbody id="equipment-table-body"><tr><td colspan="9"><div class="empty-state"><i class="fa-solid fa-city"></i><p>Loading equipment...</p></div></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-equipment_parts" class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title"><i class="fa-solid fa-cogs"></i> Equipment BOM</div>
+                <div class="section-sub">Bill of materials and part mappings</div>
+            </div>
+            <button class="btn btn-primary" onclick="openUploadModal('equipment_parts', '/api/manager_portal/equipment-parts/upload')"><i class="fa-solid fa-upload"></i> Upload BOM CSV</button>
+        </div>
+        <div class="table-container">
+            <table class="clean-table">
+                <thead><tr><th>Mapping ID</th><th>Eq ID</th><th>Eq Name</th><th>Part No</th><th>Part Name</th><th>Qty Req</th><th>Critical</th></tr></thead>
+                <tbody id="equipment_parts-table-body"><tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-cogs"></i><p>Loading BOM data...</p></div></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-inventory" class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title"><i class="fa-solid fa-boxes-stacked"></i> Inventory Management</div>
+                <div class="section-sub">Spare parts stock and warehouse locations</div>
+            </div>
+            <button class="btn btn-primary" onclick="openUploadModal('inventory', '/api/manager_portal/inventory/upload')"><i class="fa-solid fa-upload"></i> Upload CSV</button>
+        </div>
+        <div class="table-container">
+            <table class="clean-table">
+                <thead><tr><th>Part No</th><th>Name</th><th>Category</th><th>Stock Qty</th><th>Min Stock</th><th>Warehouse</th><th>Block</th><th>Rack</th><th>Bin</th><th>Supplier</th><th>Last Updated</th><th>Actions</th></tr></thead>
+                <tbody id="inventory-table-body"><tr><td colspan="9"><div class="empty-state"><i class="fa-solid fa-boxes-stacked"></i><p>Loading inventory...</p></div></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-work_orders" class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title"><i class="fa-solid fa-clipboard-list"></i> Work Orders</div>
+                <div class="section-sub">Active and completed maintenance work orders</div>
+            </div>
+            <button class="btn btn-primary" onclick="openUploadModal('work_orders', '/api/manager_portal/work-orders/upload')"><i class="fa-solid fa-upload"></i> Upload CSV</button>
+        </div>
+        <div class="table-container">
+            <table class="clean-table">
+                <thead><tr><th>ID</th><th>Equipment</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned To</th><th>Created By</th><th>Created At</th></tr></thead>
+                <tbody id="work_orders-table-body"><tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-clipboard-list"></i><p>Loading work orders...</p></div></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-maintenance" class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title"><i class="fa-solid fa-toolbox"></i> Maintenance History</div>
+                <div class="section-sub">Complete equipment maintenance records</div>
+            </div>
+            <button class="btn btn-primary" onclick="openUploadModal('maintenance_history', '/api/manager_portal/maintenance-history/upload')"><i class="fa-solid fa-upload"></i> Upload CSV</button>
+        </div>
+        <div class="table-container">
+            <table class="clean-table">
+                <thead><tr><th>ID</th><th>Eq ID</th><th>Eq Name</th><th>Date</th><th>Description</th><th>Performed By</th><th>Status</th></tr></thead>
+                <tbody id="maintenance-table-body"><tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-toolbox"></i><p>Loading history...</p></div></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-documents" class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title"><i class="fa-solid fa-file-pdf"></i> Document Library</div>
+                <div class="section-sub">Manage verified company SOPs and technical manuals</div>
+            </div>
+            <button class="btn btn-primary" onclick="openDocUploadModal()"><i class="fa-solid fa-upload"></i> Upload PDF</button>
+        </div>
+        <div class="table-container">
+            <table class="clean-table">
+                <thead><tr><th>ID</th><th>Filename</th><th>Uploaded By</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="documents-table-body"><tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-file-pdf"></i><p>Loading documents...</p></div></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-audit" class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title"><i class="fa-solid fa-file-invoice"></i> Audit Logs</div>
+                <div class="section-sub">Complete system activity and compliance trail</div>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="clean-table">
+                <thead><tr><th>ID</th><th>Time</th><th>User</th><th>Action</th><th>Entity</th><th>Entity ID</th><th>Details</th></tr></thead>
+                <tbody id="audit-table-body"><tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-file-invoice"></i><p>Loading audit logs...</p></div></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</div>
+<div class="modal-overlay" id="upload-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <span id="upload-title">Upload CSV</span>
+            <div class="close-btn" onclick="closeUploadModal()">✕</div>
+        </div>
+        <div style="margin-bottom:16px;font-size:13px;color:var(--text-muted)">Select a CSV file to import records. Existing records will be updated automatically.</div>
+        <input type="file" id="csv-file" class="form-control" accept=".csv" style="margin-bottom:16px;">
+        <button class="btn btn-primary" onclick="submitUpload()" id="upload-btn" style="width:100%;padding:10px;"><i class="fa-solid fa-upload"></i> Upload and Sync</button>
+        <div id="upload-report" style="margin-top:16px;"></div>
+    </div>
+</div>
+<div id="docUploadModal" class="modal-overlay" style="display: none; align-items: center; justify-content: center;">
+    <div class="modal">
+        <div class="modal-header">
+            <span>Upload Document</span>
+            <div class="close-btn" onclick="document.getElementById('docUploadModal').style.display='none'">✕</div>
+        </div>
+        
+        <div id="docUploadForm">
+            <input type="file" id="docFileInput" accept=".pdf,.docx" class="form-control" style="margin-bottom: 20px;">
+            <button class="btn btn-primary" id="btnSubmitDocUpload" onclick="submitDocUpload()" style="width: 100%;">Upload PDF</button>
+        </div>
+        
+        <div id="docUploadProgress" style="display: none; margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h4 id="mgrVerifStatus">Initializing Document Processing...</h4>
+              <div id="mgrProcessingTimer" style="font-size: 12px; color: var(--text-muted); font-family: monospace;">0s</div>
+            </div>
+            <p id="mgrLoadingMessage" style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Large engineering manuals may take up to 1-2 minutes during first-time indexing. Please wait. The document is being processed.</p>
+            <div class="progress-track" style="width: 100%; height: 8px; background-color: var(--border); border-radius: 4px; overflow: hidden; margin-top: 8px;">
+              <div class="progress-fill" id="mgrProgressFill" style="height: 100%; background-color: var(--primary); width: 5%; transition: width 0.3s ease;"></div>
+            </div>
+            
+            <div id="mgrProcessingSteps" style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+              <div class="step-item" id="mgrStep1" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Extracting PDF Text</div>
+              <div class="step-item" id="mgrStep2" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Chunking Document</div>
+              <div class="step-item" id="mgrStep3" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Generating Embeddings</div>
+              <div class="step-item" id="mgrStep4" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Storing In ChromaDB</div>
+              <div class="step-item" id="mgrStep5" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Building Vector Index</div>
+              <div class="step-item" id="mgrStep6" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Retrieval Ready</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="edit-supervisor-modal">
+    <div class="modal" style="max-width:500px">
+        <div class="modal-header">
+            <span>Edit Supervisor</span>
+            <div class="close-btn" onclick="document.getElementById('edit-supervisor-modal').style.display='none'">✕</div>
+        </div>
+        <form id="edit-supervisor-form" onsubmit="submitEditSupervisor(event)">
+            <input type="hidden" id="edit-sup-id">
+            <div class="form-group" style="margin-bottom:12px">
+                <label>Name</label>
+                <input type="text" id="edit-sup-name" class="form-control" required>
+            </div>
+            <div style="display:flex;gap:12px;margin-bottom:12px">
+                <div class="form-group" style="flex:1">
+                    <label>Department</label>
+                    <input type="text" id="edit-sup-dept" class="form-control">
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label>Status</label>
+                    <select id="edit-sup-status" class="form-control">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;margin-bottom:12px">
+                <div class="form-group" style="flex:1">
+                    <label>Plant</label>
+                    <input type="text" id="edit-sup-plant" class="form-control">
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label>Block</label>
+                    <input type="text" id="edit-sup-block" class="form-control">
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;margin-bottom:16px">
+                <div class="form-group" style="flex:1">
+                    <label>Phone</label>
+                    <input type="text" id="edit-sup-phone" class="form-control">
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label>Email</label>
+                    <input type="email" id="edit-sup-email" class="form-control">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">Save Changes</button>
+        </form>
+    </div>
+</div>
+<script>
+let currentUploadUrl = "";
+let currentSection = "dashboard";
+let activeNavItem = null;
+const token = localStorage.getItem('access_token') || localStorage.getItem('token') || '';
+const API = 'http://127.0.0.1:8000';
+
+window.onload = function() {
+    if (!token) { window.location.href = 'index.html'; }
+    const name = localStorage.getItem('user_name');
+    if (name) document.getElementById('sidebar-username').textContent = name;
+    
+    const activeSection = localStorage.getItem('manager_active_section') || 'dashboard';
+    const navEl = document.querySelector(`.nav-item[onclick*="'${activeSection}'"]`);
+    showSection(activeSection, navEl);
+};
+
+async function fetchAPI(url, options = {}) {
+    if (!options.headers) options.headers = {};
+    options.headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(url.startsWith('http') ? url : `${API}${url}`, options);
+    if (res.status === 401) { window.location.href = 'index.html'; return; }
+    return res.json();
+}
+
+function showSection(sectionId, navEl) {
+    localStorage.setItem('manager_active_section', sectionId);
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const target = document.getElementById(`section-${sectionId}`);
+    if (target) target.classList.add('active');
+    if (!navEl) navEl = document.querySelector(`.nav-item[onclick*="'${sectionId}'"]`);
+    if (navEl) navEl.classList.add('active');
+    currentSection = sectionId;
+    const titles = {dashboard:'Dashboard Overview',engineers:'Engineer Management',supervisors:'Supervisor Management',equipment:'Equipment Registry',equipment_parts:'Equipment BOM',inventory:'Inventory Management',work_orders:'Work Orders',maintenance:'Maintenance History',audit:'Audit Logs', documents: 'Document Library'};
+    document.getElementById('page-title').textContent = titles[sectionId] || sectionId;
+    document.getElementById('breadcrumb-section').textContent = titles[sectionId] || sectionId;
+    if (sectionId === 'dashboard') fetchDashboard();
+    if (sectionId === 'engineers') fetchEngineers();
+    if (sectionId === 'supervisors') fetchSupervisors();
+    if (sectionId === 'equipment') fetchEquipment();
+    if (sectionId === 'equipment_parts') fetchEquipmentParts();
+    if (sectionId === 'inventory') fetchInventory();
+    if (sectionId === 'work_orders') fetchWorkOrders();
+    if (sectionId === 'maintenance') fetchMaintenance();
+    if (sectionId === 'audit') fetchAuditLogs();
+    if (sectionId === 'documents') fetchDocuments();
+}
+
+async function fetchDashboard() {
+    try {
+        const data = await fetchAPI('/api/manager_portal/dashboard');
+        const cards = [
+            {title:'Total Engineers',value:data.engineers,icon:'fa-users-gear',color:''},
+            {title:'Total Supervisors',value:data.supervisors,icon:'fa-user-tie',color:''},
+            {title:'Total Equipment',value:data.equipment,icon:'fa-city',color:''},
+            {title:'Inventory Items',value:data.inventory,icon:'fa-boxes-stacked',color:''},
+            {title:'Running Equipment',value:data.running_equipment,icon:'fa-circle-check',color:'var(--success)'},
+            {title:'Under Maintenance',value:data.maintenance_equipment,icon:'fa-wrench',color:'var(--warning)'},
+            {title:'Open Work Orders',value:data.open_work_orders,icon:'fa-clipboard-list',color:'var(--danger)'},
+            {title:'Low Stock Alerts',value:data.low_stock,icon:'fa-triangle-exclamation',color:'var(--danger)'},
+        ];
+        document.getElementById('dashboard-cards').innerHTML = cards.map(c => `
+            <div class="card">
+                <div class="card-title">${c.title}</div>
+                <div class="card-value" style="${c.color ? 'color:'+c.color : ''}">${c.value ?? 0}</div>
+                <i class="fa-solid ${c.icon} card-icon"></i>
+            </div>
+        `).join('');
+    } catch(e) { console.error(e); }
+}
+
+async function fetchEngineers() {
+    const data = await fetchAPI('/api/manager_portal/engineers');
+    document.getElementById('engineers-table-body').innerHTML = data.length ? data.map(d => `
+        <tr><td>${d.id}</td><td>${d.employee_id}</td><td>${d.name}</td><td>${d.department}</td><td>${d.assigned_supervisor}</td><td>${d.phone||''}</td>
+        <td><span class="badge ${d.status==='Active'?'badge-success':'badge-default'}">${d.status}</span></td>
+        <td><button class="action-btn delete-btn" onclick="deleteEntity('engineers','${d.id}')">Delete</button></td></tr>
+    `).join('') : '<tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-users"></i><p>No engineers found</p></div></td></tr>';
+}
+
+async function fetchSupervisors() {
+    const data = await fetchAPI('/api/manager_portal/supervisors');
+    document.getElementById('supervisors-table-body').innerHTML = data.length ? data.map(d => `
+        <tr><td>${d.supervisor_id}</td><td>${d.name}</td><td>${d.department}</td><td>${d.plant}</td><td>${d.block}</td><td>${d.assigned_engineers}</td><td>${d.assigned_equipment}</td>
+        <td><span class="badge ${d.status==='Active'?'badge-success':'badge-default'}">${d.status}</span></td>
+        <td>
+            <button class="action-btn" style="background:#2563eb;color:white;border:none;margin-right:8px;" onclick="openEditSupervisorModal('${d.supervisor_id}', '${d.name}', '${d.department}', '${d.plant}', '${d.block}', '${d.phone}', '${d.email}', '${d.status}')">Edit</button>
+            <button class="action-btn delete-btn" onclick="deleteEntity('supervisors','${d.supervisor_id}')">Delete</button>
+        </td></tr>
+    `).join('') : '<tr><td colspan="9"><div class="empty-state"><i class="fa-solid fa-user-tie"></i><p>No supervisors found</p></div></td></tr>';
+}
+
+async function fetchEquipment() {
+    const data = await fetchAPI('/api/manager_portal/equipment');
+    document.getElementById('equipment-table-body').innerHTML = data.length ? data.map(d => `
+        <tr><td>${d.equipment_id}</td><td>${d.equipment_name}</td><td>${d.equipment_type||''}</td><td>${d.location||''}</td><td>${d.plant||''}</td><td>${d.block||''}</td><td>${d.area||''}</td>
+        <td><span class="badge ${d.status==='Running'?'badge-success':d.status==='Maintenance'?'badge-warning':'badge-danger'}">${d.status}</span></td>
+        <td>${d.criticality||''}</td><td>${d.manufacturer||''}</td><td>${d.model_number||''}</td><td>${d.assigned_supervisor||''}</td>
+        <td><button class="action-btn delete-btn" onclick="deleteEntity('equipment','${d.equipment_id}')">Delete</button></td></tr>
+    `).join('') : '<tr><td colspan="13"><div class="empty-state"><i class="fa-solid fa-city"></i><p>No equipment found</p></div></td></tr>';
+}
+
+async function fetchEquipmentParts() {
+    const data = await fetchAPI('/api/manager_portal/equipment-parts');
+    document.getElementById('equipment_parts-table-body').innerHTML = data.length ? data.map(d => `
+        <tr><td>${d.id}</td><td>${d.equipment_id}</td><td>${d.equipment_name}</td><td>${d.part_number}</td><td>${d.part_name}</td><td>${d.quantity_required}</td><td>${d.critical_part?'Yes':'No'}</td></tr>
+    `).join('') : '<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-cogs"></i><p>No BOM data found</p></div></td></tr>';
+}
+
+async function fetchInventory() {
+    const data = await fetchAPI('/api/manager_portal/inventory');
+    document.getElementById('inventory-table-body').innerHTML = data.length ? data.map(d => `
+        <tr><td>${d.part_number}</td><td>${d.part_name}</td><td>${d.part_category||''}</td>
+        <td><span class="${d.stock_qty<=d.minimum_stock?'badge badge-danger':''}">${d.stock_qty}</span></td>
+        <td>${d.minimum_stock}</td><td>${d.warehouse||''}</td><td>${d.block||''}</td><td>${d.rack||''}</td><td>${d.bin||''}</td><td>${d.supplier||''}</td><td>${d.last_updated ? new Date(typeof d.last_updated === 'string' && !d.last_updated.endsWith('Z') ? d.last_updated + 'Z' : d.last_updated).toLocaleDateString() : ''}</td>
+        <td><button class="action-btn delete-btn" onclick="deleteEntity('inventory','${d.part_number}')">Delete</button></td></tr>
+    `).join('') : '<tr><td colspan="12"><div class="empty-state"><i class="fa-solid fa-boxes-stacked"></i><p>No inventory found</p></div></td></tr>';
+}
+
+async function fetchWorkOrders() {
+    const data = await fetchAPI('/api/manager_portal/work-orders');
+    document.getElementById('work_orders-table-body').innerHTML = data.length ? data.map(d => `
+        <tr><td>${d.id}</td><td>${d.equipment_name}</td><td>${d.title}</td>
+        <td><span class="badge badge-default">${d.priority}</span></td>
+        <td><span class="badge ${d.status==='Completed'?'badge-success':d.status==='Open'?'badge-danger':'badge-warning'}">${d.status}</span></td>
+        <td>${d.assigned_to}</td><td>${d.created_by}</td><td>${new Date(typeof d.created_at === 'string' && !d.created_at.endsWith('Z') ? d.created_at + 'Z' : d.created_at).toLocaleDateString()}</td></tr>
+    `).join('') : '<tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-clipboard-list"></i><p>No work orders found</p></div></td></tr>';
+}
+
+async function fetchMaintenance() {
+    const data = await fetchAPI('/api/manager_portal/maintenance-history');
+    document.getElementById('maintenance-table-body').innerHTML = data.length ? data.map(d => `
+        <tr><td>${d.id}</td><td>${d.equipment_id}</td><td>${d.equipment_name}</td><td>${new Date(typeof d.maintenance_date === 'string' && !d.maintenance_date.endsWith('Z') ? d.maintenance_date + 'Z' : d.maintenance_date).toLocaleDateString()}</td>
+        <td>${d.description}</td><td>${d.performed_by}</td>
+        <td><span class="badge ${d.status==='Completed'?'badge-success':'badge-warning'}">${d.status}</span></td></tr>
+    `).join('') : '<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-toolbox"></i><p>No maintenance records found</p></div></td></tr>';
+}
+
+async function fetchAuditLogs() {
+    const data = await fetchAPI('/api/manager_portal/audit-logs');
+    document.getElementById('audit-table-body').innerHTML = data.length ? data.map(d => `
+        <tr><td>${d.id}</td><td>${new Date(typeof d.timestamp === 'string' && !d.timestamp.endsWith('Z') ? d.timestamp + 'Z' : d.timestamp).toLocaleString()}</td><td>${d.user}</td><td>${d.action}</td><td>${d.entity_type}</td><td>${d.entity_id}</td><td>${d.details}</td></tr>
+    `).join('') : '<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-file-invoice"></i><p>No audit logs found</p></div></td></tr>';
+}
+
+async function fetchDocuments() {
+    const data = await fetchAPI('/api/company-documents');
+    document.getElementById('documents-table-body').innerHTML = data.length ? data.map(d => `
+        <tr>
+            <td>${d.id}</td><td>${d.filename}</td>
+            <td>${new Date(typeof d.upload_date === 'string' && !d.upload_date.endsWith('Z') ? d.upload_date + 'Z' : d.upload_date).toLocaleString()}</td>
+            <td>${d.uploader}</td>
+            <td>
+                <select onchange="updateDocStatus(${d.id}, this.value)" style="padding: 5px; border-radius: 5px;">
+                    <option value="Pending" ${d.status==='Pending'?'selected':''}>Pending</option>
+                    <option value="Approved" ${d.status==='Approved'?'selected':''}>Approved</option>
+                    <option value="Rejected" ${d.status==='Rejected'?'selected':''}>Rejected</option>
+                </select>
+            </td>
+            <td>
+                <button class="action-btn" onclick="document.getElementById('replace-doc-file-${d.id}').click()" style="color: var(--primary); margin-right: 8px;" title="Replace Document"><i class="fa-solid fa-upload"></i></button>
+                <input type="file" id="replace-doc-file-${d.id}" style="display:none" accept=".pdf" onchange="replaceDocument(${d.id}, this.files[0])">
+                <button class="action-btn delete-btn" onclick="deleteDocument(${d.id})" title="Delete Document"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('') : '<tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-file-pdf"></i><p>No documents found</p></div></td></tr>';
+}
+
+function openDocUploadModal() {
+    document.getElementById('docFileInput').value = '';
+    document.getElementById('docUploadModal').style.display = 'flex';
+}
+
+async function submitDocUpload() {
+    const fileInput = document.getElementById('docFileInput');
+    if (!fileInput.files.length) return alert('Please select a file');
+    const file = fileInput.files[0];
+    
+    document.getElementById('docUploadForm').style.display = 'none';
+    document.getElementById('docUploadProgress').style.display = 'block';
+    
+    const fill = document.getElementById('mgrProgressFill');
+    const status = document.getElementById('mgrVerifStatus');
+    
+    let seconds = 0;
+    const timerInt = setInterval(() => {
+        seconds++;
+        document.getElementById('mgrProcessingTimer').innerText = `${seconds}s`;
+    }, 1000);
+
+    const simIntervals = [];
+    const completeStep = (stepNum, text) => {
+        const el = document.getElementById(`mgrStep${stepNum}`);
+        if (el) el.innerHTML = `<i class="fa-solid fa-check-circle" style="color: var(--success);"></i> <span style="color: var(--text); font-weight: 500;">${text}</span>`;
+    };
+
+    fill.style.width = '10%';
+    status.textContent = 'Processing PDF Document...';
+    
+    simIntervals.push(setTimeout(() => { fill.style.width = '25%'; completeStep(1, 'Extracting PDF Text'); }, 2000));
+    simIntervals.push(setTimeout(() => { fill.style.width = '40%'; completeStep(2, 'Chunking Document'); }, 4000));
+    simIntervals.push(setTimeout(() => { fill.style.width = '60%'; completeStep(3, 'Generating Embeddings'); }, 7000));
+    simIntervals.push(setTimeout(() => { fill.style.width = '80%'; completeStep(4, 'Storing In ChromaDB'); }, 10000));
+
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        const response = await fetch(API + '/api/company-documents/upload', {
+            method: 'POST',
+            headers: {'Authorization': `Bearer ${token}`},
+            body: formData
+        });
+        
+        clearInterval(timerInt);
+        simIntervals.forEach(clearTimeout);
+        
+        if (response.ok) {
+            completeStep(1, 'Extracting PDF Text');
+            completeStep(2, 'Chunking Document');
+            completeStep(3, 'Generating Embeddings');
+            completeStep(4, 'Storing In ChromaDB');
+            completeStep(5, 'Building Vector Index');
+            completeStep(6, 'Retrieval Ready');
+            
+            fill.style.width = '100%'; 
+            status.innerHTML = `<i class="fa-solid fa-file-pdf" style="color: var(--success);"></i> PDF Uploaded Successfully`;
+            status.style.color = 'var(--success)';
+            
+            document.getElementById('mgrLoadingMessage').innerHTML = `<strong>File:</strong> ${file.name}<br><strong>Processing Time:</strong> ${seconds} seconds`;
+            document.getElementById('mgrLoadingMessage').style.color = 'var(--text)';
+            
+            setTimeout(() => {
+                document.getElementById('docUploadModal').style.display = 'none';
+                document.getElementById('docUploadForm').style.display = 'block';
+                document.getElementById('docUploadProgress').style.display = 'none';
+                fetchDocuments();
+            }, 3000);
+            
+        } else {
+            const err = await response.json();
+            fill.style.width = '100%';
+            fill.style.backgroundColor = 'var(--danger)';
+            status.textContent = `Rejected: ${err.detail || 'Unknown error'}`;
+            status.style.color = 'var(--danger)';
+        }
+    } catch(e) {
+        clearInterval(timerInt);
+        simIntervals.forEach(clearTimeout);
+        fill.style.width = '100%';
+        fill.style.backgroundColor = 'var(--danger)';
+        status.textContent = `Upload failed: ${e.message}`;
+        status.style.color = 'var(--danger)';
+    }
+}
+
+async function updateDocStatus(id, status) {
+    const formData = new URLSearchParams();
+    formData.append('status', status);
+    try {
+        await fetch(API + `/api/company-documents/${id}/status`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData.toString()
+        });
+        fetchDocuments();
+    } catch(e) {
+        alert('Status update failed');
+    }
+}
+
+async function deleteDocument(id) {
+    if (!confirm('Are you sure you want to delete this document?')) return;
+    try {
+        await fetchAPI(`/api/company-documents/${id}`, {method:'DELETE'});
+        fetchDocuments();
+    } catch(e) {
+        alert('Delete failed');
+    }
+}
+
+async function replaceDocument(id, file) {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/api/company-documents/replace/${id}`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+        if(response.ok) {
+            alert('Document replaced and new embeddings generated successfully.');
+            fetchDocuments();
+        } else {
+            alert('Failed to replace document');
+        }
+    } catch(e) {
+        console.error(e);
+        alert('Error replacing document');
+    }
+}
+
+async function deleteEntity(type, id) {
+    if (!confirm(`Delete this ${type} record?`)) return;
+    try {
+        await fetchAPI(`/api/manager_portal/${type}/${id}`, {method:'DELETE'});
+        showSection(currentSection, document.querySelector('.nav-item.active'));
+    } catch(e) { alert('Error deleting record'); }
+}
+
+function openUploadModal(type, url) {
+    currentUploadUrl = url.startsWith('http') ? url : `${API}${url}`;
+    document.getElementById('upload-title').innerText = `Upload CSV — ${type}`;
+    document.getElementById('upload-report').innerHTML = '';
+    document.getElementById('csv-file').value = '';
+    document.getElementById('upload-modal').style.display = 'flex';
+}
+
+function closeUploadModal() {
+    document.getElementById('upload-modal').style.display = 'none';
+}
+
+async function submitUpload() {
+    const fileInput = document.getElementById('csv-file');
+    if (!fileInput.files.length) return alert('Please select a file');
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    const btn = document.getElementById('upload-btn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+    btn.disabled = true;
+    try {
+        const res = await fetch(currentUploadUrl, {method:'POST',headers:{'Authorization':`Bearer ${token}`},body:formData});
+        const result = await res.json();
+        document.getElementById('upload-report').innerHTML = `
+            <div style="background:rgba(22,163,74,0.05);border:1px solid rgba(22,163,74,0.1);border-radius:8px;padding:16px;margin-top:8px;">
+                <div style="color:#4ade80;margin-bottom:4px;font-size:13px;"><i class="fa-solid fa-check"></i> Imported: ${result.inserted||0}</div>
+                <div style="color:#60a5fa;margin-bottom:4px;font-size:13px;"><i class="fa-solid fa-rotate"></i> Updated: ${result.updated||0}</div>
+                <div style="color:#f87171;font-size:13px;"><i class="fa-solid fa-xmark"></i> Failed: ${result.failed||0}</div>
+                ${result.errors?.length ? `<div style="margin-top:8px;max-height:80px;overflow-y:auto;font-size:11px;color:#f87171;">${result.errors.map(e=>`<div>${e}</div>`).join('')}</div>` : ''}
+            </div>`;
+        showSection(currentSection, document.querySelector('.nav-item.active'));
+    } catch(e) {
+        document.getElementById('upload-report').innerHTML = `<div style="color:var(--danger);font-size:13px;margin-top:8px;">Upload failed: ${e.message}</div>`;
+    } finally {
+        btn.innerHTML = '<i class="fa-solid fa-upload"></i> Upload and Sync';
+        btn.disabled = false;
+    }
+}
+function openEditSupervisorModal(id, name, dept, plant, block, phone, email, status) {
+    document.getElementById('edit-sup-id').value = id;
+    document.getElementById('edit-sup-name').value = name === 'null' || name === 'undefined' ? '' : name;
+    document.getElementById('edit-sup-dept').value = dept === 'null' || dept === 'undefined' ? '' : dept;
+    document.getElementById('edit-sup-plant').value = plant === 'null' || plant === 'undefined' ? '' : plant;
+    document.getElementById('edit-sup-block').value = block === 'null' || block === 'undefined' ? '' : block;
+    document.getElementById('edit-sup-phone').value = phone === 'null' || phone === 'undefined' ? '' : phone;
+    document.getElementById('edit-sup-email').value = email === 'null' || email === 'undefined' ? '' : email;
+    document.getElementById('edit-sup-status').value = status || 'Active';
+    document.getElementById('edit-supervisor-modal').style.display = 'flex';
+}
+
+async function submitEditSupervisor(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-sup-id').value;
+    const payload = {
+        name: document.getElementById('edit-sup-name').value,
+        department: document.getElementById('edit-sup-dept').value,
+        plant: document.getElementById('edit-sup-plant').value,
+        block: document.getElementById('edit-sup-block').value,
+        phone: document.getElementById('edit-sup-phone').value,
+        email: document.getElementById('edit-sup-email').value,
+        status: document.getElementById('edit-sup-status').value
+    };
+    
+    try {
+        const res = await fetch(`${API}/api/manager_portal/supervisors/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if(res.ok) {
+            document.getElementById('edit-supervisor-modal').style.display = 'none';
+            fetchSupervisors();
+        } else {
+            alert('Failed to update supervisor');
+        }
+    } catch(err) {
+        alert('Error updating supervisor: ' + err.message);
+    }
+}
+</script>
+</body>
+</html>

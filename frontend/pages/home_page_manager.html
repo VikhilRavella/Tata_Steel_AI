@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manager Dashboard - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    .app-container { display: flex; height: 100vh; overflow: hidden; }
+    .top-nav { height: 52px; background-color: var(--bg-card); border-bottom: 1px solid var(--border-default); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--spacing-6); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+    .nav-brand { display: flex; align-items: center; gap: var(--spacing-3); width: 220px; }
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .search-bar { position: relative; width: 320px; }
+    .search-input { width: 100%; height: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 12px; background-color: var(--bg-page); }
+    .nav-actions { display: flex; align-items: center; gap: var(--spacing-4); }
+    .avatar { height: 32px; width: 32px; border-radius: 50%; background-color: var(--status-info); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+    .sidebar { width: 220px; background-color: var(--bg-card); border-right: 1px solid var(--border-default); height: calc(100vh - 52px); margin-top: 52px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .user-card { padding: var(--spacing-5); border-bottom: 1px solid var(--border-default); display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .nav-menu { padding: var(--spacing-4) 0; flex-grow: 1; overflow-y: auto; }
+    .nav-item { display: flex; align-items: center; padding: var(--spacing-3) var(--spacing-5); color: var(--text-secondary); text-decoration: none; font-weight: 500; gap: var(--spacing-3); }
+    .nav-item.active { color: var(--primary); background-color: var(--status-success-bg); border-right: 3px solid var(--primary); }
+    .main-content { flex-grow: 1; height: calc(100vh - 52px); margin-top: 52px; overflow-y: auto; padding: var(--spacing-6) var(--spacing-8); background-color: var(--bg-page); }
+    .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-6); margin-bottom: var(--spacing-6); }
+    .metric-value { font-size: 32px; font-weight: 600; font-family: var(--font-mono); margin: var(--spacing-2) 0; }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div class="nav-title">Maintenance Wizard</div>
+    </div>
+    <div class="search-bar"><input type="text" class="search-input" placeholder="Search plant KPIs, reports..."></div>
+    <div class="nav-actions">
+      <span class="badge status-info">Plant Manager</span>
+      <div class="avatar">MK</div>
+      <a href="index.html" style="color: var(--text-secondary)"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar profile-icon" style="width:48px;height:48px;font-size:18px;margin-bottom:8px;">MK</div>
+        <div class="profile-name" style="font-weight:600">Manish Kumar</div>
+        <span class="badge status-info profile-role">Plant Manager</span>
+      </div>
+      <nav class="nav-menu">
+        <a href="home_page_manager.html" class="nav-item active"><i class="fa-solid fa-chart-pie"></i> Plant KPIs</a>
+        <a href="manager_audit_log.html" class="nav-item"><i class="fa-solid fa-file-invoice"></i> Audit Logs</a>
+        <a href="manager_documents.html" class="nav-item"><i class="fa-solid fa-book"></i> Global SOPs</a>
+        <a href="manager_asset_health.html" class="nav-item"><i class="fa-solid fa-city"></i> Asset Health</a>
+        <a href="manager_users.html" class="nav-item"><i class="fa-solid fa-users-gear"></i> Manage Users</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <h2 style="margin-bottom: var(--spacing-6)">Plant Overview: Jamshedpur</h2>
+      
+      <div class="metrics-grid">
+        <div class="card">
+          <span class="text-secondary font-medium">Overall Equipment Effectiveness (OEE)</span>
+          <div class="metric-value status-success"><span id="kpi-oee">--</span></div>
+        </div>
+        <div class="card">
+          <span class="text-secondary font-medium">Mean Time To Repair (MTTR)</span>
+          <div class="metric-value"><span id="kpi-mttr">--</span></div>
+        </div>
+        <div class="card">
+          <span class="text-secondary font-medium">Compliance Audits Due</span>
+          <div class="metric-value status-warning"><span id="kpi-audits-due">--</span></div>
+        </div>
+        <div class="card">
+          <span class="text-secondary font-medium">Total Active Issues</span>
+          <div class="metric-value status-critical"><span id="kpi-active-issues">--</span></div>
+        </div>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-6);">
+        <div class="card">
+          <h3 style="margin-bottom: var(--spacing-4)">Maintenance Cost vs Budget</h3>
+          <div style="height: 200px; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--border-strong); color: var(--text-muted); border-radius: var(--radius-sm);">
+            [ Chart.js Canvas Placeholder ]
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3 style="margin-bottom: var(--spacing-4)">Department Status</h3>
+          <div id="department-status-container">
+            <ul style="list-style: none; padding: 0;">
+              <li style="display: flex; justify-content: center; padding: 8px 0; color: var(--text-secondary);">Loading...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    async function loadPlantKPIs() {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/manager/kpis', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Set Top KPIs
+          document.getElementById('kpi-oee').innerText = data.top_kpis.oee;
+          document.getElementById('kpi-mttr').innerText = data.top_kpis.mttr;
+          document.getElementById('kpi-audits-due').innerText = data.top_kpis.audits_due;
+          document.getElementById('kpi-active-issues').innerText = data.top_kpis.active_issues;
+          
+          // Set Department Status
+          const depContainer = document.getElementById('department-status-container');
+          if (data.departments.length === 0) {
+            depContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-secondary);">No department data available.</div>';
+          } else {
+            let html = '<ul style="list-style: none; padding: 0;">';
+            data.departments.forEach((dep, index) => {
+              const borderStyle = index < data.departments.length - 1 ? 'border-bottom: 1px solid var(--border-default);' : '';
+              const badgeClass = dep.status === 'Healthy' ? 'status-success' : 'status-warning';
+              
+              html += `
+                <li style="display: flex; justify-content: space-between; padding: 8px 0; ${borderStyle}">
+                  <span>${dep.name}</span> <span class="badge ${badgeClass}">${dep.status}</span>
+                </li>
+              `;
+            });
+            html += '</ul>';
+            depContainer.innerHTML = html;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load Plant KPIs", e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPlantKPIs);
+  </script>
+</body>
+</html>

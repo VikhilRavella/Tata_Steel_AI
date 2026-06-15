@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safety Verification - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    /* Layout */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Top Nav */
+    .top-nav {
+      height: 52px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-6);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      width: 220px;
+    }
+    
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .nav-plant { font-size: 11px; color: var(--text-muted); }
+    
+    .search-bar {
+      position: relative;
+      width: 320px;
+    }
+    
+    .search-bar i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .search-input {
+      width: 100%;
+      height: 32px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      background-color: var(--bg-page);
+      font-size: 13px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+    }
+    
+    .icon-btn {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    
+    .icon-btn:hover { color: var(--text-primary); }
+    
+    .badge-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--status-critical);
+      color: white;
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 50%;
+      height: 14px;
+      min-width: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+    }
+    
+    .avatar {
+      height: 32px;
+      width: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border-default);
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .user-card {
+      padding: var(--spacing-5);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .user-card .avatar { width: 48px; height: 48px; font-size: 18px; margin-bottom: var(--spacing-2); }
+    .user-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .user-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: var(--spacing-1); }
+    
+    .nav-menu {
+      padding: var(--spacing-4) 0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-3) var(--spacing-5);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      gap: var(--spacing-3);
+      transition: background 0.2s, color 0.2s;
+    }
+    
+    .nav-item:hover {
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      color: var(--primary);
+      background-color: var(--status-success-bg);
+      border-right: 3px solid var(--primary);
+    }
+    
+    .nav-item i { width: 16px; text-align: center; }
+    
+    .sidebar-footer {
+      padding: var(--spacing-5);
+      border-top: 1px solid var(--border-default);
+    }
+    
+    .version-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: var(--spacing-4);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex-grow: 1;
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      overflow-y: auto;
+      padding: var(--spacing-6) var(--spacing-8);
+      background-color: var(--bg-page);
+    }
+
+
+    body { background-color: var(--bg-page); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    
+    .wizard-card { background-color: var(--bg-card); width: 100%; max-width: 560px; border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); padding: 40px; display: flex; flex-direction: column; }
+    
+    .wizard-header { text-align: center; margin-bottom: var(--spacing-6); }
+    .wizard-title { font-size: 20px; font-weight: 600; margin-bottom: var(--spacing-2); }
+    
+    .progress-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: var(--spacing-6); }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background-color: var(--border-default); transition: all 0.3s ease; }
+    .dot.active { background-color: var(--primary); transform: scale(1.2); }
+    .dot.completed { background-color: var(--status-success); }
+    
+    .step-container { display: none; }
+    .step-container.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .upload-zone-small { border: 2px dashed var(--border-default); border-radius: var(--radius-md); text-align: center; padding: var(--spacing-6); cursor: pointer; transition: all 0.2s; }
+    .upload-zone-small:hover { border-color: var(--primary); background-color: var(--status-success-bg); }
+    
+    .wizard-footer { display: flex; justify-content: space-between; margin-top: var(--spacing-8); border-top: 1px solid var(--border-default); padding-top: var(--spacing-4); }
+    
+    .ppe-list { list-style: none; padding: 0; margin-top: var(--spacing-4); }
+    .ppe-item { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-2) 0; border-bottom: 1px solid var(--border-default); }
+    .ppe-item:last-child { border-bottom: none; }
+  
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div>
+        <div class="nav-title">Maintenance Wizard</div>
+        <div class="nav-plant">Tata Steel &middot; Jamshedpur</div>
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <i class="fa-solid fa-search"></i>
+      <input type="text" class="search-input" placeholder="Search equipment, SOPs, logs...">
+    </div>
+    
+    <div class="nav-actions">
+      <button class="icon-btn">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge-count">3</span>
+      </button>
+      <span class="badge status-info" id="userRole">Engineer</span>
+      <div class="avatar" id="navAvatar">EN</div>
+      <a href="index.html" class="icon-btn" title="Logout" onclick="localStorage.clear();"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar" id="userAvatar">EN</div>
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-id" id="userId">ID: ...</div>
+      </div>
+      
+            <nav class="nav-menu">
+        <a href="home_page_engineer.html" class="nav-item">
+          <i class="fa-solid fa-home"></i> Home Dashboard
+        </a>
+        <a href="engineering_agent.html" class="nav-item">
+          <i class="fa-solid fa-robot"></i> AI Agent
+        </a>
+        <a href="agent_sandbox.html" class="nav-item">
+          <i class="fa-solid fa-flask"></i> Sandbox
+        </a>
+        <a href="chat.html" class="nav-item">
+          <i class="fa-solid fa-clipboard-check"></i> My Tasks
+        </a>
+        <a href="history.html" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i> Session Logs
+        </a>
+        <a href="upload.html" class="nav-item">
+          <i class="fa-solid fa-file-pdf"></i> Documents
+        </a>
+        <a href="equipment.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i> Equipment Health
+        </a>
+        <a href="safety.html" class="nav-item active">
+          <i class="fa-solid fa-shield-halved"></i> Safety Verification
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i> Profile
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="version-info">v2.1.0 &middot; Plant: JSR-01</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="wizard-card">
+    <div class="wizard-header">
+      <i class="fa-solid fa-shield-halved" style="font-size: 32px; color: var(--primary); margin-bottom: var(--spacing-3);"></i>
+      <div class="wizard-title">Mandatory Safety Verification</div>
+      <div class="text-muted">Complete all steps before starting maintenance</div>
+    </div>
+    
+    <div class="progress-dots">
+      <div class="dot active" id="dot1"></div>
+      <div class="dot" id="dot2"></div>
+      <div class="dot" id="dot3"></div>
+      <div class="dot" id="dot4"></div>
+      <div class="dot" id="dot5"></div>
+    </div>
+    
+    <!-- Step 1 -->
+    <div class="step-container active" id="step1">
+      <h3 style="margin-bottom: var(--spacing-4);">1. Confirm Identity</h3>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" value="Rahul Agarwal" readonly style="background-color: var(--bg-page);">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Employee ID</label>
+        <input type="text" class="form-input" value="12345" readonly style="background-color: var(--bg-page);">
+      </div>
+    </div>
+    
+    <!-- Step 2 -->
+    <div class="step-container" id="step2">
+      <h3 style="margin-bottom: var(--spacing-4);">2. Work Location</h3>
+      <div class="form-group">
+        <label class="form-label">Block</label>
+        <select class="form-input">
+          <option>Block A - Blast Furnace</option>
+          <option>Block B - Rolling Mill</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Equipment ID</label>
+        <input type="text" class="form-input" placeholder="e.g. PUMP-C104">
+      </div>
+    </div>
+    
+    <!-- Step 3 -->
+    <div class="step-container" id="step3">
+      <h3 style="margin-bottom: var(--spacing-4);">3. PPE Verification</h3>
+      <div class="upload-zone-small" onclick="simulateAI()">
+        <i class="fa-solid fa-camera" style="font-size: 24px; color: var(--text-muted); margin-bottom: 8px;"></i>
+        <div>Click to upload PPE photo</div>
+      </div>
+      <ul class="ppe-list" id="ppeList" style="display: none;">
+        <li class="ppe-item"><span>Hard Hat</span> <i class="fa-solid fa-check status-success"></i></li>
+        <li class="ppe-item"><span>Safety Glasses</span> <i class="fa-solid fa-check status-success"></i></li>
+        <li class="ppe-item"><span>High-Vis Vest</span> <i class="fa-solid fa-check status-success"></i></li>
+        <li class="ppe-item"><span>Steel-toe Boots</span> <input type="checkbox" checked> (Manual confirm)</li>
+      </ul>
+    </div>
+    
+    <!-- Step 4 -->
+    <div class="step-container" id="step4">
+      <h3 style="margin-bottom: var(--spacing-4);">4. Work Permit & LOTO</h3>
+      <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+        <label style="font-weight: 500;">Valid Work Permit?</label>
+        <input type="checkbox" checked style="width: 20px; height: 20px;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Permit Number</label>
+        <input type="text" class="form-input" value="WP-2026-8891">
+      </div>
+      <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-top: var(--spacing-4);">
+        <label style="font-weight: 500;">LOTO Applied?</label>
+        <span class="badge status-success">Verified via Agent</span>
+      </div>
+    </div>
+    
+    <!-- Step 5 -->
+    <div class="step-container" id="step5">
+      <h3 style="margin-bottom: var(--spacing-4);">5. Digital Signature</h3>
+      <div style="height: 100px; overflow-y: auto; background-color: var(--bg-page); padding: var(--spacing-3); border-radius: var(--radius-sm); font-size: 12px; margin-bottom: var(--spacing-4); border: 1px solid var(--border-default);">
+        I hereby confirm that I have completed all mandatory safety checks. I have applied Lockout/Tagout procedures as required for this equipment. I have the necessary PPE and am authorized to perform this maintenance...
+      </div>
+      <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px; margin-bottom: var(--spacing-4);">
+        <input type="checkbox" id="agreeCb">
+        <label for="agreeCb" style="font-size: 13px;">I have read and understood the safety policy</label>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type name to sign</label>
+        <input type="text" class="form-input" id="sigInput" placeholder="Rahul Agarwal">
+      </div>
+    </div>
+    
+    <div class="wizard-footer">
+      <button class="btn btn-secondary" id="prevBtn" onclick="nextStep(-1)" disabled>Back</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextStep(1)">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 5;
+    
+    function nextStep(dir) {
+      document.getElementById('step' + currentStep).classList.remove('active');
+      document.getElementById('dot' + currentStep).classList.remove('active');
+      if (dir === 1) document.getElementById('dot' + currentStep).classList.add('completed');
+      else document.getElementById('dot' + currentStep).classList.remove('completed');
+      
+      currentStep += dir;
+      
+      document.getElementById('step' + currentStep).classList.add('active');
+      document.getElementById('dot' + currentStep).classList.add('active');
+      
+      document.getElementById('prevBtn').disabled = (currentStep === 1);
+      
+      const nextBtn = document.getElementById('nextBtn');
+      if (currentStep === totalSteps) {
+        nextBtn.innerHTML = '<i class="fa-solid fa-check"></i> Submit Audit';
+        nextBtn.onclick = () => {
+          if(!document.getElementById('agreeCb').checked || !document.getElementById('sigInput').value) {
+            alert('Please check the agreement box and type your signature.');
+            return;
+          }
+          nextBtn.innerHTML = '<div class="spinner"></div>';
+          setTimeout(() => window.location.href = 'chat.html', 1500);
+        };
+      } else {
+        nextBtn.innerHTML = 'Continue';
+        nextBtn.onclick = () => nextStep(1);
+      }
+    }
+    
+    function simulateAI() {
+      const btn = document.querySelector('.upload-zone-small');
+      btn.innerHTML = '<div class="spinner" style="margin: 0 auto; border-top-color: var(--primary);"></div><div style="margin-top: 8px;">AI analyzing PPE...</div>';
+      setTimeout(() => {
+        btn.style.display = 'none';
+        document.getElementById('ppeList').style.display = 'block';
+      }, 1500);
+    }
+  </script>
+    </main>
+  </div>
+  <script src="../js/dashboard.js?v=2.0"></script>
+</body>
+</html>

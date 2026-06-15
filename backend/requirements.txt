@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+python-multipart
+httpx
+# Optional integrations for document parsing and AI
+chromadb
+pymupdf
+python-docx

@@ -1,0 +1,6 @@
+==================================================
+FINAL DASHBOARD & DB AUDIT REPORT
+==================================================
+
+
+DB INTEGRITY: 'users' table missing or schema mismatch.

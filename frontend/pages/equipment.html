@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipment Health - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    /* Layout */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Top Nav */
+    .top-nav {
+      height: 52px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-6);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      width: 220px;
+    }
+    
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .nav-plant { font-size: 11px; color: var(--text-muted); }
+    
+    .search-bar {
+      position: relative;
+      width: 320px;
+    }
+    
+    .search-bar i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .search-input {
+      width: 100%;
+      height: 32px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      background-color: var(--bg-page);
+      font-size: 13px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+    }
+    
+    .icon-btn {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    
+    .icon-btn:hover { color: var(--text-primary); }
+    
+    .badge-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--status-critical);
+      color: white;
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 50%;
+      height: 14px;
+      min-width: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+    }
+    
+    .avatar {
+      height: 32px;
+      width: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border-default);
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .user-card {
+      padding: var(--spacing-5);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .user-card .avatar { width: 48px; height: 48px; font-size: 18px; margin-bottom: var(--spacing-2); }
+    .user-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .user-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: var(--spacing-1); }
+    
+    .nav-menu {
+      padding: var(--spacing-4) 0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-3) var(--spacing-5);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      gap: var(--spacing-3);
+      transition: background 0.2s, color 0.2s;
+    }
+    
+    .nav-item:hover {
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      color: var(--primary);
+      background-color: var(--status-success-bg);
+      border-right: 3px solid var(--primary);
+    }
+    
+    .nav-item i { width: 16px; text-align: center; }
+    
+    .sidebar-footer {
+      padding: var(--spacing-5);
+      border-top: 1px solid var(--border-default);
+    }
+    
+    .version-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: var(--spacing-4);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex-grow: 1;
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      overflow-y: auto;
+      padding: var(--spacing-6) var(--spacing-8);
+      background-color: var(--bg-page);
+    }
+
+
+    
+    
+    
+    .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-6); margin-bottom: var(--spacing-6); }
+    .metric-value { font-size: 32px; font-weight: 600; font-family: var(--font-mono); margin: var(--spacing-2) 0; }
+    
+    .map-container { position: relative; background-color: var(--bg-card); border: 1px solid var(--border-default); border-radius: var(--radius-md); height: 400px; display: flex; align-items: center; justify-content: center; margin-bottom: var(--spacing-6); overflow: hidden; }
+    .map-bg { opacity: 0.1; width: 100%; height: 100%; position: absolute; background: repeating-linear-gradient(45deg, #000, #000 1px, transparent 1px, transparent 20px); }
+    .map-node { position: absolute; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
+    .map-node:hover { transform: scale(1.3); }
+    .node-healthy { background-color: var(--status-success); }
+    .node-warning { background-color: var(--status-warning); animation: pulse-warn 2s infinite; }
+    .node-critical { background-color: var(--status-critical); animation: pulse-crit 1s infinite; }
+    
+    @keyframes pulse-warn { 0% { box-shadow: 0 0 0 0 rgba(239, 159, 39, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 159, 39, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 159, 39, 0); } }
+    @keyframes pulse-crit { 0% { box-shadow: 0 0 0 0 rgba(226, 75, 74, 0.6); } 70% { box-shadow: 0 0 0 15px rgba(226, 75, 74, 0); } 100% { box-shadow: 0 0 0 0 rgba(226, 75, 74, 0); } }
+
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6); }
+    .chart-box { height: 250px; background-color: var(--bg-card); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: var(--spacing-4); }
+  
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div>
+        <div class="nav-title">Maintenance Wizard</div>
+        <div class="nav-plant">Tata Steel &middot; Jamshedpur</div>
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <i class="fa-solid fa-search"></i>
+      <input type="text" class="search-input" placeholder="Search equipment, SOPs, logs...">
+    </div>
+    
+    <div class="nav-actions">
+      <button class="icon-btn">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge-count">3</span>
+      </button>
+      <span class="badge status-info" id="userRole">Engineer</span>
+      <div class="avatar" id="navAvatar">EN</div>
+      <a href="index.html" class="icon-btn" title="Logout" onclick="localStorage.clear();"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar" id="userAvatar">EN</div>
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-id" id="userId">ID: ...</div>
+      </div>
+      
+            <nav class="nav-menu">
+        <a href="home_page_engineer.html" class="nav-item">
+          <i class="fa-solid fa-home"></i> Home Dashboard
+        </a>
+        <a href="engineering_agent.html" class="nav-item">
+          <i class="fa-solid fa-robot"></i> AI Agent
+        </a>
+        <a href="agent_sandbox.html" class="nav-item">
+          <i class="fa-solid fa-flask"></i> Sandbox
+        </a>
+        <a href="chat.html" class="nav-item">
+          <i class="fa-solid fa-clipboard-check"></i> My Tasks
+        </a>
+        <a href="history.html" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i> Session Logs
+        </a>
+        <a href="upload.html" class="nav-item">
+          <i class="fa-solid fa-file-pdf"></i> Documents
+        </a>
+        <a href="equipment.html" class="nav-item active">
+          <i class="fa-solid fa-chart-line"></i> Equipment Health
+        </a>
+        <a href="safety.html" class="nav-item">
+          <i class="fa-solid fa-shield-halved"></i> Safety Verification
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i> Profile
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="version-info">v2.1.0 &middot; Plant: JSR-01</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <h2 style="margin-bottom: var(--spacing-6)">Equipment Health Overview</h2>
+      
+      <div class="metrics-grid">
+        <div class="card">
+          <span class="text-secondary font-medium">Total Tracked Assets</span>
+          <div class="metric-value">1,204</div>
+        </div>
+        <div class="card">
+          <span class="text-secondary font-medium">Critical Alerts</span>
+          <div class="metric-value status-critical">4</div>
+        </div>
+        <div class="card">
+          <span class="text-secondary font-medium">Scheduled Maint. Due</span>
+          <div class="metric-value status-warning">12</div>
+        </div>
+        <div class="card">
+          <span class="text-secondary font-medium">Avg Health Score</span>
+          <div class="metric-value status-success">92%</div>
+        </div>
+      </div>
+      
+      <!-- Plant Map -->
+      <div class="map-container">
+        <div class="map-bg"></div>
+        <div style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 4px; font-weight: 500; font-size: 12px;">Plant Floor Diagram (Block A)</div>
+        
+        <!-- Nodes -->
+        <div class="map-node node-healthy" style="top: 30%; left: 20%;" title="C-101 (Healthy)"></div>
+        <div class="map-node node-healthy" style="top: 35%; left: 25%;" title="C-102 (Healthy)"></div>
+        <div class="map-node node-warning" style="top: 50%; left: 45%;" title="M-450 (Warning - Temp)"></div>
+        <div class="map-node node-healthy" style="top: 60%; left: 70%;" title="P-200 (Healthy)"></div>
+        <div class="map-node node-critical" style="top: 75%; left: 60%;" title="C-104 (Critical - Vibration)"></div>
+      </div>
+      
+      <!-- Trend Charts -->
+      <div class="charts-grid">
+        <div class="chart-box">
+          <h4 style="margin-bottom: 12px;">Vibration Trends (C-104)</h4>
+          <div style="width: 100%; height: calc(100% - 30px); border: 1px dashed var(--border-strong); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+            [ Chart.js Canvas ]
+          </div>
+        </div>
+        <div class="chart-box">
+          <h4 style="margin-bottom: 12px;">Temperature Trends (M-450)</h4>
+          <div style="width: 100%; height: calc(100% - 30px); border: 1px dashed var(--border-strong); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+            [ Chart.js Canvas ]
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/dashboard.js?v=2.0"></script>
+</body>
+</html>

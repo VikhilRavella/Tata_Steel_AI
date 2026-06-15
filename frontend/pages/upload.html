@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Upload - Maintenance Wizard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <script src="../js/rbac.js?v=2.1"></script>
+
+  <style>
+    /* Layout */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Top Nav */
+    .top-nav {
+      height: 52px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-6);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      width: 220px;
+    }
+    
+    .nav-brand i { color: var(--primary); font-size: 20px; }
+    .nav-title { font-weight: 600; font-size: 16px; }
+    .nav-plant { font-size: 11px; color: var(--text-muted); }
+    
+    .search-bar {
+      position: relative;
+      width: 320px;
+    }
+    
+    .search-bar i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .search-input {
+      width: 100%;
+      height: 32px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      background-color: var(--bg-page);
+      font-size: 13px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+    }
+    
+    .icon-btn {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    
+    .icon-btn:hover { color: var(--text-primary); }
+    
+    .badge-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--status-critical);
+      color: white;
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 50%;
+      height: 14px;
+      min-width: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+    }
+    
+    .avatar {
+      height: 32px;
+      width: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border-default);
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .user-card {
+      padding: var(--spacing-5);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .user-card .avatar { width: 48px; height: 48px; font-size: 18px; margin-bottom: var(--spacing-2); }
+    .user-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .user-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: var(--spacing-1); }
+    
+    .nav-menu {
+      padding: var(--spacing-4) 0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-3) var(--spacing-5);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      gap: var(--spacing-3);
+      transition: background 0.2s, color 0.2s;
+    }
+    
+    .nav-item:hover {
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      color: var(--primary);
+      background-color: var(--status-success-bg);
+      border-right: 3px solid var(--primary);
+    }
+    
+    .nav-item i { width: 16px; text-align: center; }
+    
+    .sidebar-footer {
+      padding: var(--spacing-5);
+      border-top: 1px solid var(--border-default);
+    }
+    
+    .version-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: var(--spacing-4);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex-grow: 1;
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      overflow-y: auto;
+      padding: var(--spacing-6) var(--spacing-8);
+      background-color: var(--bg-page);
+    }
+
+
+    
+    
+    
+    .upload-layout { display: grid; grid-template-columns: 60% 40%; gap: var(--spacing-6); height: 100%; }
+    
+    .upload-zone { border: 2px dashed var(--border-strong); border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--spacing-12); background-color: var(--bg-card); transition: all 0.2s ease; cursor: pointer; min-height: 300px; }
+    .upload-zone:hover { border-color: var(--primary); background-color: var(--status-success-bg); }
+    .upload-icon { font-size: 48px; color: var(--border-strong); margin-bottom: var(--spacing-4); }
+    .upload-zone:hover .upload-icon { color: var(--primary); }
+    
+    .doc-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4); }
+    .filter-bar { display: flex; gap: var(--spacing-2); }
+    .filter-btn { background: none; border: 1px solid var(--border-default); padding: 4px 12px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; }
+    .filter-btn.active { background-color: var(--bg-panel); font-weight: 600; border-color: var(--border-strong); }
+    
+    .doc-row { display: flex; align-items: center; padding: var(--spacing-3) 0; border-bottom: 1px solid var(--border-default); }
+    .doc-icon { width: 32px; font-size: 20px; text-align: center; color: var(--status-critical); }
+    .doc-icon.docx { color: var(--status-info); }
+    .doc-info { flex-grow: 1; padding: 0 var(--spacing-3); }
+    .doc-title { font-weight: 500; font-size: 14px; margin-bottom: 2px; }
+    .doc-meta { font-size: 11px; color: var(--text-muted); }
+    .doc-actions { display: flex; gap: var(--spacing-2); }
+    .action-icon { color: var(--text-secondary); cursor: pointer; }
+    .action-icon:hover { color: var(--text-primary); }
+    
+    .verification-panel { margin-top: var(--spacing-6); display: none; }
+    .progress-track { width: 100%; height: 8px; background-color: var(--border-default); border-radius: 4px; overflow: hidden; margin-top: var(--spacing-2); }
+    .progress-fill { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.3s ease; }
+  
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); this.classList.remove('active');"></div>
+
+
+  <header class="top-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-wrench"></i>
+      <div>
+        <div class="nav-title">Maintenance Wizard</div>
+        <div class="nav-plant">Tata Steel &middot; Jamshedpur</div>
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <i class="fa-solid fa-search"></i>
+      <input type="text" class="search-input" placeholder="Search equipment, SOPs, logs...">
+    </div>
+    
+    <div class="nav-actions">
+      <button class="icon-btn">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge-count">3</span>
+      </button>
+      <span class="badge status-info" id="userRole">Engineer</span>
+      <div class="avatar" id="navAvatar">EN</div>
+      <a href="index.html" class="icon-btn" title="Logout" onclick="localStorage.clear();"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar" id="userAvatar">EN</div>
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-id" id="userId">ID: ...</div>
+      </div>
+      
+            <nav class="nav-menu">
+        <a href="home_page_engineer.html" class="nav-item">
+          <i class="fa-solid fa-home"></i> Home Dashboard
+        </a>
+        <a href="engineering_agent.html" class="nav-item">
+          <i class="fa-solid fa-robot"></i> AI Agent
+        </a>
+        <a href="agent_sandbox.html" class="nav-item">
+          <i class="fa-solid fa-flask"></i> Sandbox
+        </a>
+        <a href="chat.html" class="nav-item">
+          <i class="fa-solid fa-clipboard-check"></i> My Tasks
+        </a>
+        <a href="history.html" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i> Session Logs
+        </a>
+        <a href="upload.html" class="nav-item active">
+          <i class="fa-solid fa-file-pdf"></i> Documents
+        </a>
+        <a href="equipment.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i> Equipment Health
+        </a>
+        <a href="safety.html" class="nav-item">
+          <i class="fa-solid fa-shield-halved"></i> Safety Verification
+        </a>
+        <a href="profile.html" class="nav-item">
+          <i class="fa-solid fa-user"></i> Profile
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="version-info">v2.1.0 &middot; Plant: JSR-01</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div style="background-color: var(--status-info-bg); border: 1px solid rgba(24,95,165,0.3); padding: var(--spacing-3) var(--spacing-4); border-radius: var(--radius-md); margin-bottom: var(--spacing-6); display: flex; align-items: center; gap: var(--spacing-3);">
+        <i class="fa-solid fa-circle-info" style="color: var(--status-info);"></i>
+        <span style="font-size: 13px; color: var(--text-secondary);"><strong>Role Access:</strong> You can upload role-specific manuals only. Documents will undergo security stamp verification.</span>
+      </div>
+
+      <div class="upload-layout">
+        <!-- Left: Upload Zone -->
+        <div>
+          <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+            <h3 style="margin-bottom: var(--spacing-2);">Drag PDF or DOCX here or click to browse</h3>
+            <span class="text-muted">PDF and DOCX only &middot; Max 50MB</span>
+            <input type="file" id="fileInput" accept=".pdf,.docx" style="display: none;">
+          </div>
+          
+          <div class="card verification-panel" id="verificationPanel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h4 id="verifStatus">Initializing Document Processing...</h4>
+              <div id="processingTimer" style="font-size: 12px; color: var(--text-muted); font-family: monospace;">0s</div>
+            </div>
+            <p id="loadingMessage" style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Large engineering manuals may take up to 1-2 minutes during first-time indexing. Please wait. The document is being processed.</p>
+            <div class="progress-track">
+              <div class="progress-fill" id="progressFill" style="width: 5%;"></div>
+            </div>
+            
+            <div id="processingSteps" style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+              <div class="step-item" id="step1" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Extracting PDF Text</div>
+              <div class="step-item" id="step2" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Chunking Document</div>
+              <div class="step-item" id="step3" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Generating Embeddings</div>
+              <div class="step-item" id="step4" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Storing In ChromaDB</div>
+              <div class="step-item" id="step5" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Building Vector Index</div>
+              <div class="step-item" id="step6" style="font-size: 13px; color: var(--text-muted);"><i class="fa-regular fa-circle"></i> Retrieval Ready</div>
+            </div>
+            
+            <div style="margin-top: var(--spacing-4); display: none; gap: var(--spacing-2);" id="pageResults">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right: Document List -->
+        <div class="card" style="height: 100%; display: flex; flex-direction: column;">
+          <div class="doc-list-header">
+            <h3>Knowledge Base</h3>
+            <div class="filter-bar">
+              <button class="filter-btn active">All</button>
+              <button class="filter-btn">My Uploads</button>
+            </div>
+          </div>
+          
+          <div style="flex-grow: 1; overflow-y: auto;" id="docs-container">
+            <div style="padding: 10px; color: var(--text-muted); font-size: 14px;">Loading documents...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById('fileInput').addEventListener('change', async function(e) {
+      if(this.files.length > 0) {
+        const file = this.files[0];
+        document.getElementById('dropZone').style.display = 'none';
+        const panel = document.getElementById('verificationPanel');
+        panel.style.display = 'block';
+        
+        const fill = document.getElementById('progressFill');
+        const status = document.getElementById('verifStatus');
+        
+        let seconds = 0;
+        const timerInt = setInterval(() => {
+            seconds++;
+            document.getElementById('processingTimer').innerText = `${seconds}s`;
+        }, 1000);
+
+        // Simulation timings
+        const simIntervals = [];
+        const completeStep = (stepNum, text) => {
+            const el = document.getElementById(`step${stepNum}`);
+            if (el) {
+                el.innerHTML = `<i class="fa-solid fa-check-circle" style="color: var(--status-success);"></i> <span style="color: var(--text-primary); font-weight: 500;">${text}</span>`;
+            }
+        };
+
+        fill.style.width = '10%';
+        status.textContent = 'Processing PDF Document...';
+        
+        simIntervals.push(setTimeout(() => { fill.style.width = '25%'; completeStep(1, 'Extracting PDF Text'); }, 2000));
+        simIntervals.push(setTimeout(() => { fill.style.width = '40%'; completeStep(2, 'Chunking Document'); }, 4000));
+        simIntervals.push(setTimeout(() => { fill.style.width = '60%'; completeStep(3, 'Generating Embeddings'); }, 7000));
+        simIntervals.push(setTimeout(() => { fill.style.width = '80%'; completeStep(4, 'Storing In ChromaDB'); }, 10000));
+        
+        const token = localStorage.getItem('access_token') || 'mock_token';
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+          const response = await fetch('http://localhost:8000/api/documents/upload', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Upload failed');
+          }
+          
+          clearInterval(timerInt);
+          simIntervals.forEach(clearTimeout);
+          
+          completeStep(1, 'Extracting PDF Text');
+          completeStep(2, 'Chunking Document');
+          completeStep(3, 'Generating Embeddings');
+          completeStep(4, 'Storing In ChromaDB');
+          completeStep(5, 'Building Vector Index');
+          completeStep(6, 'Retrieval Ready');
+          
+          fill.style.width = '100%'; 
+          status.innerHTML = `<i class="fa-solid fa-file-pdf" style="color: var(--status-success);"></i> PDF Uploaded Successfully`;
+          status.style.color = 'var(--status-success)';
+          
+          document.getElementById('loadingMessage').innerHTML = `<strong>File:</strong> ${file.name}<br><strong>Processing Time:</strong> ${seconds} seconds`;
+          document.getElementById('loadingMessage').style.color = 'var(--text-primary)';
+          
+          document.getElementById('pageResults').style.display = 'flex';
+          document.getElementById('pageResults').innerHTML = '<span class="badge status-success">Security Stamp Verified</span>';
+          
+          loadDocuments();
+          
+        } catch (err) {
+          clearInterval(timerInt);
+          simIntervals.forEach(clearTimeout);
+          fill.style.width = '100%';
+          fill.style.backgroundColor = 'var(--status-critical)';
+          status.textContent = `Rejected: ${err.message}`;
+          status.style.color = 'var(--status-critical)';
+          document.getElementById('pageResults').style.display = 'flex';
+          document.getElementById('pageResults').innerHTML = '<span class="badge status-critical">Failed</span>';
+        }
+      }
+    });
+
+    async function loadDocuments() {
+      const token = localStorage.getItem('access_token');
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/documents/', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const docs = await response.json();
+          const container = document.getElementById('docs-container');
+          container.innerHTML = '';
+          if (docs.length === 0) {
+            container.innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 14px;">No documents available in knowledge base.</div>';
+            return;
+          }
+          docs.forEach(doc => {
+            const iconClass = doc.filename.endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-word';
+            const typeClass = doc.filename.endsWith('.pdf') ? '' : 'docx';
+            container.innerHTML += `
+              <div class="doc-row">
+                <div class="doc-icon ${typeClass}"><i class="fa-solid ${iconClass}"></i></div>
+                <div class="doc-info">
+                  <div class="doc-title">${doc.filename}</div>
+                  <div class="doc-meta">Uploaded by ${doc.uploaded_by_name} &middot; ${new Date(typeof doc.uploaded_at === 'string' && !doc.uploaded_at.endsWith('Z') ? doc.uploaded_at + 'Z' : doc.uploaded_at).toLocaleDateString()}</div>
+                </div>
+                <div class="doc-actions">
+                  <span class="badge status-success">Verified</span>
+                  <i class="fa-solid fa-eye action-icon" style="margin-left: 8px;"></i>
+                </div>
+              </div>
+            `;
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load documents", e);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadDocuments);
+  </script>
+  <script src="../js/dashboard.js?v=2.0"></script>
+</body>
+</html>
