@@ -32,6 +32,32 @@ Tata_Steel_AI/
 
 ---
 
+## ✨ Platform Features & Capabilities
+
+The Maintenance Wizard is a comprehensive, production-ready Agentic AI platform built with a wide array of advanced features specifically tailored for industrial environments:
+
+### 🤖 1. Specialized Agentic AI
+*   **Engineering Assistant**: A conversational AI agent that can diagnose equipment failures, recommend repair strategies, and summarize complex manuals.
+*   **Computer Vision Diagnostics**: Engineers can upload images of broken machinery or parts, and the AI agent uses Vision Models to analyze the visual data and suggest repair steps.
+*   **Automated Workflows**: The AI dynamically detects intents during a chat session to automatically trigger workflows, such as generating maintenance work orders and inventory requests without manual form entry.
+
+### 📚 2. Advanced RAG Pipeline (Retrieval-Augmented Generation)
+*   **PDF Knowledge Ingestion**: Managers can upload massive PDF technical manuals and Standard Operating Procedures (SOPs).
+*   **Vector Database Integration**: Uploaded documents are automatically chunked, embedded using `BAAI/bge-small-en-v1.5`, and stored in a local ChromaDB instance for ultra-fast semantic search.
+*   **Source Citations & Metadata**: The AI accurately cites exact page numbers and document names when providing technical advice, ensuring perfect traceability.
+
+### 👥 3. Role-Based Access Control (RBAC) & Portals
+*   **Manager Portal**: Full administrative oversight, including PDF document library management, user auditing, and system-wide analytics.
+*   **Supervisor Dashboard**: Live tracking of shift metrics, plant health, active escalations, open maintenance requests, and team management.
+*   **Engineer Portal**: Focuses purely on execution—featuring the active AI Sandbox, assigned work orders, equipment lists, and safety compliance tools.
+
+### ⚙️ 4. Intelligent Orchestration & Escalations
+*   **Dynamic Escalation Matrix**: Automatically tracks overdue maintenance requests, critical equipment downtime, and triggers live escalations to Shift Supervisors.
+*   **Inventory Tracking**: Live tracking of warehouse parts with automated "Low Stock" warnings integrated into the Supervisor reports.
+*   **Safety Compliance Tracker**: Manages safety waivers and tracks maintenance operations to ensure factory compliance protocols are strictly met.
+
+---
+
 ## 🛠️ Step 1: Install Python
 This project requires **Python 3.10 or higher**.
 
