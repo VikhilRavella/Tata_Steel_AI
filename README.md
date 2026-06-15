@@ -5,6 +5,33 @@ Follow these exact steps to run the application from scratch on a brand new mach
 
 ---
 
+## 📁 Project Folder Structure
+
+Understanding how the application is organized:
+
+```text
+Tata_Steel_AI/
+│
+├── backend/            # Core backend infrastructure. Contains the FastAPI server, database models, 
+│                       # API routers (for Auth, Engineering, Manager, Supervisor), service layers 
+│                       # (RAG, Ollama AI, Vector Storage), and file storage systems.
+│
+├── frontend/           # The vanilla HTML, CSS, and JS web interfaces for all user roles. 
+│                       # Contains separate portals for Engineers, Shift Supervisors, and Managers.
+│
+├── docs/               # Comprehensive system documentation, including architecture diagrams, 
+│                       # API route maps, database schemas, and final acceptance/audit reports.
+│
+├── scratch/            # Temporary experimental scripts, test files, and notification checkers 
+│                       # used during active development and debugging.
+│
+├── start_app.py        # The unified startup orchestrator script.
+├── requirements.txt    # Python dependency lockfile.
+└── docker-compose.yml  # Docker configuration for containerized deployment.
+```
+
+---
+
 ## 🛠️ Step 1: Install Python
 This project requires **Python 3.10 or higher**.
 
@@ -17,9 +44,9 @@ This project requires **Python 3.10 or higher**.
 ## 📦 Step 2: Create and Activate a Virtual Environment
 You must create an isolated environment (`venv`) to prevent package conflicts.
 
-1. Navigate to the `FINAL_SUBMISSION` folder.
+1. Navigate to the root project folder:
    ```bash
-   cd path/to/FINAL_SUBMISSION
+   cd path/to/Tata_Steel_AI
    ```
 
 2. **Create the virtual environment:**
@@ -42,7 +69,7 @@ You must create an isolated environment (`venv`) to prevent package conflicts.
 ## ⚙️ Step 3: Install Required Dependencies
 Once your environment is active, install all the locked production dependencies.
 
-1. Ensure your terminal is inside the `FINAL_SUBMISSION` folder and your environment is activated (`(env)` should appear in your prompt).
+1. Ensure your terminal is inside the root folder and your environment is activated (`(env)` should appear in your prompt).
 2. Install the packages using pip:
    ```bash
    pip install -r requirements.txt
@@ -65,14 +92,14 @@ Because this platform uses completely private, locally-hosted AI models, you nee
 ## 🚀 Step 5: Start the Application!
 Everything is now installed and configured. You can boot up both the **Frontend** and the **Backend** concurrently using our built-in orchestration script.
 
-1. Ensure you are in the `FINAL_SUBMISSION` directory and your virtual environment is activated.
+1. Ensure you are in the root directory and your virtual environment is activated.
 2. Run the start script:
    ```bash
    python start_app.py
    ```
 
 **The script will automatically:**
-1. Connect to Ollama and pull all 4 required AI models (`mistral`, `qwen2.5vl`, `qwen3-coder`, `BAAI/bge-small-en-v1.5`) if they aren't already installed.
+1. Connect to Ollama and pull all required AI models (`mistral`, `qwen2.5-coder`, etc.) if they aren't already installed.
 2. Start the FastAPI Backend on `http://localhost:8000`
 3. Start the Web Frontend on `http://localhost:3000`
 4. Automatically open your default web browser directly to the Login portal!
