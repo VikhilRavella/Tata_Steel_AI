@@ -1,0 +1,6 @@
+supervisor_id,user_id,employee_id,name,phone,email,department,plant,block,status,role
+SUP001,U0021,SUP001,Supervisor 1,555-2000,sup1@plant.com,Mechanical,Plant Alpha,Block B,ACTIVE,SUPERVISOR
+SUP002,U0022,SUP002,Supervisor 2,555-2001,sup2@plant.com,Electrical,Plant Alpha,Block C,ACTIVE,SUPERVISOR
+SUP003,U0023,SUP003,Supervisor 3,555-2002,sup3@plant.com,Mechanical,Plant Alpha,Block B,ACTIVE,SUPERVISOR
+SUP004,U0024,SUP004,Supervisor 4,555-2003,sup4@plant.com,Instrumentation,Plant Alpha,Block B,ACTIVE,SUPERVISOR
+SUP005,U0025,SUP005,Supervisor 5,555-2004,sup5@plant.com,Instrumentation,Plant Alpha,Block C,ACTIVE,SUPERVISOR
