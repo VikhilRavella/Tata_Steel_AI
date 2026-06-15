@@ -23,6 +23,12 @@ def ensure_manager(current_user: User = Depends(get_current_active_user)):
         raise HTTPException(status_code=403, detail="Manager access required")
     return current_user
 
+def ensure_manager_or_supervisor(current_user: User = Depends(get_current_active_user)):
+    role = (current_user.role or '').lower()
+    if role not in ['manager', 'supervisor']:
+        raise HTTPException(status_code=403, detail="Manager or Supervisor access required")
+    return current_user
+
 # 1. Manager: Upload Document
 @router.post("/upload")
 async def upload_document(
@@ -52,9 +58,9 @@ async def upload_document(
     
     return {"id": doc.id, "filename": doc.filename, "status": doc.status}
 
-# 2. Manager: Get all documents
+# 2. Manager & Supervisor: Get all documents
 @router.get("")
-def get_all_documents(db: Session = Depends(get_db), current_user: User = Depends(ensure_manager)):
+def get_all_documents(db: Session = Depends(get_db), current_user: User = Depends(ensure_manager_or_supervisor)):
     docs = db.query(CompanyDocument).order_by(CompanyDocument.upload_date.desc()).all()
     res = []
     for d in docs:

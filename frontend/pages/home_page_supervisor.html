@@ -229,11 +229,86 @@
       </div>
 
       <!-- Placeholders for other sections -->
-      <div id="section-equipment_health" class="section"><h2 class="section-title">Equipment Health (Coming Soon)</h2></div>
-      <div id="section-plant_health" class="section"><h2 class="section-title">Plant Health (Coming Soon)</h2></div>
-      <div id="section-documents" class="section"><h2 class="section-title">Documents (Coming Soon)</h2></div>
-      <div id="section-maintenance_history" class="section"><h2 class="section-title">Maintenance History (Coming Soon)</h2></div>
-      <div id="section-reports" class="section"><h2 class="section-title">Reports (Coming Soon)</h2></div>
+      <!-- EQUIPMENT HEALTH -->
+      <div id="section-equipment_health" class="section">
+        <div class="section-header">
+          <h2 class="section-title">Equipment Health Dashboard</h2>
+          <button class="btn btn-primary" onclick="loadEquipmentHealth()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+        </div>
+        <div class="dashboard-grid" id="equipment-health-grid">
+           <!-- Cards will go here -->
+        </div>
+      </div>
+
+      <!-- PLANT HEALTH -->
+      <div id="section-plant_health" class="section">
+        <div class="section-header">
+          <h2 class="section-title">Plant Health Summary</h2>
+          <button class="btn btn-primary" onclick="loadPlantHealth()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+        </div>
+        <div class="dashboard-grid">
+          <div class="card"><div class="card-title">Overall Plant Health</div><div class="card-value" id="ph-overall">...</div></div>
+          <div class="card"><div class="card-title">Healthy Assets</div><div class="card-value" style="color:var(--success)" id="ph-healthy">...</div></div>
+          <div class="card"><div class="card-title">Warning Assets</div><div class="card-value" style="color:var(--warning)" id="ph-warning">...</div></div>
+          <div class="card"><div class="card-title">Critical Assets</div><div class="card-value" style="color:var(--danger)" id="ph-critical">...</div></div>
+        </div>
+      </div>
+      <!-- DOCUMENTS -->
+      <div id="section-documents" class="section">
+        <div class="section-header">
+          <h2 class="section-title">Document Library</h2>
+          <button class="btn btn-primary" onclick="loadDocuments()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+        </div>
+        <div class="table-container">
+          <table class="clean-table">
+            <thead>
+              <tr><th>ID</th><th>Filename</th><th>Upload Date</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="documents-table-body">
+              <tr><td colspan="5" style="text-align: center;">Loading documents...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- MAINTENANCE HISTORY -->
+      <div id="section-maintenance_history" class="section">
+        <div class="section-header">
+          <h2 class="section-title">Maintenance History</h2>
+          <button class="btn btn-primary" onclick="loadMaintenanceHistory()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+        </div>
+        <div class="table-container">
+          <table class="clean-table">
+            <thead>
+              <tr><th>Date</th><th>Equipment</th><th>Engineer</th><th>Description</th><th>Status</th></tr>
+            </thead>
+            <tbody id="maintenance_history-table-body">
+              <tr><td colspan="5" style="text-align: center;">Loading history...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div id="section-reports" class="section">
+        <div class="section-header">
+          <h2 class="section-title">Reports Dashboard</h2>
+          <button class="btn btn-primary" onclick="loadReports()"><i class="fa-solid fa-rotate-right"></i> Generate Reports</button>
+        </div>
+        <div class="card" style="margin-bottom: 20px;">
+           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+             <h3 style="margin:0;">Maintenance Summary Report</h3>
+             <button class="btn btn-outline" onclick="alert('Exporting PDF...')"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+           </div>
+           <div id="report-maintenance" style="color:var(--text-muted);">Generating...</div>
+        </div>
+        <div class="card">
+           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+             <h3 style="margin:0;">Equipment Health & Escalations</h3>
+             <button class="btn btn-outline" onclick="alert('Exporting CSV...')"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+           </div>
+           <div id="report-health" style="color:var(--text-muted);">Generating...</div>
+        </div>
+      </div>
       <div id="section-profile" class="section">
         <div class="header-actions">
           <h2 class="section-title">My Profile</h2>
@@ -327,6 +402,11 @@
       if(sectionId === 'inventory_requests') loadInventoryRequests();
       if(sectionId === 'inventory_status') loadInventoryStatus();
       if(sectionId === 'escalations') loadEscalations();
+      if(sectionId === 'equipment_health') loadEquipmentHealth();
+      if(sectionId === 'plant_health') loadPlantHealth();
+      if(sectionId === 'documents') loadDocuments();
+      if(sectionId === 'maintenance_history') loadMaintenanceHistory();
+      if(sectionId === 'reports') loadReports();
       if(sectionId === 'audit_logs') loadAuditLogs();
       if(sectionId === 'profile') loadProfile();
     }
@@ -501,16 +581,112 @@
     }
 
     async function loadEscalations() {
-      const data = await fetchAPI('/api/supervisor/escalations');
+      // Frontend Simulation
+      const wos = await fetchAPI('/api/supervisor/work-orders') || [];
+      const reqs = await fetchAPI('/api/supervisor/maintenance-requests') || [];
       const tbody = document.getElementById('escalations-table-body');
-      tbody.innerHTML = data.map(esc => `
+      
+      let escalations = [];
+      wos.filter(w => w.status !== 'Completed' && (w.priority === 'High' || w.priority === 'Critical')).forEach(w => {
+        escalations.push({ engineer: w.assigned_to, equipment: w.equipment_name, time: 'High Priority Alert', action: 'Review Work Order' });
+      });
+      reqs.filter(r => r.status === 'Open').forEach(r => {
+        escalations.push({ engineer: r.engineer, equipment: r.equipment_name, time: 'Pending Request', action: 'Approve Request' });
+      });
+      
+      tbody.innerHTML = escalations.length ? escalations.map(e => `
         <tr>
-          <td>${esc.engineer_name}</td>
-          <td>${esc.equipment}</td>
-          <td style="color:#ef4444; font-weight:600;">${esc.time_elapsed}</td>
-          <td><button class="action-btn approve-btn" onclick="alert('Reviewing session ${esc.session_id}')">Review Logs</button></td>
+          <td>${e.engineer}</td>
+          <td>${e.equipment}</td>
+          <td style="color:#ef4444; font-weight:600;">${e.time}</td>
+          <td><button class="action-btn approve-btn" onclick="alert('${e.action}')">Review</button></td>
         </tr>
-      `).join('') || '<tr><td colspan="4" style="text-align:center;">No active escalations.</td></tr>';
+      `).join('') : '<tr><td colspan="4" style="text-align:center;">No active escalations.</td></tr>';
+    }
+
+    async function loadEquipmentHealth() {
+      const data = await fetchAPI('/api/supervisor/equipment') || [];
+      const grid = document.getElementById('equipment-health-grid');
+      if (data.length === 0) { grid.innerHTML = '<p style="grid-column: 1 / -1; text-align:center;">No equipment data available.</p>'; return; }
+      
+      grid.innerHTML = data.map(d => {
+        let health = 100; let color = 'var(--success)';
+        if (d.status === 'Maintenance') { health = 65; color = 'var(--warning)'; }
+        if (d.status === 'Down' || d.status === 'Critical') { health = 30; color = 'var(--danger)'; }
+        return `<div class="card" style="border-left: 4px solid ${color}">
+          <h3 style="margin-top:0">${d.equipment_name}</h3>
+          <p style="color:var(--text-muted); font-size:13px;">ID: ${d.equipment_id} | ${d.plant}</p>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+             <div><div style="font-size:12px; text-transform:uppercase; color:var(--text-muted);">Health Score</div><div style="font-size:24px; font-weight:bold; color:${color}">${health}%</div></div>
+             <div><span class="badge" style="background:${color}; color:white">${d.status}</span></div>
+          </div>
+          <p style="font-size:12px; margin-top:10px; color:var(--text-muted);">Last Inspection: ${d.last_maintenance || 'N/A'}</p>
+        </div>`;
+      }).join('');
+    }
+
+    async function loadPlantHealth() {
+      const data = await fetchAPI('/api/supervisor/equipment') || [];
+      let healthy = 0, warning = 0, critical = 0;
+      data.forEach(d => {
+        if (d.status === 'Running' || d.status === 'Operational') healthy++;
+        else if (d.status === 'Maintenance') warning++;
+        else critical++;
+      });
+      const total = healthy + warning + critical;
+      const overall = total > 0 ? Math.round(((healthy * 100) + (warning * 60) + (critical * 20)) / total) : 0;
+      document.getElementById('ph-overall').innerText = overall + '%';
+      document.getElementById('ph-healthy').innerText = healthy;
+      document.getElementById('ph-warning').innerText = warning;
+      document.getElementById('ph-critical').innerText = critical;
+    }
+
+    async function loadMaintenanceHistory() {
+      const reqs = await fetchAPI('/api/supervisor/maintenance-requests') || [];
+      const tbody = document.getElementById('maintenance_history-table-body');
+      const history = reqs.filter(r => r.status === 'Completed' || r.status === 'Closed');
+      tbody.innerHTML = history.length ? history.map(r => `
+        <tr>
+          <td>${new Date(typeof r.date === 'string' && !r.date.endsWith('Z') ? r.date + 'Z' : r.date).toLocaleDateString()}</td>
+          <td>${r.equipment_name}</td>
+          <td>${r.engineer}</td>
+          <td>${r.description}</td>
+          <td><span class="badge badge-success">${r.status}</span></td>
+        </tr>
+      `).join('') : '<tr><td colspan="5" style="text-align:center;">No completed maintenance history found.</td></tr>';
+    }
+
+    async function loadReports() {
+      const wos = await fetchAPI('/api/supervisor/work-orders') || [];
+      const eq = await fetchAPI('/api/supervisor/equipment') || [];
+      const inv = await fetchAPI('/api/supervisor/inventory-status') || [];
+      
+      const completedWO = wos.filter(w => w.status === 'Completed').length;
+      const openWO = wos.filter(w => w.status === 'Open').length;
+      
+      document.getElementById('report-maintenance').innerHTML = `
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:8px;">
+          <span>Total Work Orders</span> <span style="font-weight:600">${wos.length}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:8px;">
+          <span>Completed</span> <span style="font-weight:600; color:var(--success)">${completedWO}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span>Pending/Open</span> <span style="font-weight:600; color:var(--warning)">${openWO}</span>
+        </div>
+      `;
+      
+      const criticalEq = eq.filter(e => e.status === 'Down' || e.status === 'Critical').length;
+      const lowInv = inv.filter(i => i.stock_qty <= i.minimum_stock).length;
+      
+      document.getElementById('report-health').innerHTML = `
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:8px;">
+          <span>Critical Equipment Down</span> <span style="font-weight:600; color:var(--danger)">${criticalEq}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span>Inventory Alerts (Low Stock)</span> <span style="font-weight:600; color:var(--warning)">${lowInv}</span>
+        </div>
+      `;
     }
 
     async function loadAuditLogs() {
@@ -522,6 +698,22 @@
           <td>${d.action}</td><td>${d.entity}</td><td>${d.details}</td>
         </tr>
       `).join('') || '<tr><td colspan="5" style="text-align:center;">No data available</td></tr>';
+    }
+
+    async function loadDocuments() {
+      const data = await fetchAPI('/api/company-documents');
+      const tbody = document.getElementById('documents-table-body');
+      tbody.innerHTML = data && data.length ? data.map(d => `
+        <tr>
+          <td>${d.id}</td><td>${d.filename}</td>
+          <td>${new Date(typeof d.upload_date === 'string' && !d.upload_date.endsWith('Z') ? d.upload_date + 'Z' : d.upload_date).toLocaleString()}</td>
+          <td><span class="badge ${d.status === 'Approved' ? 'badge-success' : (d.status === 'Pending' ? 'badge-warning' : 'badge-danger')}">${d.status}</span></td>
+          <td>
+            <a href="/company_documents/${d.filename}" target="_blank" class="action-btn" style="text-decoration:none; color:var(--primary); margin-right:8px; border:1px solid var(--border); padding:4px 8px; border-radius:4px;"><i class="fa-solid fa-eye"></i> View</a>
+            <a href="/company_documents/${d.filename}" download class="action-btn" style="text-decoration:none; color:var(--primary); border:1px solid var(--border); padding:4px 8px; border-radius:4px;"><i class="fa-solid fa-download"></i> Download</a>
+          </td>
+        </tr>
+      `).join('') : '<tr><td colspan="5" style="text-align:center;">No documents found</td></tr>';
     }
 
     async function handleInventoryAction(action, transactionId) {
