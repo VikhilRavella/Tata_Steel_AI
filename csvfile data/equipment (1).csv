@@ -1,0 +1,51 @@
+equipment_id,name,type,location,plant,block,area,status,criticality,manufacturer,model,installdata
+EQP-001,Generator-001,Generator,Power Station A,Plant Alpha,Block B,Production,Maintenance,Low,Cummins,C175D5,2018-03-04
+EQP-002,Generator-002,Generator,DG Room,Plant Alpha,Block C,Production,Operational,Medium,Cummins,C175D5,2019-09-11
+EQP-003,Compressor-003,Compressor,Compressor Bay C,Plant Alpha,Block A,Production,Maintenance,Medium,Ingersoll Rand,IR-75,2023-06-19
+EQP-004,Boiler-004,Boiler,Steam Generation Unit,Plant Alpha,Block B,Production,Maintenance,Low,Thermax,TMX-400,2017-12-04
+EQP-005,Turbine-005,Turbine,Power Generation Area,Plant Alpha,Block C,Production,Standby,Low,GE,GT-700,2019-06-03
+EQP-006,Compressor-006,Compressor,Utility Area,Plant Alpha,Block C,Production,Maintenance,High,Ingersoll Rand,IR-75,2024-04-04
+EQP-007,Conveyor-007,Conveyor,Material Yard,Plant Alpha,Block B,Production,Operational,Low,Metso,MC-300,2023-06-20
+EQP-008,Boiler-008,Boiler,Steam Generation Unit,Plant Alpha,Block C,Production,Maintenance,Medium,BHEL,BH-500,2024-11-14
+EQP-009,Generator-009,Generator,Power Station A,Plant Alpha,Block C,Production,Maintenance,High,Cummins,C175D5,2023-09-11
+EQP-010,Conveyor-010,Conveyor,Material Yard,Plant Alpha,Block C,Production,Maintenance,Medium,Metso,MC-300,2016-10-17
+EQP-011,Conveyor-011,Conveyor,Material Yard,Plant Alpha,Block A,Production,Standby,High,FLSmidth,CV-200,2018-01-26
+EQP-012,Compressor-012,Compressor,Compressor Bay C,Plant Alpha,Block A,Production,Standby,High,Ingersoll Rand,IR-75,2022-06-12
+EQP-013,Compressor-013,Compressor,Compressor Bay C,Plant Alpha,Block B,Production,Maintenance,Medium,Ingersoll Rand,IR-75,2017-09-07
+EQP-014,Compressor-014,Compressor,Compressor Bay C,Plant Alpha,Block A,Production,Operational,Low,Atlas Copco,GA-110,2019-02-10
+EQP-015,Conveyor-015,Conveyor,Raw Material Handling Area,Plant Alpha,Block B,Production,Standby,High,Metso,MC-300,2020-03-11
+EQP-016,Compressor-016,Compressor,Utility Area,Plant Alpha,Block A,Production,Standby,Medium,Ingersoll Rand,IR-75,2020-06-06
+EQP-017,Generator-017,Generator,Power Station A,Plant Alpha,Block A,Production,Standby,High,Caterpillar,CAT-3516,2023-11-05
+EQP-018,Conveyor-018,Conveyor,Raw Material Handling Area,Plant Alpha,Block B,Production,Standby,High,FLSmidth,CV-200,2022-05-09
+EQP-019,Boiler-019,Boiler,Steam Generation Unit,Plant Alpha,Block A,Production,Standby,Low,Thermax,TMX-400,2016-05-07
+EQP-020,Boiler-020,Boiler,Boiler House A,Plant Alpha,Block C,Production,Maintenance,Low,Thermax,TMX-400,2015-01-22
+EQP-021,Turbine-021,Turbine,Power Generation Area,Plant Alpha,Block B,Production,Standby,High,Siemens,ST-800,2020-08-11
+EQP-022,Generator-022,Generator,DG Room,Plant Alpha,Block B,Production,Maintenance,Medium,Caterpillar,CAT-3516,2022-02-02
+EQP-023,Turbine-023,Turbine,Power Generation Area,Plant Alpha,Block A,Production,Operational,High,GE,GT-700,2023-11-28
+EQP-024,Compressor-024,Compressor,Utility Area,Plant Alpha,Block B,Production,Operational,Low,Ingersoll Rand,IR-75,2024-07-18
+EQP-025,Conveyor-025,Conveyor,Material Yard,Plant Alpha,Block A,Production,Operational,Low,Metso,MC-300,2022-11-15
+EQP-026,Pump-026,Pump,Pump House A,Plant Alpha,Block A,Production,Operational,Low,KSB,ETA-150,2015-09-05
+EQP-027,Compressor-027,Compressor,Compressor Bay C,Plant Alpha,Block C,Production,Operational,Low,Ingersoll Rand,IR-75,2022-02-06
+EQP-028,Pump-028,Pump,Pump House A,Plant Alpha,Block B,Production,Maintenance,Low,Grundfos,CR-95,2019-07-02
+EQP-029,Boiler-029,Boiler,Boiler House A,Plant Alpha,Block B,Production,Maintenance,Medium,BHEL,BH-500,2024-06-20
+EQP-030,Compressor-030,Compressor,Compressor Bay C,Plant Alpha,Block A,Production,Maintenance,Low,Ingersoll Rand,IR-75,2018-05-06
+EQP-031,Pump-031,Pump,Cooling Water Station,Plant Alpha,Block C,Production,Maintenance,Medium,KSB,ETA-150,2023-09-05
+EQP-032,Boiler-032,Boiler,Steam Generation Unit,Plant Alpha,Block C,Production,Maintenance,Low,BHEL,BH-500,2024-08-03
+EQP-033,Generator-033,Generator,DG Room,Plant Alpha,Block A,Production,Standby,High,Cummins,C175D5,2015-01-03
+EQP-034,Turbine-034,Turbine,Turbine Hall B,Plant Alpha,Block A,Production,Maintenance,Low,Siemens,ST-800,2015-04-27
+EQP-035,Pump-035,Pump,Pump House A,Plant Alpha,Block C,Production,Operational,Low,Grundfos,CR-95,2017-08-07
+EQP-036,Turbine-036,Turbine,Turbine Hall B,Plant Alpha,Block C,Production,Standby,Medium,Siemens,ST-1200,2023-09-07
+EQP-037,Pump-037,Pump,Pump House A,Plant Alpha,Block C,Production,Standby,High,Grundfos,CR-95,2015-03-14
+EQP-038,Pump-038,Pump,Cooling Water Station,Plant Alpha,Block B,Production,Maintenance,Low,Grundfos,CR-95,2018-03-02
+EQP-039,Compressor-039,Compressor,Utility Area,Plant Alpha,Block B,Production,Operational,Low,Ingersoll Rand,IR-75,2021-12-05
+EQP-040,Pump-040,Pump,Cooling Water Station,Plant Alpha,Block A,Production,Standby,Medium,Grundfos,CR-95,2020-09-18
+EQP-041,Pump-041,Pump,Pump House A,Plant Alpha,Block C,Production,Operational,Low,Grundfos,CR-95,2018-06-18
+EQP-042,Conveyor-042,Conveyor,Raw Material Handling Area,Plant Alpha,Block C,Production,Maintenance,Medium,FLSmidth,CV-200,2018-12-26
+EQP-043,Pump-043,Pump,Cooling Water Station,Plant Alpha,Block C,Production,Operational,Medium,Grundfos,CR-95,2015-08-24
+EQP-044,Conveyor-044,Conveyor,Raw Material Handling Area,Plant Alpha,Block B,Production,Maintenance,Medium,Metso,MC-300,2020-11-09
+EQP-045,Boiler-045,Boiler,Boiler House A,Plant Alpha,Block B,Production,Standby,Low,Thermax,TMX-400,2025-07-07
+EQP-046,Turbine-046,Turbine,Power Generation Area,Plant Alpha,Block A,Production,Operational,Medium,GE,GT-700,2024-09-03
+EQP-047,Conveyor-047,Conveyor,Material Yard,Plant Alpha,Block A,Production,Operational,Low,FLSmidth,CV-200,2018-05-09
+EQP-048,Pump-048,Pump,Pump House A,Plant Alpha,Block B,Production,Standby,High,Grundfos,CR-95,2017-01-22
+EQP-049,Turbine-049,Turbine,Power Generation Area,Plant Alpha,Block C,Production,Maintenance,High,GE,GT-700,2025-09-01
+EQP-050,Pump-050,Pump,Pump House A,Plant Alpha,Block C,Production,Operational,High,KSB,ETA-150,2017-06-25
