@@ -140,6 +140,77 @@ graph TD
 
 ---
 
+## 📚 Document Intelligence (RAG) Workflow
+**Retrieval-Augmented Generation for Engineering Knowledge**
+
+```mermaid
+graph TD
+    %% Styling Colors (Steel Gray & Blue Theme)
+    classDef input fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef process fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef embed fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef db fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef agent fill:#312e81,stroke:#c084fc,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef output fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+
+    %% Document Ingestion
+    subgraph "📄 Document Ingestion"
+        PU("<b>Manager Uploads PDF</b><br/>• SOP Manuals<br/>• Equipment Manuals<br/>• Maintenance Procedures<br/>• Safety Documents"):::input
+        DA[Document Approval]:::process
+        PS[PDF Storage]:::process
+        PU --> DA --> PS
+    end
+
+    %% Document Processing
+    subgraph "⚙️ Document Processing"
+        PS --> PE[PDF Extraction]:::process
+        PE --> TC[Text Cleaning]:::process
+        TC --> CH("<b>Chunking</b><br/>Chunk Size = 800<br/>Chunk Overlap = 100"):::process
+        CH --> MG("<b>Metadata Generation</b><br/>Document Name<br/>Page Number<br/>Section Title"):::process
+    end
+
+    %% Embedding Generation
+    subgraph "🧠 Embedding Generation"
+        MG --> TXC[Text Chunks]:::process
+        TXC --> BAAI["<b>BAAI/bge-small-en-v1.5</b><br/>Embedding Model"]:::embed
+        BAAI --> DIM[384-Dimensional Vectors]:::embed
+        DIM --> VG[Vector Generation]:::embed
+    end
+
+    %% Vector Storage
+    subgraph "💾 Vector Storage"
+        VG --> VDB("<b>ChromaDB</b><br/>Stores:<br/>• SOP Chunks<br/>• Manual Chunks<br/>• Maintenance Procedures<br/>• Safety Guidelines<br/>• Technical Knowledge"):::db
+    end
+
+    %% Query Workflow
+    subgraph "🔍 Query Workflow"
+        EQ("<b>Engineer Question</b><br/>• Summarize this PDF<br/>• What maintenance procedures are described?<br/>• What safety precautions are mentioned?<br/>• Explain bearing maintenance SOP"):::input
+        QE[Question Embedding]:::process
+        Q_BAAI["<b>BAAI/bge-small-en-v1.5</b>"]:::embed
+        SS[Semantic Search]:::process
+        TRC[Top Relevant Chunks Retrieved]:::process
+
+        EQ --> QE --> Q_BAAI --> SS
+        VDB -.->|Vector Comparison| SS
+        SS --> TRC
+    end
+
+    %% Answer Generation
+    subgraph "🤖 Answer Generation"
+        TRC --> EA((Engineering Agent)):::agent
+        EA --> MIS[Mistral]:::agent
+        MIS --> GR("<b>Grounded Engineering Response</b>"):::agent
+        GR --> SC("<b>Source Citations</b><br/>Document Name<br/>Page Number<br/>Section Reference"):::agent
+    end
+
+    %% Final Outputs
+    subgraph "📤 Final Outputs"
+        SC --> FO("<b>Outputs:</b><br/>• PDF Summary<br/>• SOP Explanation<br/>• Maintenance Procedures<br/>• Safety Guidelines<br/>• Engineering Reports<br/>• Technical Recommendations"):::output
+    end
+```
+
+---
+
 ## ✨ Platform Features & Capabilities
 
 The Maintenance Wizard is a comprehensive, production-ready Agentic AI platform built with a wide array of advanced features specifically tailored for industrial environments:
