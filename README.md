@@ -211,6 +211,83 @@ graph TD
 
 ---
 
+## 👁️ Vision Diagnostics Workflow
+**AI-Powered Equipment Inspection & Defect Detection**
+
+```mermaid
+graph TD
+    %% Styling Colors (Steel Gray & Blue Theme)
+    classDef input fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef ai fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef detect fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef assess fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef risk fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef action fill:#312e81,stroke:#c084fc,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+
+    %% Image Input
+    subgraph "📷 Image Input"
+        EI("<b>Engineer Uploads Equipment Image</b><br/>• Bearing<br/>• Motor<br/>• Gearbox<br/>• Pump<br/>• Conveyor<br/>• Shaft"):::input
+        IV[Image Validation]:::detect
+        IP[Image Processing]:::detect
+        EI --> IV --> IP
+    end
+
+    %% Vision AI Analysis
+    subgraph "🧠 Vision AI Analysis"
+        IP --> EQ[Equipment Image]:::input
+        EQ --> QW["<b>Qwen2.5VL</b><br/>Vision Foundation Model"]:::ai
+        QW --> OD("<b>Object Detection</b><br/>Identify:<br/>• Bearings<br/>• Motors<br/>• Gearboxes<br/>• Pumps<br/>• Shafts<br/>• Belts<br/>• Couplings"):::detect
+    end
+
+    %% Defect Detection
+    subgraph "🔍 Defect Detection"
+        OD --> VI[Visual Inspection]:::detect
+        VI --> CD[Crack Detection]:::detect
+        VI --> COR[Corrosion Detection]:::detect
+        VI --> WD[Wear Detection]:::detect
+        VI --> LD[Leak Detection]:::detect
+        VI --> MD[Misalignment Detection]:::detect
+        VI --> SD[Surface Damage Detection]:::detect
+    end
+
+    %% Condition Assessment
+    subgraph "📊 Condition Assessment"
+        CD & COR & WD & LD & MD & SD --> EHE[Equipment Health Evaluation]:::assess
+        EHE --> CC("<b>Condition Classification:</b><br/>Excellent | Good | Fair | Poor | Critical"):::assess
+    end
+
+    %% Risk Assessment Engine
+    subgraph "⚠️ Risk Assessment Engine"
+        CC --> DD[Detected Defects]:::risk
+        DD --> RCA[Root Cause Analysis]:::risk
+        RCA --> FP[Failure Prediction]:::risk
+        FP --> SA[Severity Assessment]:::risk
+        SA --> RC("<b>Risk Classification:</b><br/>LOW | MEDIUM | HIGH | CRITICAL"):::risk
+    end
+
+    %% Recommendation Engine
+    subgraph "💡 Recommendation Engine"
+        RC --> AMA[AI Maintenance Advisor]:::action
+        AMA --> GEN("<b>Generate:</b><br/>• Maintenance Recommendation<br/>• Inspection Report<br/>• Defect Report<br/>• Root Cause Analysis<br/>• Risk Assessment Report<br/>• Corrective Action Plan"):::action
+    end
+
+    %% Workflow Automation
+    subgraph "⚡ Workflow Automation"
+        GEN -->|If HIGH or CRITICAL| ALERT[Safety Alert]:::risk
+        ALERT --> SN[Supervisor Notification]:::action
+        SN --> IC[Inventory Check]:::action
+        IC --> WOG[Work Order Generation]:::action
+        WOG --> ME[Maintenance Escalation]:::action
+    end
+
+    %% Final Output
+    subgraph "🖥️ Final Output"
+        ME --> DASH("<b>Engineer Dashboard Displays:</b><br/>• Defect Summary<br/>• Risk Level<br/>• Root Cause<br/>• Recommended Action<br/>• Maintenance Plan<br/>• Safety Alerts"):::input
+    end
+```
+
+---
+
 ## ✨ Platform Features & Capabilities
 
 The Maintenance Wizard is a comprehensive, production-ready Agentic AI platform built with a wide array of advanced features specifically tailored for industrial environments:
