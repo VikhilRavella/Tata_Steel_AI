@@ -86,6 +86,60 @@ graph TD
 
 ---
 
+## ⚙️ Engineering Agent Workflow
+
+```mermaid
+graph TD
+    %% Styling Colors (Steel Gray & Blue Theme)
+    classDef input fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef router fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef branch fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef process fill:#312e81,stroke:#c084fc,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef agent fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef output fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+
+    Q(Engineer Query):::input --> ID(Intent Detection):::router
+    ID --> DR(Decision Router):::router
+
+    subgraph "🔀 Intelligent Routing"
+        DR --> DOC(1. Document Intelligence / RAG):::branch
+        DR --> VIS(2. Vision Diagnostics):::branch
+        DR --> INV(3. Inventory Intelligence):::branch
+        DR --> RISK(4. Risk Assessment Engine):::branch
+    end
+
+    subgraph "📚 Document Intelligence Flow"
+        DOC --> PU[PDF Upload]:::process --> TE[Text Extraction]:::process --> CH[Chunking]:::process --> BAAI[BAAI/bge-small-en-v1.5]:::process --> DB[ChromaDB Retrieval]:::process --> RK[Relevant Knowledge Chunks]:::process
+    end
+
+    subgraph "👁️ Vision Diagnostics Flow"
+        VIS --> EI[Equipment Image]:::process --> QW[Qwen2.5VL]:::process --> OD[Object Detection]:::process --> DD[Defect Detection]:::process --> CD[Crack Detection]:::process --> CRD[Corrosion Detection]:::process --> WD[Wear Detection]:::process
+    end
+
+    subgraph "📦 Inventory Intelligence Flow"
+        INV --> IS[Inventory Search]:::process --> SV[Stock Verification]:::process --> PA[Part Availability Check]:::process --> IR[Inventory Request Generation]:::process
+    end
+
+    subgraph "⚠️ Risk Assessment Flow"
+        RISK --> EC[Equipment Condition]:::process --> RCA[Root Cause Analysis]:::process --> FP[Failure Prediction]:::process --> RC["Risk Classification:<br/>LOW | MEDIUM | HIGH | CRITICAL"]:::process
+    end
+
+    RK --> EA((Engineering Agent)):::agent
+    WD --> EA
+    IR --> EA
+    RC --> EA
+
+    subgraph "🧠 Central Engineering Agent"
+        EA --> Tasks("<b>Core Processing:</b><br/>• Maintenance Reasoning<br/>• Engineering Analysis<br/>• Root Cause Analysis<br/>• Recommendation Generation<br/>• Safety Compliance Check<br/>• Workflow Automation"):::agent
+    end
+
+    subgraph "📤 Output Layer"
+        Tasks --> OUT("<b>Generated Deliverables:</b><br/>• Engineering Report<br/>• Maintenance Report<br/>• Work Order<br/>• Inventory Request<br/>• Risk Assessment Report<br/>• Safety Inspection Report<br/>• Notifications<br/>• Escalation Alerts"):::output
+    end
+```
+
+---
+
 ## ✨ Platform Features & Capabilities
 
 The Maintenance Wizard is a comprehensive, production-ready Agentic AI platform built with a wide array of advanced features specifically tailored for industrial environments:
