@@ -379,6 +379,152 @@ graph TD
 
 ---
 
+## 🔄 End-to-End Industrial AI Maintenance Workflow
+**Complete Maintenance Lifecycle Powered by AI**
+
+```mermaid
+graph TD
+    %% Styling Colors (Steel Gray & Blue Theme)
+    classDef input fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef process fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef agent fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef ai fill:#312e81,stroke:#c084fc,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef action fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef output fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+
+    %% STAGE 1 - KNOWLEDGE INITIALIZATION
+    subgraph "📊 STAGE 1: KNOWLEDGE INITIALIZATION"
+        MP[Manager Portal]:::input
+        UCSV("<b>Upload CSV Data</b><br/>• Users | Supervisors | Equipment<br/>• Inventory | Work Orders | Maintenance History"):::process
+        DP[Database Population]:::process
+        UTM("<b>Upload Technical Manuals</b><br/>• SOPs | User Manuals | Safety Procedures"):::process
+        DA[Document Approval]:::process
+        RAG[RAG Knowledge Base Creation]:::action
+
+        MP --> UCSV --> DP
+        DP --> UTM --> DA --> RAG
+    end
+
+    %% STAGE 2 - ENGINEER OPERATIONS
+    subgraph "👷 STAGE 2: ENGINEER OPERATIONS"
+        EL[Engineer Login]:::input
+        ED[Engineer Dashboard]:::process
+        SE[Select Equipment]:::process
+        ID("<b>Issue Detected</b><br/>Examples:<br/>• Bearing Noise<br/>• Motor Overheating<br/>• Gearbox Vibration<br/>• Pump Leakage"):::process
+
+        EL --> ED --> SE --> ID
+    end
+
+    %% STAGE 3 - ENGINEERING AGENT
+    subgraph "🤖 STAGE 3: ENGINEERING AGENT"
+        EQ[Engineer Query]:::input
+        IND[Intent Detection]:::agent
+        DROUT("<b>Decision Router</b><br/>Selects:<br/>• Document Intelligence<br/>• Vision Diagnostics<br/>• Inventory Intelligence<br/>• Risk Assessment"):::agent
+
+        EQ --> IND --> DROUT
+    end
+
+    %% STAGE 4 - DOCUMENT INTELLIGENCE
+    subgraph "📚 STAGE 4: DOCUMENT INTELLIGENCE"
+        EUP[Engineer Uploads PDF]:::input
+        SS[Semantic Search]:::ai
+        CDR[ChromaDB Retrieval]:::ai
+        EKR[Engineering Knowledge Retrieval]:::ai
+
+        EUP --> SS --> CDR --> EKR
+    end
+
+    %% STAGE 5 - VISION DIAGNOSTICS
+    subgraph "👁️ STAGE 5: VISION DIAGNOSTICS"
+        EUI[Engineer Uploads Equipment Image]:::input
+        QVA[Qwen2.5VL Analysis]:::ai
+        VDEF("<b>Defect Detection</b><br/>• Crack | Corrosion | Wear | Leakage | Misalignment"):::ai
+
+        EUI --> QVA --> VDEF
+    end
+
+    %% STAGE 6 - AI MAINTENANCE INTELLIGENCE
+    subgraph "🧠 STAGE 6: AI MAINTENANCE INTELLIGENCE"
+        EAC("<b>Engineering Agent Combines:</b><br/>• RAG Results<br/>• Vision Results<br/>• Equipment History<br/>• Maintenance Records"):::agent
+        RCA[Root Cause Analysis]:::ai
+        RA("<b>Risk Assessment</b><br/>LOW | MEDIUM | HIGH | CRITICAL"):::ai
+        MREC[Maintenance Recommendation]:::ai
+
+        EAC --> RCA --> RA --> MREC
+    end
+
+    %% STAGE 7 - AUTOMATED WORKFLOW
+    subgraph "⚡ STAGE 7: AUTOMATED WORKFLOW"
+        EAG("<b>Engineering Agent Generates:</b><br/>• Engineering Report<br/>• Maintenance Report<br/>• Risk Assessment Report<br/>• Work Order<br/>• Inventory Request"):::action
+    end
+
+    %% STAGE 8 - INVENTORY PROCESS
+    subgraph "📦 STAGE 8: INVENTORY PROCESS"
+        IR[Inventory Request]:::process
+        IAC[Inventory Availability Check]:::process
+        SA{"Stock Available?<br/>YES / NO"}:::process
+
+        IR --> IAC --> SA
+    end
+
+    %% STAGE 9 - SUPERVISOR APPROVAL
+    subgraph "✅ STAGE 9: SUPERVISOR APPROVAL"
+        SD[Supervisor Dashboard]:::input
+        RR[Review Request]:::process
+        AR[Approve / Reject]:::action
+        NS[Notification Sent]:::action
+
+        SD --> RR --> AR --> NS
+    end
+
+    %% STAGE 10 - MANAGER MONITORING
+    subgraph "📈 STAGE 10: MANAGER MONITORING"
+        MMD("<b>Manager Dashboard Displays:</b><br/>• Plant Health | Open Work Orders<br/>• Critical Risks | Inventory Status<br/>• Safety Alerts | Escalations"):::output
+    end
+
+    %% STAGE 11 - MAINTENANCE EXECUTION
+    subgraph "🔧 STAGE 11: MAINTENANCE EXECUTION"
+        EWO[Engineer Executes Work Order]:::action
+        ER[Equipment Repaired]:::action
+        MOR[Maintenance Outcome Recorded]:::action
+        MHU[Maintenance History Updated]:::action
+
+        EWO --> ER --> MOR --> MHU
+    end
+
+    %% STAGE 12 - CONTINUOUS LEARNING
+    subgraph "🔄 STAGE 12: CONTINUOUS LEARNING"
+        OD[Outcome Data]:::ai
+        AL[Audit Logs]:::ai
+        KR[Knowledge Repository]:::ai
+        FMI[Future Maintenance Intelligence]:::ai
+
+        OD --> AL --> KR --> FMI
+    end
+
+    %% FINAL BUSINESS OUTCOMES
+    subgraph "🏆 FINAL BUSINESS OUTCOMES"
+        FBO("<b>Outcomes:</b><br/>• Reduced Downtime<br/>• Faster Fault Diagnosis<br/>• Improved Safety<br/>• Better Inventory Visibility<br/>• Knowledge Preservation<br/>• Workflow Automation<br/>• Increased Operational Efficiency"):::output
+    end
+
+    %% Core Connections between Stages
+    RAG -.->|System Ready| EL
+    ID --> EQ
+    DROUT --> EUP
+    DROUT --> EUI
+    EKR --> EAC
+    VDEF --> EAC
+    MREC --> EAG
+    EAG --> IR
+    SA -->|Route| SD
+    NS --> MMD
+    NS --> EWO
+    MHU --> OD
+    FMI --> FBO
+```
+
+---
+
 ## ✨ Platform Features & Capabilities
 
 The Maintenance Wizard is a comprehensive, production-ready Agentic AI platform built with a wide array of advanced features specifically tailored for industrial environments:
