@@ -7,7 +7,9 @@ from typing import Optional
 from pydantic import BaseModel
 from backend.database import get_db
 from backend.models import Session as DbSession, User, Equipment, Message
-from backend.services.ai_service import generate_response_stream, analyze_image, analyze_bolt_damage, analyze_equipment_damage, verify_loto_compliance
+from backend.services.ai_service import generate_response_stream
+from backend.services.vision_service import analyze_equipment_image
+import asyncio
 from backend.services.document_service import search_documents
 from backend.routers.auth import get_current_active_user
 from backend.services.audit_service import log_action
@@ -56,7 +58,18 @@ async def chat_with_agent(request: ChatRequest, db: Session=Depends(get_db), cur
     db.add(user_msg)
     db.commit()
     if request.image_base64:
-        image_analysis = await analyze_image(request.image_base64, request.message, context_data, context_text)
+        vision_json_str = await asyncio.to_thread(analyze_equipment_image, request.image_base64, request.message)
+        try:
+            v_data = json.loads(vision_json_str)
+            image_analysis = f"Equipment: {v_data.get('equipment_type', 'Unknown')}\n"
+            image_analysis += f"Defects: {', '.join(v_data.get('detected_defects', []))}\n"
+            image_analysis += f"Risk Level: {v_data.get('risk_level', 'Unknown')}\n"
+            image_analysis += f"Root Cause: {v_data.get('root_cause', 'Unknown')}\n"
+            image_analysis += f"Recommendations: {', '.join(v_data.get('recommendations', []))}\n"
+            image_analysis += f"Safety Notes: {', '.join(v_data.get('safety_notes', []))}"
+        except Exception:
+            image_analysis = vision_json_str
+            
         request.message = f'{request.message}\nImage Analysis: {image_analysis}'
         
         # Trigger Vision Analysis Completed email for chat image upload
@@ -107,138 +120,4 @@ async def chat_with_agent(request: ChatRequest, db: Session=Depends(get_db), cur
             finally:
                 bg_db.close()
     return StreamingResponse(stream_with_memory(), media_type='text/event-stream')
-
-@router.post('/analyze/bolt')
-async def analyze_bolt(request: BoltAnalysisRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
-    result = await analyze_bolt_damage(request.base64_image, request.bolt_spec)
-    
-    # Trigger Vision Analysis Completed email
-    try:
-        import json
-        result_str = json.dumps(result, indent=2)
-        email_body = f"""
-        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-            <h2>Vision Analysis Results Available</h2>
-            <p>Hello {current_user.name},</p>
-            <p>Your vision analysis request for bolt {request.bolt_spec} has completed successfully.</p>
-            <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-top: 15px; white-space: pre-wrap;">
-                {result_str}
-            </div>
-        </div>
-        """
-        from backend.services.email_service import send_notification_sync
-        send_notification_sync(
-            user_id=current_user.id,
-            notification_type="Vision Analysis Completed",
-            message=f"Vision analysis results available for bolt {request.bolt_spec}",
-            to_email=current_user.email,
-            subject="Vision Analysis Results Available",
-            email_body=email_body
-        )
-        
-        # Trigger Critical Risk Alert if condition is critical
-        if result.get("bolt_condition") in ["CRITICAL", "HIGH", "REPLACE_IMMEDIATELY"]:
-            from backend.services.email_service import notify_safety_escalation
-            defects = ", ".join(result.get("detected_defects", [])) or "Corrosion or thread wear"
-            recom = result.get("recommended_action") or "Replace bolt immediately"
-            notify_safety_escalation(
-                db=db,
-                asset_name=f"Bolt ({request.bolt_spec})",
-                asset_id=request.bolt_spec,
-                location="Plant Floor",
-                risk_level=result.get("bolt_condition", "HIGH"),
-                issue_description=defects,
-                root_cause=defects,
-                recommended_action=recom,
-                priority_level="Urgent",
-                reporter_id=current_user.id
-            )
-    except Exception as e:
-        logger.error(f"Failed to trigger notifications in bolt analysis: {e}")
-        
-    return result
-
-@router.post('/analyze/equipment')
-async def analyze_equipment(request: EquipmentAnalysisRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
-    result = await analyze_equipment_damage(request.base64_image, request.equipment_id, request.equipment_type)
-    
-    # Trigger Vision Analysis Completed email
-    try:
-        import json
-        result_str = json.dumps(result, indent=2)
-        email_body = f"""
-        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-            <h2>Vision Analysis Results Available</h2>
-            <p>Hello {current_user.name},</p>
-            <p>Your vision analysis request for equipment {request.equipment_id or 'Unknown'} has completed successfully.</p>
-            <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-top: 15px; white-space: pre-wrap;">
-                {result_str}
-            </div>
-        </div>
-        """
-        from backend.services.email_service import send_notification_sync
-        send_notification_sync(
-            user_id=current_user.id,
-            notification_type="Vision Analysis Completed",
-            message=f"Vision analysis results available for equipment {request.equipment_id}",
-            to_email=current_user.email,
-            subject="Vision Analysis Results Available",
-            email_body=email_body
-        )
-        
-        # Trigger Critical Risk Alert if condition is critical
-        if result.get("overall_condition") in ["CRITICAL", "HIGH", "FAILURE"]:
-            from backend.services.email_service import notify_safety_escalation
-            issues = result.get("detected_issues", [])
-            issue_desc = ", ".join([f"{i.get('issue_type')} at {i.get('location')}" for i in issues]) or "Structural anomaly"
-            recom = result.get("recommended_action") or "Schedule immediate maintenance"
-            notify_safety_escalation(
-                db=db,
-                asset_name=request.equipment_type or "Unknown Equipment",
-                asset_id=request.equipment_id or "N/A",
-                location="Plant Floor",
-                risk_level=result.get("overall_condition", "HIGH"),
-                issue_description=issue_desc,
-                root_cause=issue_desc,
-                recommended_action=recom,
-                priority_level="Urgent",
-                reporter_id=current_user.id
-            )
-    except Exception as e:
-        logger.error(f"Failed to trigger notifications in equipment analysis: {e}")
-        
-    return result
-
-@router.post('/analyze/loto')
-async def analyze_loto(request: LotoComplianceRequest, db: Session=Depends(get_db), current_user: User=Depends(get_current_active_user)):
-    result = await verify_loto_compliance(request.base64_image)
-    if result.get('verdict') == 'REJECTED':
-        log_action(db, current_user.id, 'loto_rejected', 'safety', None, details={'reason': result.get('reason')})
-        
-    # Trigger Vision Analysis Completed email
-    try:
-        import json
-        result_str = json.dumps(result, indent=2)
-        email_body = f"""
-        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-            <h2>Vision Analysis Results Available</h2>
-            <p>Hello {current_user.name},</p>
-            <p>Your LOTO safety compliance vision analysis has completed successfully.</p>
-            <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-top: 15px; white-space: pre-wrap;">
-                {result_str}
-            </div>
-        </div>
-        """
-        from backend.services.email_service import send_notification_sync
-        send_notification_sync(
-            user_id=current_user.id,
-            notification_type="Vision Analysis Completed",
-            message="LOTO safety compliance vision analysis completed.",
-            to_email=current_user.email,
-            subject="Vision Analysis Results Available",
-            email_body=email_body
-        )
-    except Exception as e:
-        logger.error(f"Failed to trigger notification in LOTO analysis: {e}")
-        
-    return result
+

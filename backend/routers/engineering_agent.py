@@ -11,7 +11,8 @@ from backend.services.ollama_service import generate_completion_stream, generate
 from backend.services.requirement_discovery import process_requirements
 from backend.services.memory_service import extract_and_update_memory, get_global_context
 from backend.services.document_service import process_document, search_documents
-from backend.services.ai_service import analyze_image
+from backend.services.vision_service import analyze_equipment_image
+import asyncio
 from backend.services.report_service import generate_report
 from fastapi import UploadFile, File
 from typing import Optional
@@ -373,7 +374,18 @@ async def engineering_chat(request: ChatRequest, background_tasks: BackgroundTas
         selected_module = "VISION MODULE"
         resources_loaded.append("Vision Analysis Only")
         try:
-            image_analysis = await analyze_image(request.image_base64, request.message, {}, "")
+            vision_json_str = await asyncio.to_thread(analyze_equipment_image, request.image_base64, request.message)
+            try:
+                v_data = json.loads(vision_json_str)
+                image_analysis = f"Equipment: {v_data.get('equipment_type', 'Unknown')}\n"
+                image_analysis += f"Defects: {', '.join(v_data.get('detected_defects', []))}\n"
+                image_analysis += f"Risk Level: {v_data.get('risk_level', 'Unknown')}\n"
+                image_analysis += f"Root Cause: {v_data.get('root_cause', 'Unknown')}\n"
+                image_analysis += f"Recommendations: {', '.join(v_data.get('recommendations', []))}\n"
+                image_analysis += f"Safety Notes: {', '.join(v_data.get('safety_notes', []))}"
+            except Exception:
+                image_analysis = vision_json_str
+                
             context_text += f"\nVISION ANALYSIS:\n{image_analysis}\n\nWARNING: If there are safety risks (leaks, cracks, exposed wiring), emphasize them immediately.\nDO NOT automatically create inventory requests for purely visual analysis.\n"
             
             # Trigger Vision Analysis Completed email
@@ -435,7 +447,18 @@ async def engineering_chat(request: ChatRequest, background_tasks: BackgroundTas
         resources_loaded.append("Vision Analysis")
         resources_loaded.append("InventoryMaster")
         try:
-            image_analysis = await analyze_image(request.image_base64, request.message, {}, "")
+            vision_json_str = await asyncio.to_thread(analyze_equipment_image, request.image_base64, request.message)
+            try:
+                v_data = json.loads(vision_json_str)
+                image_analysis = f"Equipment: {v_data.get('equipment_type', 'Unknown')}\n"
+                image_analysis += f"Defects: {', '.join(v_data.get('detected_defects', []))}\n"
+                image_analysis += f"Risk Level: {v_data.get('risk_level', 'Unknown')}\n"
+                image_analysis += f"Root Cause: {v_data.get('root_cause', 'Unknown')}\n"
+                image_analysis += f"Recommendations: {', '.join(v_data.get('recommendations', []))}\n"
+                image_analysis += f"Safety Notes: {', '.join(v_data.get('safety_notes', []))}"
+            except Exception:
+                image_analysis = vision_json_str
+                
             context_text += f"\nVISION ANALYSIS RESULTS:\n{image_analysis}\n"
             
             # Trigger Vision Analysis Completed email
