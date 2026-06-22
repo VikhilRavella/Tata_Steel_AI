@@ -62,3 +62,30 @@ Mention that you built "Lazy Loading" and "CPU Fallbacks". Explain that you knew
 
 **Q: How would you scale this for all Tata Steel plants globally?**
 *A: "I would migrate the SQLite database to a distributed PostgreSQL cluster. The FastAPI backend is completely stateless, meaning it can be containerized using Docker and deployed on Kubernetes. The local LLMs could be hosted on dedicated internal GPU inference servers (like vLLM or Triton) accessible via private endpoints by the different plants."*
+
+---
+
+## 6. Mandatory / High-Probability Interview Questions
+Based on hackathon final rounds, you are **guaranteed** to be asked these questions. Prepare your answers:
+
+**1. "Why didn't you deploy this online / provide a web link?"**
+*How to answer:* "This is a heavy, large-scale industrial application utilizing local LLM inference (Ollama) and computer vision models (Qwen-VL). Deploying these heavy models to the cloud would be incredibly expensive and defeat the purpose of the architecture—which is **Data Privacy**. Tata Steel's data shouldn't be exposed to public web servers. The prototype runs locally because in production, it is meant to run on Tata Steel's secure, internal edge servers on the factory floor, ensuring zero data leakage and offline availability."
+
+**2. "What makes your idea different from the other teams who used API services (OpenAI, Gemini)?"**
+*How to answer:* "Many teams took the easy route of sending data to OpenAI. That is an absolute dealbreaker for a multi-billion dollar industrial company like Tata Steel due to intellectual property risks. My architecture is 100% open-source and local. It proves that Tata Steel can have ChatGPT-level intelligence *inside* their own firewall without paying API fees or risking data security."
+
+**3. "Your video was 23 minutes long. Can you give us the 2-minute pitch?"**
+*How to answer:* Practice a 2-minute elevator pitch. Say: "My solution is a 3-tier Industrial AI Assistant. It features a Multimodal Vision model to diagnose broken equipment from photos, a local RAG pipeline to instantly search safety manuals, and a conversational agent that automatically generates inventory and work orders for supervisors. It brings the entire factory workflow into one secure, local interface."
+
+**4. "What was the hardest technical challenge you faced?"**
+*How to answer:* "Orchestrating multiple local AI models without crashing the system. I had to build an intent router so the system knew when to use the Vision model vs. the RAG model, and I had to implement lazy-loading so the heavy models wouldn't consume all the system RAM at startup."
+
+---
+
+## 7. Don't Worry About GitHub/Drive Views!
+If your GitHub or Google Drive analytics show 0 views, **do not panic**. Here is why you were selected:
+1. **Executive Summaries & Reports:** Judges review hundreds of projects. They heavily rely on your written PDF reports, documentation (`SYSTEM_ARCHITECTURE.md`), and presentation slides to make the first cut.
+2. **Offline Review:** Judges often download all repos as a `.zip` file in bulk using automated scripts. This bypasses GitHub traffic analytics.
+3. **They Loved the Idea:** You made the Top 40 because your core concept—a *local, secure, multimodal industrial assistant*—is exactly what they are looking for. 
+
+You beat out the competition because your architecture is grounded in real industrial constraints (privacy, local inference, edge deployment), while others just built generic API wrappers. Stand tall and defend your architecture!
