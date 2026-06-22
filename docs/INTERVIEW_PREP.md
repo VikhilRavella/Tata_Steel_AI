@@ -80,6 +80,18 @@ Based on hackathon final rounds, you are **guaranteed** to be asked these questi
 **4. "What was the hardest technical challenge you faced?"**
 *How to answer:* "Orchestrating multiple local AI models without crashing the system. I had to build an intent router so the system knew when to use the Vision model vs. the RAG model, and I had to implement lazy-loading so the heavy models wouldn't consume all the system RAM at startup."
 
+**5. "How do you prevent the AI from giving dangerous or wrong safety advice (Hallucinations)?"**
+*How to answer:* "I implemented Strict Contextual Grounding via Prompt Engineering. The AI is strictly instructed to only answer based on the retrieved ChromaDB vector context from the official Tata SOPs. If the answer isn't in the manual, it refuses to guess and tells the engineer to escalate to a supervisor."
+
+**6. "Why did you separate the dashboard into Manager, Supervisor, and Engineer portals?"**
+*How to answer:* "To reflect real industrial workflows and maintain security. Engineers shouldn't be able to alter core inventory counts, and managers shouldn't be diagnosing broken pipes. Engineers log the issues, the AI translates those into requests, Supervisors approve the requests and budget, and Managers oversee the global data/documents."
+
+**7. "How does the Vision Model actually detect the defects?"**
+*How to answer:* "The system uses Hugging Face's Qwen3-VL multimodal architecture. When an image is uploaded, it is base64 encoded and passed to the Vision Service. The model analyzes the pixels alongside a specialized prompt, allowing it to output a structured JSON identifying the equipment type, specific defects like corrosion, and a calculated risk level."
+
+**8. "How does the Chatbot connect to the SQLite Inventory Database automatically?"**
+*How to answer:* "I built an autonomous intent router. If the Engineer asks for a spare part, the LLM generates a hidden system trigger called [INVENTORY_REQUEST]. My FastAPI backend intercepts this string, extracts the part name, queries the SQLite inventory database, deducts the stock, and logs an approval request for the Supervisor."
+
 ---
 
 ## 7. Don't Worry About GitHub/Drive Views!
